@@ -7,7 +7,8 @@ export default class LightningReporter extends LightningElement {
     @api recordId;
     @track childRecords;
     childTypes;
-    fieldList;
+    selectableFields;
+    selectedFields = new Set(["Id", "Name"]);
     selectedType;
     @wire (getChildTypes, {recordId : '$recordId'})
     getRecordsFromDefaultChildType({error, data}){
@@ -34,7 +35,10 @@ export default class LightningReporter extends LightningElement {
 
         for(let i=0; i<this.childTypes.length; i++){
             options.push(
-                {label: this.childTypes[i], value: this.childTypes[i]}
+                {
+                    label: this.childTypes[i], 
+                    value: this.childTypes[i]
+                }
             );
         }
 
@@ -42,11 +46,12 @@ export default class LightningReporter extends LightningElement {
     }
 
     getChildRecords(){
-        this.getFieldList();
+        this.getSelectableFields();
         console.log('getting records from '+this.selectedType+' type with Id '+this.recordId);
         getRecordsFromType({
             typeName: this.selectedType,
-            parentId: this.recordId
+            parentId: this.recordId,
+            fieldsToGet: Array.from(this.selectedFields)
         }).then(result => {
             console.log('retrieved '+result.length+' records from type: '+this.selectedType);
             this.childRecords = result;
@@ -55,17 +60,14 @@ export default class LightningReporter extends LightningElement {
         })
     }
 
-    getFieldList(){
+    getSelectableFields(){
         console.log('getting fields from '+this.selectedType+' type');
         getFieldsFromType({
             typeName: this.selectedType
         })
         .then(result => {
             console.log('retrieved '+result.length+' fields from type: '+this.selectedType);
-            for(let i=0; i<result.length; i++){
-                console.log(JSON.stringify(result[i]));
-            }
-            this.fieldList = result;
+            this.selectableFields = result;
         })
         .catch(error => {
             console.error('error getting records ['+
@@ -73,6 +75,18 @@ export default class LightningReporter extends LightningElement {
                                     error.body.message : 
                                     error.message+']');
         })
+    }
+
+    handleFieldClicked(evt){
+        let fieldName = evt.target["dataset"]["id"];
+        
+        if(evt.target.classList && evt.target.classList.contains("field-selected")){
+            evt.target.classList.remove("field-selected");
+            this.selectedFields.delete(fieldName);
+        }else{
+            evt.target.classList.add("field-selected");
+            this.selectedFields.add(fieldName);
+        }
     }
 
     handleChildTypeChange(event){

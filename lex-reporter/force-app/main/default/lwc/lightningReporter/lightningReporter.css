@@ -1,4 +1,22 @@
 .report-box{
-    width: 75%;
     padding-left: 1rem;
+    max-height: 400px;
+}
+
+.field-list{
+    overflow-y: auto;
+    max-height: 350px;
+}
+
+.field-name{
+    border-bottom: black 1px solid;
+    cursor: pointer;
+}
+
+.field-name:hover{
+    background-color: lightcyan;
+}
+
+.field-selected{
+    background-color: lightcyan;
 }

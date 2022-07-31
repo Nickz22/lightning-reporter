@@ -13,7 +13,7 @@ public class LightningReporterController {
     }
 
     @AuraEnabled
-    public static List<SObject> getRecordsFromType(String typeName, Id parentId){
+    public static List<SObject> getRecordsFromType(String typeName, Id parentId, List<String> fieldsToGet){
 
         SObjectType typeFromName = Schema.getGlobalDescribe().get(typeName);
         List<String> lookupsToParent = new List<String>();
@@ -30,7 +30,7 @@ public class LightningReporterController {
             }
         }
 
-        String query = 'SELECT Id,Name '+
+        String query = 'SELECT '+String.join(fieldsToGet, ',')+' '+
                         'FROM '+typeName+' '+
                         getWhereClause(lookupsToParent, parentId);
         

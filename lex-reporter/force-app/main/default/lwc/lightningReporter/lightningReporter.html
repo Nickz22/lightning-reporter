@@ -12,23 +12,36 @@
                             options={options}
                             onchange={handleChildTypeChange}>
                     </lightning-combobox>
-                </lightning-layout-item><lightning-layout-item size="9"></lightning-layout-item>
-
+                </lightning-layout-item>
+                <lightning-layout-item size="6"></lightning-layout-item>
+                <lightning-layout-item size="3" 
+                                       padding="small-around">
+                    <lightning-button
+                        label="Get Records"
+                        variant="neutral"
+                        onclick={getChildRecords}>
+                    </lightning-button>
+                </lightning-layout-item>
                 <lightning-layout-item size="9" 
                                        data-id="record-table"
                                        padding="around-medium">
                     <template if:true={childRecords}>
                         <template for:each={childRecords} for:item="record">
                             <div key={record.Id} style="border-bottom: black 1px solid">
-                                {record.Id} | {record.Name}
+                                {record.Name} | {record.AccountId} | {record.Salutation}
                             </div>
                         </template>
                     </template>
                 </lightning-layout-item>
                 <lightning-layout-item size="3" 
-                                       data-id="field-list"><!-- field list goes here -->
-                <template for:each={fieldList} for:item="field">
-                    {field.name} ({field.type})
+                                       data-id="field-list"
+                                       class="field-list">
+                <template for:each={selectableFields} for:item="field">
+                    <p key={field.name} 
+                       data-id={field.name}
+                       class="field-name"
+                       onclick={handleFieldClicked}>{field.name} ({field.type})
+                    </p>
                 </template> 
                 </lightning-layout-item>
             </lightning-layout>
