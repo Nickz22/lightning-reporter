@@ -1,3 +1,5 @@
 <template>
-    
+    <template for:each={childRecords} for:item="record">
+        {record.Id} | {record.Name}
+    </template>
 </template>
