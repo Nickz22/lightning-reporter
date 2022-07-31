@@ -1,11 +1,13 @@
 import { LightningElement, api, wire, track } from 'lwc';
 import getChildTypes from '@salesforce/apex/LightningReporterController.getChildTypes';
 import getRecordsFromType from '@salesforce/apex/LightningReporterController.getRecordsFromType'
+import getFieldsFromType from '@salesforce/apex/LightningReporterController.getFieldsFromType'
 
 export default class LightningReporter extends LightningElement {
     @api recordId;
     @track childRecords;
     childTypes;
+    fieldList;
     selectedType;
     @wire (getChildTypes, {recordId : '$recordId'})
     getRecordsFromDefaultChildType({error, data}){
@@ -40,15 +42,36 @@ export default class LightningReporter extends LightningElement {
     }
 
     getChildRecords(){
+        this.getFieldList();
         console.log('getting records from '+this.selectedType+' type with Id '+this.recordId);
         getRecordsFromType({
             typeName: this.selectedType,
             parentId: this.recordId
         }).then(result => {
-            console.log('retrieved '+result.length+' records from type: '+this.childTypes[0]);
+            console.log('retrieved '+result.length+' records from type: '+this.selectedType);
             this.childRecords = result;
         }).catch(error => {
             console.error('error getting records ['+error.body.message+']');
+        })
+    }
+
+    getFieldList(){
+        console.log('getting fields from '+this.selectedType+' type');
+        getFieldsFromType({
+            typeName: this.selectedType
+        })
+        .then(result => {
+            console.log('retrieved '+result.length+' fields from type: '+this.selectedType);
+            for(let i=0; i<result.length; i++){
+                console.log(JSON.stringify(result[i]));
+            }
+            this.fieldList = result;
+        })
+        .catch(error => {
+            console.error('error getting records ['+
+                                    error.body ? 
+                                    error.body.message : 
+                                    error.message+']');
         })
     }
 

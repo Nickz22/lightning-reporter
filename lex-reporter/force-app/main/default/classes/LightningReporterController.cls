@@ -37,6 +37,32 @@ public class LightningReporterController {
         return Database.query(query);
     }
 
+    public class FieldDTO{
+        @AuraEnabled
+        public String name;
+        @AuraEnabled
+        public String type;
+
+        public FieldDTO(String name, String type){
+            this.name = name;
+            this.type = type;
+        }
+    }
+
+    @AuraEnabled
+    public static List<FieldDTO> getFieldsFromType(String typeName){
+        List<FieldDTO> fields = new List<FieldDTO>();
+        SObjectType typeFromName = Schema.getGlobalDescribe().get(typeName);
+        Map<String, Schema.SObjectField> fieldTokenByName = typeFromName.getDescribe().fields.getMap();
+        for(String fieldName : fieldTokenByName.keyset()){
+            fields.add(new FieldDTO(
+                fieldName,
+                String.valueOf(fieldTokenByName.get(fieldName).getDescribe().getType())
+            ));
+        }
+        return fields;
+    }
+
     private static String getWhereClause(List<String> lookupsToParent, Id parentId){
         
         String whereClause = 'WHERE ';       

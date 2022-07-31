@@ -1,18 +1,37 @@
-<template>
-    <lightning-combobox
-            name="Select Child Type"
-            label=""
-            value={selectedType}
-            placeholder=""
-            options={options}
-            onchange={handleChildTypeChange}></lightning-combobox>
-    <template if:true={childRecords}>
-        <lightning-card>
-            <template for:each={childRecords} for:item="record">
-                <div key={record.Id} style="border-bottom: black 1px solid">
-                    {record.Id} | {record.Name}
-                </div>
-            </template>
-        </lightning-card>
-    </template>
+<template>    
+    <lightning-card>
+        <div class="report-box">
+            <lightning-layout multiple-rows>
+
+                <lightning-layout-item size="3" 
+                                       data-id="child-type-list">
+                    <lightning-combobox
+                            name="Select Child Type"
+                            label="Select Child Type"
+                            value={selectedType}
+                            options={options}
+                            onchange={handleChildTypeChange}>
+                    </lightning-combobox>
+                </lightning-layout-item><lightning-layout-item size="9"></lightning-layout-item>
+
+                <lightning-layout-item size="9" 
+                                       data-id="record-table"
+                                       padding="around-medium">
+                    <template if:true={childRecords}>
+                        <template for:each={childRecords} for:item="record">
+                            <div key={record.Id} style="border-bottom: black 1px solid">
+                                {record.Id} | {record.Name}
+                            </div>
+                        </template>
+                    </template>
+                </lightning-layout-item>
+                <lightning-layout-item size="3" 
+                                       data-id="field-list"><!-- field list goes here -->
+                <template for:each={fieldList} for:item="field">
+                    {field.name} ({field.type})
+                </template> 
+                </lightning-layout-item>
+            </lightning-layout>
+        </div>
+    </lightning-card>
 </template>
