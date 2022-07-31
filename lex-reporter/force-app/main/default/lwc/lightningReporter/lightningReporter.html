@@ -1,5 +1,18 @@
 <template>
-    <template for:each={childRecords} for:item="record">
-        {record.Id} | {record.Name}
+    <lightning-combobox
+            name="Select Child Type"
+            label=""
+            value={selectedType}
+            placeholder=""
+            options={options}
+            onchange={handleChildTypeChange}></lightning-combobox>
+    <template if:true={childRecords}>
+        <lightning-card>
+            <template for:each={childRecords} for:item="record">
+                <div key={record.Id} style="border-bottom: black 1px solid">
+                    {record.Id} | {record.Name}
+                </div>
+            </template>
+        </lightning-card>
     </template>
 </template>

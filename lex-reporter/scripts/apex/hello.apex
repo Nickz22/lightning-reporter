@@ -1,10 +1,13 @@
-// Use .apex files to store anonymous Apex.
-// You can execute anonymous Apex in VS Code by selecting the
-//     apex text and running the command:
-//     SFDX: Execute Anonymous Apex with Currently Selected Text
-// You can also execute the entire file by running the command:
-//     SFDX: Execute Anonymous Apex with Editor Contents
+List <Apexlog> loglist = [Select Id from Apexlog limit 100];
+for(Apexlog al: loglist){
+    Http h = new Http();
+    HttpRequest req = new HttpRequest();
+    req.setEndpoint(Url.getOrgDomainUrl().toExternalForm()
+    + '/services/data/v44.0/sobjects/Apexlog/'+al.Id);
+    req.setMethod('DELETE');
+    req.setHeader('Authorization', 'Bearer ' + UserInfo.getSessionId());
+    HttpResponse res = h.send(req);
+    System.debug(res.getStatusCode());
+}
 
-string tempvar = 'Enter_your_name_here';
-System.debug('Hello World!');
-System.debug('My name is ' + tempvar);
+System.debug('loglist'+loglist);

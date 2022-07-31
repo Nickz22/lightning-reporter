@@ -6,6 +6,7 @@ export default class LightningReporter extends LightningElement {
     @api recordId;
     @track childRecords;
     childTypes;
+    selectedType;
     @wire (getChildTypes, {recordId : '$recordId'})
     getRecordsFromDefaultChildType({error, data}){
         if(error){
@@ -14,17 +15,34 @@ export default class LightningReporter extends LightningElement {
         }
         if(data){
             this.childTypes = data;
+            this.selectedType = this.childTypes[0];
             console.log('retrieved '+this.childTypes.length+' child types: ');
-            this.getDefaultChildRecords(this.recordId);
+            this.getChildRecords(this.recordId);
         }else{
             console.error('no data returned from getChildTypes');
         }
     }
 
-    getDefaultChildRecords(){
-        console.log('getting records from '+this.childTypes[0]+' type with Id '+this.recordId);
+    get options() {
+        let options = [];
+        
+        if(!this.childTypes){
+            return options;
+        }
+
+        for(let i=0; i<this.childTypes.length; i++){
+            options.push(
+                {label: this.childTypes[i], value: this.childTypes[i]}
+            );
+        }
+
+        return options;
+    }
+
+    getChildRecords(){
+        console.log('getting records from '+this.selectedType+' type with Id '+this.recordId);
         getRecordsFromType({
-            typeName: this.childTypes[0],
+            typeName: this.selectedType,
             parentId: this.recordId
         }).then(result => {
             console.log('retrieved '+result.length+' records from type: '+this.childTypes[0]);
@@ -32,5 +50,11 @@ export default class LightningReporter extends LightningElement {
         }).catch(error => {
             console.error('error getting records ['+error.body.message+']');
         })
+    }
+
+    handleChildTypeChange(event){
+        console.log('new child type: '+event.target.value);
+        this.selectedType = event.target.value;
+        this.getChildRecords();
     }
 }
