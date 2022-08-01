@@ -1,0 +1,13 @@
+<template>
+    <lightning-layout class="table-row">
+        <template for:each={cellValues} for:item="value">
+            <lightning-layout-item size={cellSize}
+                                   key={value}
+                                   flexibility="auto"
+                                   alignment-bump="right"
+                                   class="cell">
+                {value}
+            </lightning-layout-item>
+        </template>
+    </lightning-layout>
+</template>

@@ -12,4 +12,17 @@
 
 // System.debug('loglist'+loglist);
 
-LightningReporterController.getFieldsFromType('Contact');
+// LightningReporterController.getFieldsFromType('Contact');
+
+List<Contact> contacts = new List<Contact>();
+for(Integer i = 0; i<10; i++){
+    contacts.add(
+        new Contact(
+            AccountId='0015400000r6V1UAAU',
+            LastName='test_lastname',
+            FirstName='test_firstname'+i
+        )
+    );
+}
+
+insert contacts;

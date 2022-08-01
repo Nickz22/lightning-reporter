@@ -6,7 +6,9 @@ public class LightningReporterController {
         DescribeSObjectResult typeDescribe = recordId.getSobjectType().getDescribe();
         for(Schema.ChildRelationship relationship : typeDescribe.getChildRelationships()){
             String childTypeName = relationship.getChildSObject().getDescribe().getName();
-            childTypes.add(relationship.getChildSObject().getDescribe().getName());
+            if(childTypeName == 'Contact'){
+                childTypes.add(relationship.getChildSObject().getDescribe().getName());
+            }
         }
         
         return childTypes;
@@ -38,23 +40,27 @@ public class LightningReporterController {
     }
 
     public class FieldDTO{
-        @AuraEnabled
-        public String name;
-        @AuraEnabled
-        public String type;
+        @AuraEnabled public String name;
+        @AuraEnabled public String type;
+        @AuraEnabled public Boolean defaultSelected = false;
 
         public FieldDTO(String name, String type){
             this.name = name;
             this.type = type;
+            this.defaultSelected = (name == 'Id' || name == 'Name');
         }
     }
 
     @AuraEnabled
     public static List<FieldDTO> getFieldsFromType(String typeName){
+
         List<FieldDTO> fields = new List<FieldDTO>();
         SObjectType typeFromName = Schema.getGlobalDescribe().get(typeName);
         Map<String, Schema.SObjectField> fieldTokenByName = typeFromName.getDescribe().fields.getMap();
-        for(String fieldName : fieldTokenByName.keyset()){
+        List<String> iterableFieldNames = new List<String>(fieldTokenByName.keyset());
+        iterableFieldNames.sort();
+
+        for(String fieldName : iterableFieldNames){
             fields.add(new FieldDTO(
                 fieldName,
                 String.valueOf(fieldTokenByName.get(fieldName).getDescribe().getType())

@@ -8,7 +8,8 @@ export default class LightningReporter extends LightningElement {
     @track childRecords;
     childTypes;
     selectableFields;
-    selectedFields = new Set(["Id", "Name"]);
+    @track selectedFields = new Set(["Id", "Name"]);
+    iterableSelectedFields = [];
     selectedType;
     @wire (getChildTypes, {recordId : '$recordId'})
     getRecordsFromDefaultChildType({error, data}){
@@ -47,13 +48,13 @@ export default class LightningReporter extends LightningElement {
 
     getChildRecords(){
         this.getSelectableFields();
-        console.log('getting records from '+this.selectedType+' type with Id '+this.recordId);
+        // this.iterableSelectedFields = Array.from(this.selectedFields);
+        // console.log(this.iterableSelectedFields.length+' iterable selected fields');
         getRecordsFromType({
             typeName: this.selectedType,
             parentId: this.recordId,
             fieldsToGet: Array.from(this.selectedFields)
         }).then(result => {
-            console.log('retrieved '+result.length+' records from type: '+this.selectedType);
             this.childRecords = result;
         }).catch(error => {
             console.error('error getting records ['+error.body.message+']');
@@ -61,7 +62,6 @@ export default class LightningReporter extends LightningElement {
     }
 
     getSelectableFields(){
-        console.log('getting fields from '+this.selectedType+' type');
         getFieldsFromType({
             typeName: this.selectedType
         })
@@ -79,6 +79,10 @@ export default class LightningReporter extends LightningElement {
 
     handleFieldClicked(evt){
         let fieldName = evt.target["dataset"]["id"];
+        console.log('field clicked: '+fieldName);
+        if(fieldName.toLowerCase() == "id" || fieldName.toLowerCase() == "name"){
+            return;
+        }
         
         if(evt.target.classList && evt.target.classList.contains("field-selected")){
             evt.target.classList.remove("field-selected");

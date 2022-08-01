@@ -1,0 +1,11 @@
+.table-row{
+    border-bottom: 1px solid black;
+}
+
+.table-row:hover{
+    background-color: lightgray;
+}
+
+.cell{
+    overflow-x: clip;
+}

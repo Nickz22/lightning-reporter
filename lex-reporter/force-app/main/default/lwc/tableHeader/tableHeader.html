@@ -1,0 +1,12 @@
+<template>
+    <lightning-layout>
+        <template for:each={columns} for:item="column">
+            <lightning-layout-item key={column} 
+                                   size={cellSize}
+                                   flexibility="auto"
+                                   alignment-bump="right">
+                <b>{column}</b>
+            </lightning-layout-item>
+        </template>
+    </lightning-layout>
+</template>
