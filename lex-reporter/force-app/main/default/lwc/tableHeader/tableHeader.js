@@ -9,9 +9,14 @@ export default class TableHeader extends LightningElement {
     };
 
     set columns(value){
+        let length = 0;
+
+        for(let c of value){
+            length++;
+        }
+
         this._columns = value;
-        console.log('set columns: '+JSON.stringify(this._columns));
-        this.cellSize = Math.floor(12/this._columns.length);
+        this.cellSize = Math.floor(12/length);
     }
 
 }

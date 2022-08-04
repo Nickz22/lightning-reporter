@@ -20,3 +20,12 @@
 .field-selected{
     background-color: lightcyan;
 }
+
+.table-container{
+    text-align: center;   
+}
+
+.table-data-container{
+    overflow-y: auto;
+    max-height: 325px;
+}

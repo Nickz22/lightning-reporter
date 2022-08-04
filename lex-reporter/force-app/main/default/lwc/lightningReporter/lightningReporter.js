@@ -9,7 +9,6 @@ export default class LightningReporter extends LightningElement {
     childTypes;
     selectableFields;
     @track selectedFields = new Set(["Id", "Name"]);
-    iterableSelectedFields = [];
     selectedType;
     @wire (getChildTypes, {recordId : '$recordId'})
     getRecordsFromDefaultChildType({error, data}){
@@ -47,9 +46,14 @@ export default class LightningReporter extends LightningElement {
     }
 
     getChildRecords(){
-        this.getSelectableFields();
-        // this.iterableSelectedFields = Array.from(this.selectedFields);
-        // console.log(this.iterableSelectedFields.length+' iterable selected fields');
+        if(!this.selectableFields){
+            this.getSelectableFields();
+        }
+        console.log('getting records from type: '+this.selectedType);
+        console.log('selected fields: ');
+        for(let field of this.selectedFields){
+            console.log(field);
+        }
         getRecordsFromType({
             typeName: this.selectedType,
             parentId: this.recordId,
@@ -83,14 +87,21 @@ export default class LightningReporter extends LightningElement {
         if(fieldName.toLowerCase() == "id" || fieldName.toLowerCase() == "name"){
             return;
         }
-        
+
+        let fieldSet = new Set();
+        for(let i of this.selectedFields){
+            fieldSet.add(i);
+        }
+
         if(evt.target.classList && evt.target.classList.contains("field-selected")){
             evt.target.classList.remove("field-selected");
-            this.selectedFields.delete(fieldName);
+            fieldSet.delete(fieldName);
         }else{
             evt.target.classList.add("field-selected");
-            this.selectedFields.add(fieldName);
+            fieldSet.add(fieldName);
         }
+
+        this.selectedFields = fieldSet;
     }
 
     handleChildTypeChange(event){

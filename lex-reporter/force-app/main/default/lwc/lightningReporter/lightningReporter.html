@@ -1,3 +1,14 @@
+<!-- 
+    TODO 
+    - Mass update button
+    - Editable fields
+    - Filter by current user in any user lookup
+    - front end filter search
+    - see all child records, see all parents of each row
+    - better styling
+ -->
+
+<!-- headers aren't following the selected fields -->
 <template>    
     <lightning-card>
         <div class="report-box">
@@ -29,14 +40,17 @@
                 <lightning-layout-item size="9" 
                                        data-id="record-table"
                                        padding="around-medium"
-                                       class="table-row">
+                                       class="table-container">
                     <lightning-layout multiple-rows>
-                        <lightning-layout-item size="12" padding-around="large">
+                        <lightning-layout-item size="12" 
+                                                padding-around="large"
+                                                class="table-header-container">
                             <template if:true={selectedFields}>
                                 <c-table-header columns={selectedFields}></c-table-header>
                             </template>
                         </lightning-layout-item>
-                        <lightning-layout-item size="12">
+                        <lightning-layout-item size="12" 
+                                                class="table-data-container">
                             <template if:true={childRecords}>
                                 <template for:each={childRecords} for:item="record">
                                     <c-table-row key={record.Id}
