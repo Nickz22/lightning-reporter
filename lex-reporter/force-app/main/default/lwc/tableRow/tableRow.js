@@ -2,8 +2,12 @@ import { LightningElement, api } from 'lwc';
 
 export default class TableRow extends LightningElement {
     
-    cellValues = [];
+    fields = [];
     cellSize;
+
+    @api get updatedSObject(){
+        return this._updatedSObject ? this._updatedSObject : this._sObject;
+    }
 
     @api get sObject(){
         return this._sObject;
@@ -12,12 +16,37 @@ export default class TableRow extends LightningElement {
     set sObject(value){
         this._sObject = value;
         let i = 0;
-        this.cellValues = [];
+        this.fields = [];
         
         for(let prop in this._sObject){
             i++
-            this.cellValues.push(this._sObject[prop]);
+            this.fields.push(
+                {'apiName': prop, 'value': this._sObject[prop]}
+            );
         }
         this.cellSize = Math.floor(12/i);
+    }
+
+    handleValueChange(event){
+        console.log('handleValueChange');
+        try{
+
+            let clone = {};
+
+            for(let prop in this._sObject){
+                clone[prop] = this._sObject[prop];
+            }
+
+            let f = event.target["dataset"]["id"];
+            let v = event.target.value;
+            clone[f] = v;
+            console.log('clone is');
+            console.log(clone);
+            this._updatedSObject = clone;
+            console.log('hvc updated sObject: ');
+            console.log(this._updatedSObject);
+        }catch(e){
+            console.error(e);
+        }
     }
 }

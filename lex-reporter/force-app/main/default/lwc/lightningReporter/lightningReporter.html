@@ -1,6 +1,13 @@
 <!-- 
-    TODO 
+    TODO (Bugs)
+    - The headers aren't aligning properly
+ -->
+
+<!-- 
+    TODO (Features)
     - Mass update button
+       * we're getting updated child records at this point
+       * row inputs are not matching selected fields
     - Editable fields
     - Filter by current user in any user lookup
     - front end filter search
@@ -33,6 +40,11 @@
                         variant="neutral"
                         onclick={getChildRecords}>
                     </lightning-button>
+                    <lightning-button
+                        label="Save Changes"
+                        variant="brand"
+                        onclick={updateRecords}>
+                    </lightning-button>
                 </lightning-layout-item>
                 <!-- END HEADER -->
 
@@ -54,6 +66,7 @@
                             <template if:true={childRecords}>
                                 <template for:each={childRecords} for:item="record">
                                     <c-table-row key={record.Id}
+                                                data-id={record.Id}
                                                  s-object={record}>
                                     </c-table-row>
                                 </template>

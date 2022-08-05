@@ -2,6 +2,7 @@ import { LightningElement, api, wire, track } from 'lwc';
 import getChildTypes from '@salesforce/apex/LightningReporterController.getChildTypes';
 import getRecordsFromType from '@salesforce/apex/LightningReporterController.getRecordsFromType'
 import getFieldsFromType from '@salesforce/apex/LightningReporterController.getFieldsFromType'
+import dbUpdateRecords from '@salesforce/apex/LightningReporterController.updateRecords'
 
 export default class LightningReporter extends LightningElement {
     @api recordId;
@@ -59,6 +60,9 @@ export default class LightningReporter extends LightningElement {
             parentId: this.recordId,
             fieldsToGet: Array.from(this.selectedFields)
         }).then(result => {
+            for(let i=0; i<result.length; i++){
+                result['sObjectType'] = this.selectedType;
+            }
             this.childRecords = result;
         }).catch(error => {
             console.error('error getting records ['+error.body.message+']');
@@ -108,5 +112,27 @@ export default class LightningReporter extends LightningElement {
         console.log('new child type: '+event.target.value);
         this.selectedType = event.target.value;
         this.getChildRecords();
+    }
+
+    updateRecords(event){
+        console.log('updating records');
+        let sObjects = [];
+
+        // use reducer here? 
+        let rows = this.template.querySelectorAll('c-table-row');
+        console.log('got '+rows.length+' rows');
+        for(let i = 0; i<rows.length; i++){
+            sObjects.push(rows[i].updatedSObject);
+        }
+
+        dbUpdateRecords({
+            sObjects: sObjects
+        }).then(result => {
+            console.log('returned from apex: '+result);
+        }
+        ).catch(error => {
+            console.error('error updating records ['+error.body.message+']');
+        })
+
     }
 }

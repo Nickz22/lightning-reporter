@@ -1,12 +1,14 @@
 <template>
     <lightning-layout class="table-row">
-        <template for:each={cellValues} for:item="value">
+        <template for:each={fields} for:item="field">
             <lightning-layout-item size={cellSize}
-                                   key={value}
+                                   key={field.value}
                                    flexibility="auto"
                                    alignment-bump="right"
                                    class="cell">
-                {value}
+                <lightning-input data-id={field.apiName} 
+                                   value={field.value} 
+                                onchange={handleValueChange}></lightning-input>
             </lightning-layout-item>
         </template>
     </lightning-layout>

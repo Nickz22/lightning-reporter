@@ -37,7 +37,7 @@ public class LightningReporterController {
                         getWhereClause(lookupsToParent, parentId);
         
         return Database.query(query);
-    }
+    }    
 
     public class FieldDTO{
         @AuraEnabled public String name;
@@ -77,5 +77,15 @@ public class LightningReporterController {
         }
 
         return whereClause.removeEnd(' OR ');
+    }
+
+    @AuraEnabled
+    public static void updateRecords(List<SObject> sObjects){
+        System.debug('logging update targets');
+        for(SObject sobj : sObjects){
+            System.debug(
+                JSON.serialize(sobj)
+            );
+        }
     }
 }
