@@ -50,11 +50,7 @@ export default class LightningReporter extends LightningElement {
         if(!this.selectableFields){
             this.getSelectableFields();
         }
-        console.log('getting records from type: '+this.selectedType);
-        console.log('selected fields: ');
-        for(let field of this.selectedFields){
-            console.log(field);
-        }
+        
         getRecordsFromType({
             typeName: this.selectedType,
             parentId: this.recordId,
