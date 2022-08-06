@@ -15,7 +15,7 @@ public class LightningReporterController {
     }
 
     @AuraEnabled
-    public static List<SObject> getRecordsFromType(String typeName, Id parentId, List<String> fieldsToGet){
+    public static List<SObject> getRecordsFromType(String typeName, Id parentId, List<FieldDTO> fieldsToGet){
 
         SObjectType typeFromName = Schema.getGlobalDescribe().get(typeName);
         List<String> lookupsToParent = new List<String>();
@@ -32,7 +32,12 @@ public class LightningReporterController {
             }
         }
 
-        String query = 'SELECT '+String.join(fieldsToGet, ',')+' '+
+        List<String> fieldApiNames = new List<String>();
+        for(FieldDTO field : fieldsToGet){
+            fieldApiNames.add(field.name);
+        }
+
+        String query = 'SELECT '+String.join(fieldApiNames, ',')+' '+
                         'FROM '+typeName+' '+
                         getWhereClause(lookupsToParent, parentId);
         
@@ -40,15 +45,19 @@ public class LightningReporterController {
     }    
 
     public class FieldDTO{
-        @AuraEnabled public String name;
-        @AuraEnabled public String type;
+        @AuraEnabled public String name {get; set;}
+        @AuraEnabled public String type {get; set;}
+        @AuraEnabled public Boolean isUpdateable {get; set;}
         @AuraEnabled public Boolean defaultSelected = false;
 
-        public FieldDTO(String name, String type){
+        public FieldDTO(String name, String type, Boolean isUpdateable){
             this.name = name;
             this.type = type;
+            this.isUpdateable = isUpdateable;
             this.defaultSelected = (name == 'Id' || name == 'Name');
         }
+
+        public FieldDTO(){}
     }
 
     @AuraEnabled
@@ -61,14 +70,22 @@ public class LightningReporterController {
         iterableFieldNames.sort();
 
         for(String fieldName : iterableFieldNames){
+            DescribeFieldResult describe = fieldTokenByName.get(fieldName).getDescribe();
             fields.add(new FieldDTO(
                 fieldName,
-                String.valueOf(fieldTokenByName.get(fieldName).getDescribe().getType())
+                String.valueOf(describe.getType()),
+                describe.isUpdateable()
             ));
         }
         return fields;
     }
 
+    @AuraEnabled
+    public static void updateRecords(List<SObject> sObjects){
+        List<Database.SaveResult> results = Database.update(sObjects, false);
+    }
+
+    // helpers
     private static String getWhereClause(List<String> lookupsToParent, Id parentId){
         
         String whereClause = 'WHERE ';       
@@ -77,17 +94,5 @@ public class LightningReporterController {
         }
 
         return whereClause.removeEnd(' OR ');
-    }
-
-    @AuraEnabled
-    public static void updateRecords(List<SObject> sObjects){
-
-        List<Database.SaveResult> results = Database.update(sObjects, false);
-
-        for(Database.SaveResult result : results){
-            if(!result.isSuccess()){
-                System.debug('Error updating record: '+result.getErrors()[0]);  
-            }
-        }
     }
 }

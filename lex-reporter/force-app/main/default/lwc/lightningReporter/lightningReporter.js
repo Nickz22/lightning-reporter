@@ -9,7 +9,10 @@ export default class LightningReporter extends LightningElement {
     @track childRecords;
     childTypes;
     selectableFields;
-    @track selectedFields = new Set(["Id", "Name"]);
+    @track selectedFields = [
+        {"name" : "Id", "type" : "id", "isUpdateable" : false}, 
+        {"name" : "Name", "type" : "string", "isUpdateable" : false}, 
+    ];
     selectedType;
     @wire (getChildTypes, {recordId : '$recordId'})
     getRecordsFromDefaultChildType({error, data}){
@@ -20,7 +23,7 @@ export default class LightningReporter extends LightningElement {
         if(data){
             this.childTypes = data;
             this.selectedType = this.childTypes[0];
-            this.getChildRecords(this.recordId);
+            this.getChildRecords();
         }else{
             console.error('no data returned from getChildTypes');
         }
@@ -53,7 +56,7 @@ export default class LightningReporter extends LightningElement {
         getRecordsFromType({
             typeName: this.selectedType,
             parentId: this.recordId,
-            fieldsToGet: Array.from(this.selectedFields)
+            fieldsToGet: this.selectedFields
         }).then(result => {
             for(let i=0; i<result.length; i++){
                 result['sObjectType'] = this.selectedType;
@@ -70,9 +73,19 @@ export default class LightningReporter extends LightningElement {
         })
         .then(result => {
             this.selectableFields = result;
+            // this.selectableFieldByName = this.selectableFields.map(field => {
+            //     return {
+            //         label: field.label,
+            //         value: field.name
+            //     }
+            // });
+            // // log map
+            // for(let i of this.selectableFieldByName){
+            //     console.log(i);
+            // }
         })
         .catch(error => {
-            console.error('error getting records ['+
+            console.error('error getting selectable fields ['+
                                     error.body ? 
                                     error.body.message : 
                                     error.message+']');
@@ -85,17 +98,19 @@ export default class LightningReporter extends LightningElement {
             return;
         }
 
-        let fieldSet = new Set();
+        // this pattern is weird and wasteful, but I'm not sure if there's
+        // a better way to do clone one list into another
+        let fieldByName = new Map();
         for(let i of this.selectedFields){
-            fieldSet.add(i);
+            fieldByName.put(i.name, i);
         }
 
         if(evt.target.classList && evt.target.classList.contains("field-selected")){
             evt.target.classList.remove("field-selected");
-            fieldSet.delete(fieldName);
+            fieldByName.remove(fieldName);
         }else{
             evt.target.classList.add("field-selected");
-            fieldSet.add(fieldName);
+            fieldByName.put(fieldName, );
         }
 
         this.selectedFields = fieldSet;

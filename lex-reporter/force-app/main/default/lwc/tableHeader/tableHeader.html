@@ -2,11 +2,11 @@
     <lightning-layout>
         <template for:each={columns} for:item="column">
             <lightning-layout-item size={cellSize}
-                                   key={column} 
+                                   key={column.name} 
                                    flexibility="auto"
                                    alignment-bump="right"
                                    class="column-cell">
-                <b>{column}</b>
+                <b>{column.name}</b>
             </lightning-layout-item>
         </template>
     </lightning-layout>
