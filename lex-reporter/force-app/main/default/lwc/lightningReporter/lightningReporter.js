@@ -98,7 +98,6 @@ export default class LightningReporter extends LightningElement {
         // this pattern is weird and wasteful, but I'm not sure if there's
         // a better way to do clone one list into another
         let newSelectedFieldByName = new Map();
-        console.log('selected fields : '+this.selectedFields.length);
         for(let i = 0; i<this.selectedFields.length; i++){
             let selectedField = this.selectedFields[i];
             newSelectedFieldByName.set(selectedField.name, selectedField);
@@ -106,13 +105,13 @@ export default class LightningReporter extends LightningElement {
 
         if(evt.target.classList && evt.target.classList.contains("field-selected")){
             evt.target.classList.remove("field-selected");
-            newSelectedFieldByName.remove(fieldName);
+            newSelectedFieldByName.delete(fieldName);
         }else{
             evt.target.classList.add("field-selected");
-            newSelectedFieldByName.put(fieldName, this.selectableFieldByName.get(fieldName));
+            newSelectedFieldByName.set(fieldName, this.selectableFieldByName.get(fieldName));
         }
 
-        this.selectedFields = newSelectedFieldByName.values();
+        this.selectedFields = Array.from(newSelectedFieldByName.values());
     }
 
     handleChildTypeChange(event){
