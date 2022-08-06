@@ -1,0 +1,4 @@
+.table-data-container{
+    overflow-y: auto;
+    max-height: 325px;
+}

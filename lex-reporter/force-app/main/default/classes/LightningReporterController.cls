@@ -81,11 +81,13 @@ public class LightningReporterController {
 
     @AuraEnabled
     public static void updateRecords(List<SObject> sObjects){
-        System.debug('logging update targets');
-        for(SObject sobj : sObjects){
-            System.debug(
-                JSON.serialize(sobj)
-            );
+
+        List<Database.SaveResult> results = Database.update(sObjects, false);
+
+        for(Database.SaveResult result : results){
+            if(!result.isSuccess()){
+                System.debug('Error updating record: '+result.getErrors()[0]);  
+            }
         }
     }
 }

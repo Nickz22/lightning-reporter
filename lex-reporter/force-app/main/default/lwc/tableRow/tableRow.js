@@ -40,11 +40,8 @@ export default class TableRow extends LightningElement {
             let f = event.target["dataset"]["id"];
             let v = event.target.value;
             clone[f] = v;
-            console.log('clone is');
             console.log(clone);
             this._updatedSObject = clone;
-            console.log('hvc updated sObject: ');
-            console.log(this._updatedSObject);
         }catch(e){
             console.error(e);
         }

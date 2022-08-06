@@ -115,9 +115,12 @@ export default class LightningReporter extends LightningElement {
         let sObjects = [];
 
         // use reducer here? 
-        let rows = this.template.querySelectorAll('c-table-row');
+        let table = this.template.querySelectorAll('c-table');
+        console.log('table length: '+table.length);
+        let rows = table[0].getRows();
         console.log('got '+rows.length+' rows');
         for(let i = 0; i<rows.length; i++){
+            console.log(JSON.stringify(rows[i].updatedSObject));
             sObjects.push(rows[i].updatedSObject);
         }
 
