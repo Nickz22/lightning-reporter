@@ -9,6 +9,7 @@ export default class LightningReporter extends LightningElement {
     @track childRecords;
     childTypes;
     selectableFields;
+    selectableFieldByName = new Map();
     @track selectedFields = [
         {"name" : "Id", "type" : "id", "isUpdateable" : false}, 
         {"name" : "Name", "type" : "string", "isUpdateable" : false}, 
@@ -73,16 +74,10 @@ export default class LightningReporter extends LightningElement {
         })
         .then(result => {
             this.selectableFields = result;
-            // this.selectableFieldByName = this.selectableFields.map(field => {
-            //     return {
-            //         label: field.label,
-            //         value: field.name
-            //     }
-            // });
-            // // log map
-            // for(let i of this.selectableFieldByName){
-            //     console.log(i);
-            // }
+            this.selectableFieldByName = new Map(
+                this.selectableFields.map(field => {
+                    return [field.name, field];
+            }));
         })
         .catch(error => {
             console.error('error getting selectable fields ['+
@@ -94,26 +89,30 @@ export default class LightningReporter extends LightningElement {
 
     handleFieldClicked(evt){
         let fieldName = evt.target["dataset"]["id"];
+        console.log('clicked :'+fieldName);
         if(fieldName.toLowerCase() == "id" || fieldName.toLowerCase() == "name"){
+            console.log('retuning');
             return;
         }
 
         // this pattern is weird and wasteful, but I'm not sure if there's
         // a better way to do clone one list into another
-        let fieldByName = new Map();
-        for(let i of this.selectedFields){
-            fieldByName.put(i.name, i);
+        let newSelectedFieldByName = new Map();
+        console.log('selected fields : '+this.selectedFields.length);
+        for(let i = 0; i<this.selectedFields.length; i++){
+            let selectedField = this.selectedFields[i];
+            newSelectedFieldByName.set(selectedField.name, selectedField);
         }
 
         if(evt.target.classList && evt.target.classList.contains("field-selected")){
             evt.target.classList.remove("field-selected");
-            fieldByName.remove(fieldName);
+            newSelectedFieldByName.remove(fieldName);
         }else{
             evt.target.classList.add("field-selected");
-            fieldByName.put(fieldName, );
+            newSelectedFieldByName.put(fieldName, this.selectableFieldByName.get(fieldName));
         }
 
-        this.selectedFields = fieldSet;
+        this.selectedFields = newSelectedFieldByName.values();
     }
 
     handleChildTypeChange(event){
