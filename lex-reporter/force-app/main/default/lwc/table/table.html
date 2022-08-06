@@ -1,8 +1,7 @@
 <template>
     <lightning-layout multiple-rows>
         <lightning-layout-item size="12" 
-                                padding-around="large"
-                                class="table-header-container">
+                               class="table-header-container">
             <template if:true={selectedFields}>
                 <c-table-header columns={selectedFields}></c-table-header>
             </template>

@@ -1,8 +1,8 @@
 <template>
     <lightning-layout>
         <template for:each={columns} for:item="column">
-            <lightning-layout-item key={column} 
-                                   size={cellSize}
+            <lightning-layout-item size={cellSize}
+                                   key={column} 
                                    flexibility="auto"
                                    alignment-bump="right"
                                    class="column-cell">

@@ -20,7 +20,6 @@ export default class LightningReporter extends LightningElement {
         if(data){
             this.childTypes = data;
             this.selectedType = this.childTypes[0];
-            console.log('retrieved '+this.childTypes.length+' child types: ');
             this.getChildRecords(this.recordId);
         }else{
             console.error('no data returned from getChildTypes');
@@ -70,7 +69,6 @@ export default class LightningReporter extends LightningElement {
             typeName: this.selectedType
         })
         .then(result => {
-            console.log('retrieved '+result.length+' fields from type: '+this.selectedType);
             this.selectableFields = result;
         })
         .catch(error => {
@@ -83,7 +81,6 @@ export default class LightningReporter extends LightningElement {
 
     handleFieldClicked(evt){
         let fieldName = evt.target["dataset"]["id"];
-        console.log('field clicked: '+fieldName);
         if(fieldName.toLowerCase() == "id" || fieldName.toLowerCase() == "name"){
             return;
         }
@@ -105,22 +102,17 @@ export default class LightningReporter extends LightningElement {
     }
 
     handleChildTypeChange(event){
-        console.log('new child type: '+event.target.value);
         this.selectedType = event.target.value;
         this.getChildRecords();
     }
 
     updateRecords(event){
-        console.log('updating records');
         let sObjects = [];
 
         // use reducer here? 
         let table = this.template.querySelectorAll('c-table');
-        console.log('table length: '+table.length);
         let rows = table[0].getRows();
-        console.log('got '+rows.length+' rows');
         for(let i = 0; i<rows.length; i++){
-            console.log(JSON.stringify(rows[i].updatedSObject));
             sObjects.push(rows[i].updatedSObject);
         }
 

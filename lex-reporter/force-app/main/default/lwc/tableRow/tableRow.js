@@ -28,7 +28,6 @@ export default class TableRow extends LightningElement {
     }
 
     handleValueChange(event){
-        console.log('handleValueChange');
         try{
 
             let clone = {};
@@ -40,7 +39,6 @@ export default class TableRow extends LightningElement {
             let f = event.target["dataset"]["id"];
             let v = event.target.value;
             clone[f] = v;
-            console.log(clone);
             this._updatedSObject = clone;
         }catch(e){
             console.error(e);
