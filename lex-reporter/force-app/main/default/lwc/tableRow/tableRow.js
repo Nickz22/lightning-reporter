@@ -2,7 +2,7 @@ import { LightningElement, api } from 'lwc';
 
 export default class TableRow extends LightningElement {
     
-    @api fields = [];
+    @api fields = [];  //
     cells = [];
     cellSize;
 
