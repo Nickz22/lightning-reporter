@@ -2,6 +2,18 @@ import { LightningElement, api } from 'lwc';
 
 export default class TableRow extends LightningElement {
     
+    inputTypeBySfSchemaType = new Map(
+        [
+            ['id', 'text'],
+            ['string', 'text'],
+            ['date', 'date'],
+            ['datetime', 'datetime'],
+            ['boolean', 'checkbox'],
+            ['email', 'email'],
+            ['phone', 'tel'],
+            ['number', 'number'],
+        ]
+    );
     @api fields = [];
     cells = [];
     cellSize;
@@ -26,7 +38,8 @@ export default class TableRow extends LightningElement {
                     'apiName': field.name, 
                     'label' : field.label,
                     'value': this._sObject[field.name], 
-                    'isUpdateable' : field.isUpdateable
+                    'isUpdateable' : field.isUpdateable,
+                    'type' : this.inputTypeBySfSchemaType.get(field.type),
                 }
             );
         }

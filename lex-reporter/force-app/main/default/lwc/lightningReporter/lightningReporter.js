@@ -11,8 +11,8 @@ export default class LightningReporter extends LightningElement {
     selectableFields;
     selectableFieldByName = new Map();
     @track selectedFields = [
-        {"name" : "Id", "type" : "id", "isUpdateable" : false}, 
-        {"name" : "Name", "type" : "string", "isUpdateable" : false}, 
+        {"name" : "Id", "label" : "Id", "type" : "id", "isUpdateable" : false}, 
+        {"name" : "Name", "label" : "Name", "type" : "string", "isUpdateable" : false}, 
     ];
     selectedType;
     @wire (getChildTypes, {recordId : '$recordId'})
@@ -50,6 +50,7 @@ export default class LightningReporter extends LightningElement {
     }
 
     getChildRecords(){
+        // this setup needs to be done for every fetch
         if(!this.selectableFields){
             this.getSelectableFields();
         }

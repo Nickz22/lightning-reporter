@@ -9,12 +9,14 @@
                 <template if:true={cell.isUpdateable}>
                     <lightning-input data-id={cell.apiName} 
                                      value={cell.value} 
+                                     type={cell.type}
                                      onchange={handleValueChange}></lightning-input>
                 </template>
                 <template if:false={cell.isUpdateable}>
                     <lightning-input data-id={cell.apiName} 
                                      value={cell.value} 
-                                     disabled
+                                     read-only
+                                     type={cell.type}
                                      onchange={handleValueChange}></lightning-input>
                 </template>
             </lightning-layout-item>

@@ -1,30 +1,23 @@
 <!-- 
     TODO (Bugs)
-    - Boolean values not showing in table cell
-    - non editable fields now rendering as table cell
-        ... need to drive which cells show in table rows by 
-                the fields DTO i'm passing in
-
-        ... currently the row is looping thru sobject props 
-                to understand which cells to show, but those are
-                empty cause that's just how SOQL works
+    - Fields aren't formatted to their field type
  -->
 
 <!-- 
-    TODO (Features)
-    - Mass update button - Editable fields
-       * 
-    - Filter by current user in any user lookup
-    - front end filter search
+    TODO (Features) (ordered by complexity descending)
     - see all child records, see all parents of each row
+    - front end filter search
+    - Filter by current user in any user lookup
+    - Double click to inline edit instead of default inline edit
     - better styling
+    - Toaster message on successful save
  -->
 <template>    
     <lightning-card>
         <!-- classes not allowed on lightning-card -->
         <div class="report-box"> 
             <lightning-layout multiple-rows>
-                <!-- HEADER -->
+                <!-- TABLE ACTIONS -->
                 <lightning-layout-item size="3" 
                                        data-id="child-type-options">
                     <lightning-combobox
@@ -49,8 +42,7 @@
                         onclick={updateRecords}>
                     </lightning-button>
                 </lightning-layout-item>
-                <!-- END HEADER -->
-                <!-- TABLE -->
+                <!-- END TABLE ACTIONS -->
                 <lightning-layout-item size="9" 
                                        data-id="record-table"
                                        padding="around-medium"
@@ -58,27 +50,26 @@
                     <c-table selected-fields={selectedFields}
                              child-records={childRecords}></c-table>
                 </lightning-layout-item>
-                <!-- END TABLE -->
                 <!-- START FIELDS -->
                 <lightning-layout-item size="3" 
                                        data-id="field-list"
                                        class="field-list">
-                <template for:each={selectableFields} for:item="field">
-                    <template if:true={field.defaultSelected}>
-                        <p key={field.name} 
-                            data-id={field.name}
-                            class="field-name field-selected"
-                            onclick={handleFieldClicked}>{field.name} ({field.type})
-                        </p>
-                    </template>
-                    <template if:false={field.defaultSelected}>
-                        <p key={field.name} 
-                            data-id={field.name}
-                            class="field-name"
-                            onclick={handleFieldClicked}>{field.name} ({field.type})
-                        </p>
-                    </template>
-                </template> 
+                    <template for:each={selectableFields} for:item="field">
+                        <template if:true={field.defaultSelected}>
+                            <p key={field.name} 
+                                data-id={field.name}
+                                class="field-name field-selected"
+                                onclick={handleFieldClicked}>{field.name} ({field.type})
+                            </p>
+                        </template>
+                        <template if:false={field.defaultSelected}>
+                            <p key={field.name} 
+                                data-id={field.name}
+                                class="field-name"
+                                onclick={handleFieldClicked}>{field.name} ({field.type})
+                            </p>
+                        </template>
+                    </template> 
                 </lightning-layout-item>
                 <!-- END FIELDS -->
             </lightning-layout>
