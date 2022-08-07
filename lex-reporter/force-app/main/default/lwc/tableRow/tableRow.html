@@ -2,7 +2,7 @@
     <lightning-layout class="table-row">
         <template for:each={cells} for:item="cell">
             <lightning-layout-item size={cellSize}
-                                   key={cell.value}
+                                   key={cell.apiName}
                                    flexibility="auto"
                                    alignment-bump="right"
                                    class="cell">

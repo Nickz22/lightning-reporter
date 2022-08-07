@@ -18,21 +18,15 @@ export default class TableRow extends LightningElement {
         this._sObject = value;
         let i = 0;
         this.cells = [];
-        let fieldByName = new Map(
-            this.fields.map(field => [field.name, field])
-        );
         
-        for(let prop in this._sObject){
+        for(let field of this.fields){
             i++
             this.cells.push(
                 {
-                    'apiName': prop, 
-                    'value': this._sObject[prop], 
-                    'isUpdateable' : (
-                        fieldByName.has(prop) ? 
-                        fieldByName.get(prop).isUpdateable : 
-                        fieldByName.get(prop.toLowerCase()).isUpdateable
-                    )
+                    'apiName': field.name, 
+                    'label' : field.label,
+                    'value': this._sObject[field.name], 
+                    'isUpdateable' : field.isUpdateable
                 }
             );
         }
@@ -44,8 +38,8 @@ export default class TableRow extends LightningElement {
 
             let clone = {};
 
-            for(let prop in this._sObject){
-                clone[prop] = this._sObject[prop];
+            for(let field in this._sObject){
+                clone[field] = this._sObject[field];
             }
 
             let f = event.target["dataset"]["id"];

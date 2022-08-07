@@ -1,12 +1,19 @@
 <!-- 
     TODO (Bugs)
     - Boolean values not showing in table cell
+    - non editable fields now rendering as table cell
+        ... need to drive which cells show in table rows by 
+                the fields DTO i'm passing in
+
+        ... currently the row is looping thru sobject props 
+                to understand which cells to show, but those are
+                empty cause that's just how SOQL works
  -->
 
 <!-- 
     TODO (Features)
     - Mass update button - Editable fields
-       * non-editable fields should be disabled
+       * 
     - Filter by current user in any user lookup
     - front end filter search
     - see all child records, see all parents of each row

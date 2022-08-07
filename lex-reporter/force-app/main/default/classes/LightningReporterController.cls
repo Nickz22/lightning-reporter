@@ -41,17 +41,28 @@ public class LightningReporterController {
                         'FROM '+typeName+' '+
                         getWhereClause(lookupsToParent, parentId);
         
-        return Database.query(query);
+        List<SObject> records = new List<SObject>();
+        for(SObject record : Database.query(query)){
+            for(String field : fieldApiNames){
+                if(record.get(field) == null){
+                    record.put(field, null);
+                }
+            }
+            records.add(record);
+        }
+        return records;
     }    
 
     public class FieldDTO{
         @AuraEnabled public String name {get; set;}
+        @AuraEnabled public String label {get; set;}
         @AuraEnabled public String type {get; set;}
         @AuraEnabled public Boolean isUpdateable {get; set;}
         @AuraEnabled public Boolean defaultSelected = false;
 
-        public FieldDTO(String name, String type, Boolean isUpdateable){
+        public FieldDTO(String name, String label, String type, Boolean isUpdateable){
             this.name = name;
+            this.label = label;
             this.type = type;
             this.isUpdateable = isUpdateable;
             this.defaultSelected = (name == 'Id' || name == 'Name');
@@ -72,7 +83,8 @@ public class LightningReporterController {
         for(String fieldName : iterableFieldNames){
             DescribeFieldResult describe = fieldTokenByName.get(fieldName).getDescribe();
             fields.add(new FieldDTO(
-                fieldName,
+                describe.getName(),
+                describe.getLabel(),
                 String.valueOf(describe.getType()),
                 describe.isUpdateable()
             ));
