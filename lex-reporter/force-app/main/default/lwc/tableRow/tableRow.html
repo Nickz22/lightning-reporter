@@ -1,14 +1,22 @@
 <template>
     <lightning-layout class="table-row">
-        <template for:each={fields} for:item="field">
+        <template for:each={cells} for:item="cell">
             <lightning-layout-item size={cellSize}
-                                   key={field.value}
+                                   key={cell.value}
                                    flexibility="auto"
                                    alignment-bump="right"
                                    class="cell">
-                <lightning-input data-id={field.apiName} 
-                                   value={field.value} 
-                                onchange={handleValueChange}></lightning-input>
+                <template if:true={cell.isUpdateable}>
+                    <lightning-input data-id={cell.apiName} 
+                                     value={cell.value} 
+                                     onchange={handleValueChange}></lightning-input>
+                </template>
+                <template if:false={cell.isUpdateable}>
+                    <lightning-input data-id={cell.apiName} 
+                                     value={cell.value} 
+                                     disabled
+                                     onchange={handleValueChange}></lightning-input>
+                </template>
             </lightning-layout-item>
         </template>
     </lightning-layout>

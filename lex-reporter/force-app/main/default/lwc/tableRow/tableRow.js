@@ -2,7 +2,8 @@ import { LightningElement, api } from 'lwc';
 
 export default class TableRow extends LightningElement {
     
-    fields = [];
+    @api fields = [];
+    cells = [];
     cellSize;
 
     @api get updatedSObject(){
@@ -16,12 +17,23 @@ export default class TableRow extends LightningElement {
     set sObject(value){
         this._sObject = value;
         let i = 0;
-        this.fields = [];
+        this.cells = [];
+        let fieldByName = new Map(
+            this.fields.map(field => [field.name, field])
+        );
         
         for(let prop in this._sObject){
             i++
-            this.fields.push(
-                {'apiName': prop, 'value': this._sObject[prop]}
+            this.cells.push(
+                {
+                    'apiName': prop, 
+                    'value': this._sObject[prop], 
+                    'isUpdateable' : (
+                        fieldByName.has(prop) ? 
+                        fieldByName.get(prop).isUpdateable : 
+                        fieldByName.get(prop.toLowerCase()).isUpdateable
+                    )
+                }
             );
         }
         this.cellSize = Math.floor(12/i);
