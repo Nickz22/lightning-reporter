@@ -1,6 +1,6 @@
 import { LightningElement, api, wire, track } from 'lwc';
 import getChildTypes from '@salesforce/apex/LightningReporterController.getChildTypes';
-import getRecordsFromType from '@salesforce/apex/LightningReporterController.getRecordsFromType'
+import getRecordsFromTypeLookingUpToId from '@salesforce/apex/LightningReporterController.getRecordsFromTypeLookingUpToId'
 import getFieldsFromType from '@salesforce/apex/LightningReporterController.getFieldsFromType'
 import dbUpdateRecords from '@salesforce/apex/LightningReporterController.updateRecords'
 
@@ -55,11 +55,12 @@ export default class LightningReporter extends LightningElement {
             this.getSelectableFields();
         }
         
-        getRecordsFromType({
+        getRecordsFromTypeLookingUpToId({
             typeName: this.selectedType,
             parentId: this.recordId,
             fieldsToGet: this.selectedFields
         }).then(result => {
+            // is this required?
             for(let i=0; i<result.length; i++){
                 result['sObjectType'] = this.selectedType;
             }
@@ -72,8 +73,7 @@ export default class LightningReporter extends LightningElement {
     getSelectableFields(){
         getFieldsFromType({
             typeName: this.selectedType
-        })
-        .then(result => {
+        }).then(result => {
             this.selectableFields = result;
             this.selectableFieldByName = new Map(
                 this.selectableFields.map(field => {

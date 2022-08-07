@@ -11,9 +11,10 @@ export default class TableRow extends LightningElement {
             ['boolean', 'checkbox'],
             ['email', 'email'],
             ['phone', 'tel'],
-            ['number', 'number'],
+            ['number', 'number']
         ]
     );
+
     @api fields = [];
     cells = [];
     cellSize;
@@ -27,6 +28,7 @@ export default class TableRow extends LightningElement {
     }
 
     set sObject(value){
+
         this._sObject = value;
         let i = 0;
         this.cells = [];

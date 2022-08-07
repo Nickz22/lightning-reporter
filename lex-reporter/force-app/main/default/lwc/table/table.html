@@ -2,20 +2,15 @@
     <lightning-layout multiple-rows>
         <lightning-layout-item size="12"
                                class="table-header-container">
-            <template if:true={selectedFields}>
-                <c-table-header columns={selectedFields}></c-table-header>
-            </template>
+            <c-table-header columns={selectedFields}></c-table-header>
         </lightning-layout-item>
         <lightning-layout-item size="12"
                                class="table-data-container">
-            <template if:true={childRecords}>
-                <template for:each={childRecords} for:item="record">
-                    <c-table-row key={record.Id}
-                                 data-id={record.Id}
-                                 fields={selectedFields}
-                                 s-object={record}>
-                    </c-table-row>
-                </template>
+            <template for:each={childRecords} for:item="record">
+                <c-table-row key={record.Id}
+                                data-id={record.Id}
+                                fields={selectedFields}
+                                s-object={record}></c-table-row>
             </template>
         </lightning-layout-item>
     </lightning-layout>
