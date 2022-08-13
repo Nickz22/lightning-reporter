@@ -10,7 +10,13 @@
                     <lightning-input data-id={cell.apiName}
                                      value={cell.value} 
                                      type={cell.type}
+                                     read-only={cell.notEditing}
                                      onchange={handleValueChange}></lightning-input>
+                    <lightning-icon class="edit-icon"
+                                    onclick={initEdit} 
+                                    icon-name="utility:edit" 
+                                    data-id={cell.apiName}
+                                    size="xx-small"></lightning-icon>
                 </template>
                 <template if:false={cell.isUpdateable}>
                     <lightning-input data-id={cell.apiName} 

@@ -1,4 +1,4 @@
-import { LightningElement, api } from 'lwc';
+import { LightningElement, api, track } from 'lwc';
 
 export default class TableRow extends LightningElement {
     
@@ -24,7 +24,7 @@ export default class TableRow extends LightningElement {
     );
 
     @api fields = [];
-    cells = [];
+    @track cells = [];
     cellSize;
 
     @api get updatedSObject(){
@@ -49,6 +49,8 @@ export default class TableRow extends LightningElement {
                     'label' : field.label,
                     'value': this._sObject[field.name], 
                     'isUpdateable' : field.isUpdateable,
+                    'notEditing' : true, // have to make this resolve to `true`...
+                                         // cant make read-only show with a `false` boolean value
                     'type' : this.inputTypeBySfSchemaType.get(field.type),
                 }
             );
@@ -71,6 +73,18 @@ export default class TableRow extends LightningElement {
             this._updatedSObject = clone;
         }catch(e){
             console.error(e);
+        }
+    }
+
+    initEdit(event){
+        let clickedFieldName = event.target["dataset"]["id"];
+        for(let cell of this.cells){
+            let isNotEditing = (
+                cell.apiName == clickedFieldName ? 
+                !cell.notEditing : // toggle pencil icon
+                cell.notEditing
+            );
+            cell.notEditing = isNotEditing;
         }
     }
 }

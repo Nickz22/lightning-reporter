@@ -7,9 +7,9 @@ public class LightningReporterController {
         for(Schema.ChildRelationship relationship : typeDescribe.getChildRelationships()){
             String childTypeName = relationship.getChildSObject().getDescribe().getName();
             // remove before releasing
-            // if(childTypeName == 'Contact'){
+            if(childTypeName == 'Contact'){
                 childTypes.add(relationship.getChildSObject().getDescribe().getName());
-            // }
+            }
         }
         
         return new List<String>(childTypes);
