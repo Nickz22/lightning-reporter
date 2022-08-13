@@ -5,17 +5,25 @@ export default class TableRow extends LightningElement {
     inputTypeBySfSchemaType = new Map(
         [
             ['id', 'text'],
+            ['ID', 'datetime'],
             ['string', 'text'],
+            ['STRING', 'text'],
             ['date', 'date'],
+            ['DATE', 'date'],
+            ['DATETIME', 'datetime'],
             ['datetime', 'datetime'],
             ['boolean', 'checkbox'],
+            ['BOOLEAN', 'checkbox'],
             ['email', 'email'],
+            ['EMAIL', 'email'],
             ['phone', 'tel'],
-            ['number', 'number']
+            ['PHONE', 'tel'],
+            ['number', 'number'],
+            ['NUMBER', 'number']
         ]
     );
 
-    @api fields = [];  //
+    @api fields = [];
     cells = [];
     cellSize;
 

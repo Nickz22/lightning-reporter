@@ -7,9 +7,9 @@ public class LightningReporterController {
         for(Schema.ChildRelationship relationship : typeDescribe.getChildRelationships()){
             String childTypeName = relationship.getChildSObject().getDescribe().getName();
             // remove before releasing
-            if(childTypeName == 'Contact'){
+            // if(childTypeName == 'Contact'){
                 childTypes.add(relationship.getChildSObject().getDescribe().getName());
-            }
+            // }
         }
         
         return new List<String>(childTypes);
@@ -68,27 +68,21 @@ public class LightningReporterController {
         @AuraEnabled public String label {get; set;}
         @AuraEnabled public String type {get; set;}
         @AuraEnabled public Boolean isUpdateable {get; set;}
-        @AuraEnabled public Boolean defaultSelected = false;
+        @AuraEnabled public Boolean defaultSelected {get; set;}
 
         public FieldDTO(String name, String label, String type, Boolean isUpdateable){
             this.name = name;
             this.label = label;
             this.type = type;
             this.isUpdateable = isUpdateable;
-            this.defaultSelected = (name == 'Id' || name == 'Name');
         }
 
         public FieldDTO(){}
     }
 
     /**
-     * @TestDirections
-     * 
-     * 1) invoke getFieldsFromType('Contact')
-     * 2) Get total number of fields on the contact object (from salesforce system)
-     * 3) Make sure the # of fields (from Salesforce) is equal to # of fields returned from getFieldsFromType('Contact')
+     * @Directions - ensure default fields are default selected
      */
-
     @AuraEnabled
     public static List<FieldDTO> getFieldsFromType(String typeName){
 
@@ -98,15 +92,17 @@ public class LightningReporterController {
         List<String> iterableFieldNames = new List<String>(fieldTokenByName.keyset());
         iterableFieldNames.sort();
 
+        // ensure any fields defined as default in the table configuration 
+        //   have their `defaultSelected` parameter set to `true`
         for(String fieldName : iterableFieldNames){
             DescribeFieldResult describe = fieldTokenByName.get(fieldName).getDescribe();
-            fields.add(
-                new FieldDTO(
-                    describe.getName(),
-                    describe.getLabel(),
-                    String.valueOf(describe.getType()),
-                    describe.isUpdateable()
-            ));
+            FieldDTO dto = new FieldDTO(
+                describe.getName(),
+                describe.getLabel(),
+                String.valueOf(describe.getType()),
+                describe.isUpdateable()
+            );
+            fields.add(dto);
         }
         return fields;
     }

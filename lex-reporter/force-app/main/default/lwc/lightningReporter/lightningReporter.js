@@ -3,6 +3,7 @@ import getChildTypes from '@salesforce/apex/LightningReporterController.getChild
 import getRecordsFromTypeLookingUpToId from '@salesforce/apex/LightningReporterController.getRecordsFromTypeLookingUpToId'
 import getFieldsFromType from '@salesforce/apex/LightningReporterController.getFieldsFromType'
 import dbUpdateRecords from '@salesforce/apex/LightningReporterController.updateRecords'
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class LightningReporter extends LightningElement {
     @api recordId;
@@ -133,11 +134,18 @@ export default class LightningReporter extends LightningElement {
         dbUpdateRecords({
             sObjects: sObjects
         }).then(result => {
-            console.log('returned from apex: '+result);
-        }
-        ).catch(error => {
-            console.error('error updating records ['+error.body.message+']');
+            this.showNotification('Records saved successfully', '', 'success');
+        }).catch(error => {
+            this.showNotification('We hit a snag', error.body.message, 'error');
         })
+    }
 
+    showNotification(title, message, variant) {
+        const evt = new ShowToastEvent({
+            title: title,
+            message: message,
+            variant: variant,
+        });
+        this.dispatchEvent(evt);
     }
 }

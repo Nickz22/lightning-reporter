@@ -1,5 +1,5 @@
 <template>
-    <lightning-layout class="table-row">
+    <lightning-layout class="table-row" horizontal-align="center">
         <template for:each={cells} for:item="cell">
             <lightning-layout-item size={cellSize}
                                    key={cell.apiName}
@@ -7,7 +7,7 @@
                                    alignment-bump="right"
                                    class="cell">
                 <template if:true={cell.isUpdateable}>
-                    <lightning-input data-id={cell.apiName} 
+                    <lightning-input data-id={cell.apiName}
                                      value={cell.value} 
                                      type={cell.type}
                                      onchange={handleValueChange}></lightning-input>
