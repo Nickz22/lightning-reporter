@@ -1,6 +1,7 @@
 import { LightningElement, api, track } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
 
-export default class TableRow extends LightningElement {
+export default class TableRow extends NavigationMixin(LightningElement) {
     
     inputTypeBySfSchemaType = new Map(
         [
@@ -22,6 +23,21 @@ export default class TableRow extends LightningElement {
             ['NUMBER', 'number']
         ]
     );
+
+    // {
+    //     type: 'standard__app',
+    //     attributes: {
+    //         appTarget: 'standard__LightningSales',
+    //         pageRef: {
+    //             type: 'standard__recordPage',
+    //             attributes: {
+    //                 recordId: '001xx000003DGg0AAG',
+    //                 objectApiName: 'Account',
+    //                 actionName: 'view'
+    //             }
+    //         }
+    //     }
+    // } need to add an onclick event to the row to open the record in a new tab
 
     @api fields = [];
     @track cells = [];

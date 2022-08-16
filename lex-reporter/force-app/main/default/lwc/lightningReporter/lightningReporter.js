@@ -5,6 +5,7 @@ import getFieldsFromType from '@salesforce/apex/LightningReporterController.getF
 import dbUpdateRecords from '@salesforce/apex/LightningReporterController.updateRecords'
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
+
 export default class LightningReporter extends LightningElement {
     @api recordId;
     @track childRecords;

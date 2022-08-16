@@ -13,7 +13,7 @@
     - see all child records, see all parents of each row
     - front end filter search
     - Filter by current user in any user lookup
-    - Double click to inline edit instead of default inline edit
+    - Link out to record in Salesforce when reference fields is showing
     - better styling
     - configure default fields to get on table load
  -->
@@ -64,7 +64,7 @@
                             <p key={field.name} 
                                 data-id={field.name}
                                 class="field-name field-selected"
-                                onclick={handleFieldClicked}>{field.name} ({field.type})
+                                onclick={handleFieldClicked}>{field.label} ({field.type})
                             </p>
                         </template>
                         <template if:false={field.defaultSelected}>
