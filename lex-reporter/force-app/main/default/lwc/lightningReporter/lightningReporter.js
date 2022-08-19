@@ -5,17 +5,13 @@ import getFieldsFromType from '@salesforce/apex/LightningReporterController.getF
 import dbUpdateRecords from '@salesforce/apex/LightningReporterController.updateRecords'
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
-
 export default class LightningReporter extends LightningElement {
     @api recordId;
     @track childRecords;
     childTypes;
     selectableFields;
     selectableFieldByName = new Map();
-    @track selectedFields = [
-        {"name" : "Id", "label" : "Id", "type" : "id", "isUpdateable" : false}, 
-        {"name" : "Name", "label" : "Name", "type" : "string", "isUpdateable" : false}, 
-    ];
+    @track selectedFields;
     selectedType;
     @wire (getChildTypes, {recordId : '$recordId'})
     getRecordsFromDefaultChildType({error, data}){
@@ -56,20 +52,6 @@ export default class LightningReporter extends LightningElement {
         if(!this.selectableFields){
             this.getSelectableFields();
         }
-        
-        getRecordsFromTypeLookingUpToId({
-            typeName: this.selectedType,
-            parentId: this.recordId,
-            fieldsToGet: this.selectedFields
-        }).then(result => {
-            // is this required?
-            for(let i=0; i<result.length; i++){
-                result['sObjectType'] = this.selectedType;
-            }
-            this.childRecords = result;
-        }).catch(error => {
-            console.error('error getting records ['+error.body.message+']');
-        })
     }
 
     getSelectableFields(){
@@ -81,6 +63,28 @@ export default class LightningReporter extends LightningElement {
                 this.selectableFields.map(field => {
                     return [field.name, field];
             }));
+
+            this.selectedFields = [];
+            for(let i=0; i<result.length; i++){
+                let dto = result[i];
+                if(dto.defaultSelected){
+                    this.selectedFields.push(dto);
+                }
+            }
+
+            getRecordsFromTypeLookingUpToId({
+                typeName: this.selectedType,
+                parentId: this.recordId,
+                fieldsToGet: this.selectedFields
+            }).then(result => {
+                // is this required?
+                for(let i=0; i<result.length; i++){
+                    result['sObjectType'] = this.selectedType;
+                }
+                this.childRecords = result;
+            }).catch(error => {
+                console.error('error getting records ['+error.body.message+']');
+            })
         })
         .catch(error => {
             console.error('error getting selectable fields ['+

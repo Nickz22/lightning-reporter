@@ -11,7 +11,7 @@ export default class TableHeader extends LightningElement {
     set columns(value){
         let length = 0;
 
-        for(let c of value){
+        for(let column of value){
             length++;
         }
 
