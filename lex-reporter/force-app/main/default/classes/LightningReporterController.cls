@@ -70,11 +70,12 @@ public class LightningReporterController {
         @AuraEnabled public Boolean isUpdateable {get; set;}
         @AuraEnabled public Boolean defaultSelected {get; set;}
 
-        public FieldDTO(String name, String label, String type, Boolean isUpdateable){
+        public FieldDTO(String name, String label, String type, Boolean isUpdateable, Boolean defaultSelected){
             this.name = name;
             this.label = label;
             this.type = type;
             this.isUpdateable = isUpdateable;
+            this.defaultSelected = defaultSelected;
         }
 
         public FieldDTO(){}
@@ -93,14 +94,24 @@ public class LightningReporterController {
         iterableFieldNames.sort();
 
         // ensure any fields defined as default in the table configuration 
+        // (1) where are the default fields
+        // (2) are the default fields in the right format for processing? 
+                // (2.a) what is the correct format
+        // (3) how do I match the config to the dto
         //   have their `defaultSelected` parameter set to `true`
+
+        LEX_Reporter_Table_Configuration__c defaultConfig = [SELECT Default_Fieldset__c 
+                                                               FROM LEX_Reporter_Table_Configuration__c
+                                                              LIMIT 1];
+        String defaultFields = defaultConfig.Default_Fieldset__c;
         for(String fieldName : iterableFieldNames){
             DescribeFieldResult describe = fieldTokenByName.get(fieldName).getDescribe();
             FieldDTO dto = new FieldDTO(
                 describe.getName(),
                 describe.getLabel(),
                 String.valueOf(describe.getType()),
-                describe.isUpdateable()
+                describe.isUpdateable(),
+                defaultFields.containsIgnoreCase(fieldName)
             );
             fields.add(dto);
         }
