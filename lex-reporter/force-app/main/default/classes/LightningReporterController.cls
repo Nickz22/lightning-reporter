@@ -81,16 +81,14 @@ public class LightningReporterController {
         public FieldDTO(){}
     }
 
-    /**
-     * @Directions - ensure default fields are default selected
-     */
     @AuraEnabled
     public static List<FieldDTO> getFieldsFromType(String typeName){
 
         List<FieldDTO> fields = new List<FieldDTO>();
         SObjectType typeFromName = Schema.getGlobalDescribe().get(typeName);
-        Map<String, SObjectField> fieldTokenByName = typeFromName.getDescribe().fields.getMap();
-        List<String> iterableFieldNames = new List<String>(fieldTokenByName.keyset());
+        DescribeSObjectResult d = typeFromName.getDescribe();
+        Map<String, SObjectField> fieldTokenByApiName = d.fields.getMap();
+        List<String> iterableFieldNames = new List<String>(fieldTokenByApiName.keyset());
         iterableFieldNames.sort();
 
         LEX_Reporter_Table_Configuration__c defaultConfig = [SELECT Default_Fieldset__c 
