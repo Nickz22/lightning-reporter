@@ -85,7 +85,7 @@ public class LightningReporterController {
      * @TestDirections
      * 
      * 1) invoke getFieldsFromType('Contact')
-     * 2) Get total number of fields on the contact object (from salesforce system)
+     * 2) Get total number of fields on the contact object (from salesforce system) ; assert 62 fields exist in SF, l. 96/97
      * 3) Make sure the # of fields (from Salesforce) is equal to # of fields returned from getFieldsFromType('Contact')
      */
 
@@ -94,12 +94,13 @@ public class LightningReporterController {
 
         List<FieldDTO> fields = new List<FieldDTO>();
         SObjectType typeFromName = Schema.getGlobalDescribe().get(typeName);
-        Map<String, SObjectField> fieldTokenByName = typeFromName.getDescribe().fields.getMap();
-        List<String> iterableFieldNames = new List<String>(fieldTokenByName.keyset());
+        DescribeSObjectResult d = typeFromName.getDescribe();
+        Map<String, SObjectField> fieldTokenByApiName = d.fields.getMap();
+        List<String> iterableFieldNames = new List<String>(fieldTokenByApiName.keyset());
         iterableFieldNames.sort();
 
         for(String fieldName : iterableFieldNames){
-            DescribeFieldResult describe = fieldTokenByName.get(fieldName).getDescribe();
+            DescribeFieldResult describe = fieldTokenByApiName.get(fieldName).getDescribe();
             fields.add(
                 new FieldDTO(
                     describe.getName(),
