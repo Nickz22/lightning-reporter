@@ -1,19 +1,23 @@
 <!-- 
-    TODO (Bugs)
-    - Fields aren't formatted to their field type
-    - Lookup field edits aren't persisting to DB
+    BUGS (ordered by severity descending)
+    - Buttons need to wrap better
+    - rows are not aligned to header
  -->
+
+ <!-- QA
+    - Check date/time fields are committing to DB
+-->
 
 <!-- 
     TODO (Features) (ordered by complexity descending)
     - see all child records, see all parents of each row
     - front end filter search
     - Filter by current user in any user lookup
-    - Double click to inline edit instead of default inline edit
+    - Link out to record in Salesforce when reference fields is showing
     - better styling
-    - Toaster message on successful save
+    - configure default fields to get on table load
  -->
-<template>    
+<template>
     <lightning-card>
         <!-- classes not allowed on lightning-card -->
         <div class="report-box"> 
@@ -48,8 +52,10 @@
                                        data-id="record-table"
                                        padding="around-medium"
                                        class="table-container">
-                    <c-table selected-fields={selectedFields}
-                             child-records={childRecords}></c-table>
+                    <template if:true={selectedFields}>
+                        <c-table selected-fields={selectedFields}
+                                 child-records={childRecords}></c-table>
+                    </template>
                 </lightning-layout-item>
                 <!-- START FIELDS -->
                 <lightning-layout-item size="3" 
@@ -60,7 +66,7 @@
                             <p key={field.name} 
                                 data-id={field.name}
                                 class="field-name field-selected"
-                                onclick={handleFieldClicked}>{field.name} ({field.type})
+                                onclick={handleFieldClicked}>{field.label} ({field.type})
                             </p>
                         </template>
                         <template if:false={field.defaultSelected}>

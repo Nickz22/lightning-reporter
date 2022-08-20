@@ -9,4 +9,16 @@
 .cell{
     overflow-x: clip;
     cursor: pointer;
+    position: relative;
+}
+
+.cell:hover{
+    /* cursor: pointer; */
+}
+
+.edit-icon{
+    position: absolute;
+    top: 50%;
+    right: 10%;
+    cursor: pointer;
 }

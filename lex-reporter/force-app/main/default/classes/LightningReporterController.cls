@@ -68,14 +68,14 @@ public class LightningReporterController {
         @AuraEnabled public String label {get; set;}
         @AuraEnabled public String type {get; set;}
         @AuraEnabled public Boolean isUpdateable {get; set;}
-        @AuraEnabled public Boolean defaultSelected = false;
+        @AuraEnabled public Boolean defaultSelected {get; set;}
 
-        public FieldDTO(String name, String label, String type, Boolean isUpdateable){
+        public FieldDTO(String name, String label, String type, Boolean isUpdateable, Boolean defaultSelected){
             this.name = name;
             this.label = label;
             this.type = type;
             this.isUpdateable = isUpdateable;
-            this.defaultSelected = (name == 'Id' || name == 'Name');
+            this.defaultSelected = defaultSelected;
         }
 
         public FieldDTO(){}
@@ -91,16 +91,20 @@ public class LightningReporterController {
         List<String> iterableFieldNames = new List<String>(fieldTokenByApiName.keyset());
         iterableFieldNames.sort();
 
+        LEX_Reporter_Table_Configuration__c defaultConfig = [SELECT Default_Fieldset__c 
+                                                               FROM LEX_Reporter_Table_Configuration__c
+                                                              LIMIT 1];
+        String defaultFields = defaultConfig.Default_Fieldset__c;
         for(String fieldName : iterableFieldNames){
-
-            DescribeFieldResult describe = fieldTokenByApiName.get(fieldName).getDescribe();
-            fields.add(
-                new FieldDTO(
-                    describe.getName(),
-                    describe.getLabel(),
-                    String.valueOf(describe.getType()),
-                    describe.isUpdateable()
-            ));
+            DescribeFieldResult describe = fieldTokenByName.get(fieldName).getDescribe();
+            FieldDTO dto = new FieldDTO(
+                describe.getName(),
+                describe.getLabel(),
+                String.valueOf(describe.getType()),
+                describe.isUpdateable(),
+                defaultFields.containsIgnoreCase(fieldName)
+            );
+            fields.add(dto);
         }
         return fields;
     }

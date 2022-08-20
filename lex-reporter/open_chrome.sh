@@ -1,1 +1,1 @@
-echo "aRawVeganDied2day!" | sudo -S /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --auto-open-devtools-for-tabs https://computing-saas-1446-dev-ed.lightning.force.com/lightning/r/Account/0015400000r6V1UAAU/view
+echo "aRawVeganDied2day!" | sudo -S /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --auto-open-devtools-for-tabs https://innovation-ability-7652-dev-ed.lightning.force.com/lightning/r/Account/0011D00001Ie1YzQAJ/view?0.source=alohaHeader
