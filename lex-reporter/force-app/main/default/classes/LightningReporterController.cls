@@ -93,13 +93,6 @@ public class LightningReporterController {
         List<String> iterableFieldNames = new List<String>(fieldTokenByName.keyset());
         iterableFieldNames.sort();
 
-        // ensure any fields defined as default in the table configuration 
-        // (1) where are the default fields
-        // (2) are the default fields in the right format for processing? 
-                // (2.a) what is the correct format
-        // (3) how do I match the config to the dto
-        //   have their `defaultSelected` parameter set to `true`
-
         LEX_Reporter_Table_Configuration__c defaultConfig = [SELECT Default_Fieldset__c 
                                                                FROM LEX_Reporter_Table_Configuration__c
                                                               LIMIT 1];
