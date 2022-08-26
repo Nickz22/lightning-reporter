@@ -4,26 +4,32 @@ public class LightningReporterControllerTest2 {
     @TestSetup
     static void makeData(){
         insert new LEX_Reporter_Table_Configuration__c(
-            Default_Fieldset__c = 'Id,Name'
+            Default_Fieldset__c = 'Id,Name',
+            Object__c = 'Contact'
         );
     }
 
     @isTest
     static void givenDefaultTableConfiguration_verifyDefaultDTOs(){
-        String defaultFields = [SELECT Default_Fieldset__C FROM LEX_Reporter_Table_Configuration__c LIMIT 1][0].Default_Fieldset__c;
-        String objectType = 'Contact';
-
+        LEX_Reporter_Table_Configuration__c config = [SELECT Default_Fieldset__C, Object__c
+                                                        FROM LEX_Reporter_Table_Configuration__c 
+                                                        WHERE Object__c = 'Contact'
+                                                        LIMIT 1][0];
+        String contactType = config.Object__c;
+        String defaultFields = config.Default_Fieldset__c;
         // invoke LightningReporterController.getFieldsFromType()
-        List<LightningReporterController.FieldDTO> dtos = LightningReporterController.getFieldsFromType(objectType);
+        List<LightningReporterController.FieldDTO> dtos = LightningReporterController.getFieldsFromType(contactType);
 
         Integer numAssertions = 0;
         for(LightningReporterController.FieldDTO dto : dtos){            
             if(defaultFields.containsIgnoreCase(dto.name)){
-                System.assert(/** assert that default fieldset contains this default selected field */); 
+                System.assert(dto.defaultSelected);
                 numAssertions++;
             }
         }
 
-        // assert num assertions equals number of default fields (2)
+        List<String> defaultFieldsArray = defaultFields.split(',');
+        System.assert(defaultFieldsArray.size()==2);
+        System.assert(defaultFieldsArray.size()==numAssertions);       
     }
 }
