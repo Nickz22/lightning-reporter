@@ -95,6 +95,7 @@ public class LightningReporterController {
 
         LEX_Reporter_Table_Configuration__c defaultConfig = [SELECT Default_Fieldset__c 
                                                                FROM LEX_Reporter_Table_Configuration__c
+                                                               WHERE Object__c = : typeName
                                                               LIMIT 1];
         String defaultFields = defaultConfig.Default_Fieldset__c;
         for(String fieldName : iterableFieldNames){
