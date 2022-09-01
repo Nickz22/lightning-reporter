@@ -9,6 +9,11 @@ public class LightningReporterControllerTest2 {
         );
     }
 
+    /**
+     * TODO: 
+     * add a test case for 0 default table config records
+     */
+
     @isTest
     static void givenDefaultTableConfiguration_verifyDefaultDTOs(){
         LEX_Reporter_Table_Configuration__c config = [SELECT Default_Fieldset__C, Object__c

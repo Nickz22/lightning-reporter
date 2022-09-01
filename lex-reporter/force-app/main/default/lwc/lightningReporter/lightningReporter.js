@@ -13,6 +13,7 @@ export default class LightningReporter extends LightningElement {
     selectableFieldByName = new Map();
     @track selectedFields;
     selectedType;
+
     @wire (getChildTypes, {recordId : '$recordId'})
     getRecordsFromDefaultChildType({error, data}){
         if(error){
@@ -51,7 +52,25 @@ export default class LightningReporter extends LightningElement {
         // this setup needs to be done for every fetch
         if(!this.selectableFields){
             this.getSelectableFields();
+        }else{
+            this.getRecords();
         }
+    }
+
+    getRecords(){
+        getRecordsFromTypeLookingUpToId({
+            typeName: this.selectedType,
+            parentId: this.recordId,
+            fieldsToGet: this.selectedFields
+        }).then(result => {
+            // is this required?
+            for(let i=0; i<result.length; i++){
+                result['sObjectType'] = this.selectedType;
+            }
+            this.childRecords = result;
+        }).catch(error => {
+            console.error('error getting records ['+error.body.message+']');
+        })
     }
 
     getSelectableFields(){
@@ -72,19 +91,7 @@ export default class LightningReporter extends LightningElement {
                 }
             }
 
-            getRecordsFromTypeLookingUpToId({
-                typeName: this.selectedType,
-                parentId: this.recordId,
-                fieldsToGet: this.selectedFields
-            }).then(result => {
-                // is this required?
-                for(let i=0; i<result.length; i++){
-                    result['sObjectType'] = this.selectedType;
-                }
-                this.childRecords = result;
-            }).catch(error => {
-                console.error('error getting records ['+error.body.message+']');
-            })
+            this.getRecords();
         })
         .catch(error => {
             console.error('error getting selectable fields ['+
