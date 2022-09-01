@@ -6,7 +6,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     inputTypeBySfSchemaType = new Map(
         [
             ['id', 'text'],
-            ['ID', 'datetime'],
+            ['ID', 'text'],
             ['string', 'text'],
             ['STRING', 'text'],
             ['date', 'date'],
