@@ -97,7 +97,7 @@ public class LightningReporterController {
                                                               LIMIT 1];
         String defaultFields = defaultConfig.Default_Fieldset__c;
         for(String fieldName : iterableFieldNames){
-            DescribeFieldResult describe = fieldTokenByName.get(fieldName).getDescribe();
+            DescribeFieldResult describe = fieldTokenByApiName.get(fieldName).getDescribe();
             FieldDTO dto = new FieldDTO(
                 describe.getName(),
                 describe.getLabel(),
