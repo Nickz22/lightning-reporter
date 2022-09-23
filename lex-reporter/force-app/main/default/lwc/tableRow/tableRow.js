@@ -42,6 +42,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     @api fields = [];
     @track cells = [];
     cellSize;
+    sObjectName;
 
     @api get updatedSObject(){
         return this._updatedSObject ? this._updatedSObject : this._sObject;
@@ -54,6 +55,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     set sObject(value){
 
         this._sObject = value;
+        this.sObjectName = this._sObject["Name"];
         let i = 0;
         this.cells = [];
         
@@ -63,8 +65,9 @@ export default class TableRow extends NavigationMixin(LightningElement) {
                 {
                     'apiName': field.name, 
                     'label' : field.label,
-                    'value': this._sObject[field.name], 
+                    'value': this._sObject[field.name],
                     'isUpdateable' : field.isUpdateable,
+                    'isReference' : (field.type == 'Id' || field.type == 'ID' || field.type == 'REFERENCE' || field.type == 'reference'),
                     'notEditing' : true, // have to make this resolve to `true`...
                                          // cant make read-only show with a `false` boolean value
                     'type' : this.inputTypeBySfSchemaType.get(field.type),
