@@ -2,6 +2,11 @@ import { LightningElement, api, track } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 
 export default class TableRow extends NavigationMixin(LightningElement) {
+
+    rteContent = "";
+    isEditMode = false;
+    usersPosition = "";
+    users = [];
     
     inputTypeBySfSchemaType = new Map(
         [
@@ -105,5 +110,29 @@ export default class TableRow extends NavigationMixin(LightningElement) {
             );
             cell.notEditing = isNotEditing;
         }
+    }
+
+    renderRte(){
+        this.isEditMode = !this.isEditMode;
+    }
+
+    rteChange(event){
+        console.log(event.target.value);
+        if(event.target.value.includes('@')){
+            console.log('found @');
+            console.log(event.target.getBoundingClientRect());
+            console.dir(event.target)
+            this.usersPosition = 'top: ' + (event.target.getBoundingClientRect().top + 200) + '; left: ' + event.target.getBoundingClientRect().left + ';';
+            for(let i = 0; i<5; i++){
+                this.users.push({name: 'test', id:'test'});
+            }
+        }
+    }
+
+    selectLookupUser(event){
+        console.log('logging curr user');
+        console.log(event.target.childNodes[0].data);
+
+        
     }
 }

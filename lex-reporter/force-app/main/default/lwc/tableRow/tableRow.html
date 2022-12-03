@@ -1,5 +1,27 @@
 <template>
     <lightning-layout class="table-row" horizontal-align="center">
+        <lightning-layout-item size="1">
+            <template if:false={isEditMode}>
+                <lightning-icon onclick={renderRte} 
+                                icon-name="standard:messaging_conversation"
+                                size="xx-small"></lightning-icon>
+            </template>
+            <template if:true={isEditMode}>
+                <div class="rte">
+                    <lightning-input-rich-text value={rteContent} 
+                                               onchange={rteChange}>
+                    </lightning-input-rich-text>
+                    <div class="user-search" style={usersPosition}>
+                        <template for:each={users} for:item="user">
+                            <div key={user.id} class="lookup-user" onclick={selectLookupUser}>
+                                {user.name}
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </template>
+
+        </lightning-layout-item>
         <template for:each={cells} for:item="cell">
             <lightning-layout-item size={cellSize}
                                    key={cell.apiName}

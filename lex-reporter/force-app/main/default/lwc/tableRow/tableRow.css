@@ -1,3 +1,27 @@
+.rte{
+    position: absolute;
+    left: 10%;
+    z-index: 1;
+    max-width: 300px;
+}
+
+.user-search{
+    position: relative;
+    overflow: scroll;
+    max-height: 50px;
+    z-index: 2;
+}
+
+.lookup-user{
+    border-bottom: 1px solid black;
+    cursor: pointer;
+}
+
+.lookup-user:hover{
+    border-bottom: 1px solid black;
+    background-color: lightblue;
+}
+
 .table-row{
     border-bottom: 1px solid black;
 }
@@ -10,6 +34,7 @@
     overflow-x: clip;
     cursor: pointer;
     position: relative;
+    z-index: 0;
 }
 
 .cell:hover{
