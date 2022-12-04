@@ -1,6 +1,6 @@
 <template>
-    <lightning-layout class="table-row" horizontal-align="center">
-        <lightning-layout-item size="1" class="rte-launcher">
+    <lightning-layout class="table-row">
+        <div class="rte-launcher">
             <template if:false={isEditMode}>
                 <lightning-icon onclick={renderRte} 
                                 icon-name="standard:messaging_conversation"
@@ -26,13 +26,10 @@
                     </div>
                 </div>
             </template>
-
-        </lightning-layout-item>
+        </div>
         <template for:each={cells} for:item="cell">
             <lightning-layout-item size={cellSize}
                                    key={cell.apiName}
-                                   flexibility="auto"
-                                   alignment-bump="right"
                                    class="cell">
                 <!-- make this href point to https://speed-saas-841-dev-ed.lightning.force.com/{salesforce_record_id} -->
                 <!-- 1) Ensure the Record Id is accessible in the javascript file (see the `sObjectName` variable for example)
@@ -42,16 +39,22 @@
                 </template>
                 <template if:false={cell.isReference}>
                     <template if:true={cell.isUpdateable}>
-                        <lightning-input data-id={cell.apiName}
+                        <lightning-layout>
+                            <lightning-layout-item size="8">
+                                <lightning-input data-id={cell.apiName}
                                          value={cell.value} 
                                          type={cell.type}
                                          read-only={cell.notEditing}
                                          onchange={handleValueChange}></lightning-input>
-                        <lightning-icon class="edit-icon"
-                                        onclick={initEdit} 
-                                        icon-name="utility:edit" 
-                                        data-id={cell.apiName}
-                                        size="xx-small"></lightning-icon>
+                                </lightning-layout-item>
+                            <lightning-layout-item size="4">
+                                <lightning-icon class="edit-icon"
+                                                onclick={initEdit} 
+                                                icon-name="utility:edit" 
+                                                data-id={cell.apiName}
+                                                size="xx-small"></lightning-icon>
+                            </lightning-layout-item>
+                        </lightning-layout>
                     </template>
                     <template if:false={cell.isUpdateable}>
                         <lightning-input data-id={cell.apiName} 

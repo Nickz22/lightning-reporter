@@ -3,8 +3,6 @@
         <template for:each={columns} for:item="column">
             <lightning-layout-item size={cellSize}
                                    key={column.name} 
-                                   flexibility="auto"
-                                   alignment-bump="right"
                                    class="column-cell">
                 <b>{column.label}</b>
             </lightning-layout-item>

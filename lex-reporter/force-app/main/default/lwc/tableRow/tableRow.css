@@ -1,6 +1,8 @@
-/* .rte-launcher{
-    margin-left: 100px;
-} */
+.rte-launcher{
+    position: relative;
+    left: 2%;
+    top: 2em;
+}
 
 .rte{
     position: absolute;
@@ -34,20 +36,14 @@
     background-color: lightgray;
 }
 
-.cell{
+/* .cell{
     overflow-x: clip;
     cursor: pointer;
-    position: relative;
     z-index: 0;
-}
-
-.cell:hover{
-    /* cursor: pointer; */
-}
+    position:relative;
+    top: 1em;
+} */
 
 .edit-icon{
-    position: absolute;
-    top: 50%;
-    right: 10%;
     cursor: pointer;
 }
