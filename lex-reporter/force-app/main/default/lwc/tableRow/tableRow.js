@@ -49,6 +49,28 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     cellSize;
     sObjectName;
 
+    renderedCallback(){
+        let users = this.template.querySelectorAll('.lookup-user');
+        if(users.length > 0){
+            users[0].focus();
+        }
+    }
+
+    handleUserKeydown(event){
+        // if key press is down
+        if(event.keyCode == 40){
+            event.target.nextSibling.focus();
+        }
+        // if key press is up
+        if(event.keyCode == 38){
+            event.target.previousSibling.focus();
+        }
+        // if key press is enter
+        if(event.keyCode == 13){
+            this.selectLookupUser(event);
+        }
+    }
+        
     @api get updatedSObject(){
         return this._updatedSObject ? this._updatedSObject : this._sObject;
     }
@@ -116,23 +138,41 @@ export default class TableRow extends NavigationMixin(LightningElement) {
         this.isEditMode = !this.isEditMode;
     }
 
-    rteChange(event){
-        console.log(event.target.value);
+    async rteChange(event){
         if(event.target.value.includes('@')){
-            console.log('found @');
-            console.log(event.target.getBoundingClientRect());
-            console.dir(event.target)
-            this.usersPosition = 'top: ' + (event.target.getBoundingClientRect().top + 200) + '; left: ' + event.target.getBoundingClientRect().left + ';';
-            for(let i = 0; i<5; i++){
-                this.users.push({name: 'test', id:'test'});
-            }
+            this.getUserList(event);
+        }
+    }
+
+    getUserList(event){
+        console.log('getting user list');
+        let x = {
+            0 : "Cornelius Rex",
+            1 : "Albert Einstein",
+            2 : "Maximilion Herman Rosegrant",
+            3 : "Aldous Huxley-Freud",
+            4 : "Steven Solomon",
+        }
+
+        this.usersPosition = 'top: ' + (event.target.getBoundingClientRect().top + 200) + '; left: ' + event.target.getBoundingClientRect().left + ';';
+        for(let i = 0; i<5; i++){
+            this.users.push(
+                {name: x[i], id:x[i]}
+            );
         }
     }
 
     selectLookupUser(event){
-        console.log('logging curr user');
-        console.log(event.target.childNodes[0].data);
 
-        
+        let rte = this.template.querySelectorAll('lightning-input-rich-text')[0];
+        let userName = event.target.childNodes[0].data;
+        console.dir(event.target)
+        console.log(userName);
+        rte.setRangeText(
+            userName, 
+            undefined, 
+            undefined,
+            'select'
+        );
     }
 }

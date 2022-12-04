@@ -9,11 +9,25 @@
             <template if:true={isEditMode}>
                 <div class="rte">
                     <lightning-input-rich-text value={rteContent} 
-                                               onchange={rteChange}>
+                                               onchange={rteChange}
+                                               onkeypress={handleKeyPress}
+                                               disabled-categories="ALIGN_TEXT,FORMAT_FONT,FORMAT_BODY">
+                        <!-- <lightning-rich-text-toolbar-button-group slot="toolbar"
+                                                                  aria-label="First group">
+                            <lightning-rich-text-toolbar-button
+                            icon-name="utility:check"
+                            icon-alternative-text="Save"
+                            onclick={handleSave}>
+                            </lightning-rich-text-toolbar-button>
+                        </lightning-rich-text-toolbar-button-group> -->
                     </lightning-input-rich-text>
                     <div class="user-search" style={usersPosition}>
                         <template for:each={users} for:item="user">
-                            <div key={user.id} class="lookup-user" onclick={selectLookupUser}>
+                            <div key={user.id} 
+                                 class="lookup-user" 
+                                 onclick={selectLookupUser}
+                                 tabindex="-1"
+                                 onkeydown={handleUserKeydown}>
                                 {user.name}
                             </div>
                         </template>
