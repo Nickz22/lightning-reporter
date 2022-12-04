@@ -137,7 +137,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
                 }
             );
         }
-        this.cellSize = Math.floor(12/i);
+        this.cellSize = Math.floor(11/i);
     }
 
     handleValueChange(event){
