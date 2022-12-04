@@ -40,15 +40,15 @@
                 </template>
                 <template if:false={cell.isReference}>
                     <template if:true={cell.isUpdateable}>
-                        <lightning-layout vertical-align="center">
-                            <lightning-layout-item size="8">
+                        <lightning-layout vertical-align="center" horizontal-align="end">
+                            <lightning-layout-item size="10">
                                 <lightning-input data-id={cell.apiName}
                                                 value={cell.value} 
                                                 type={cell.type}
                                                 read-only={cell.notEditing}
                                                 onchange={handleValueChange}></lightning-input>
                             </lightning-layout-item>
-                            <lightning-layout-item size="4">
+                            <lightning-layout-item size="2">
                                 <lightning-icon class="edit-icon"
                                                 onclick={initEdit} 
                                                 icon-name="utility:edit" 
@@ -58,12 +58,12 @@
                         </lightning-layout>
                     </template>
                     <template if:false={cell.isUpdateable}>
-                        <lightning-input data-id={cell.apiName} 
-                                         value={cell.value} 
-                                         read-only
-                                         type={cell.type}
-                                         onchange={handleValueChange}
-                                         vertical-align="center"></lightning-input>
+                        {cell.value}
+                        <!-- <lightning-input data-id={cell.apiName}
+                                        value={cell.value} 
+                                        read-only
+                                        type={cell.type}
+                                        onchange={handleValueChange}></lightning-input> -->
                     </template>
                 </template>
             </lightning-layout-item>
