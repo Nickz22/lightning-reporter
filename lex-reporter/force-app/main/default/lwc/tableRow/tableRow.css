@@ -1,7 +1,6 @@
 .rte-launcher{
     position: relative;
     left: 2%;
-    top: 2em;
 }
 
 .rte{
@@ -30,19 +29,17 @@
 
 .table-row{
     border-bottom: 1px solid black;
+    margin: 0 auto;
 }
 
 .table-row:hover{
     background-color: lightgray;
 }
 
-/* .cell{
+.cell{
     overflow-x: clip;
-    cursor: pointer;
-    z-index: 0;
-    position:relative;
-    top: 1em;
-} */
+    position: relative;
+}
 
 .edit-icon{
     cursor: pointer;

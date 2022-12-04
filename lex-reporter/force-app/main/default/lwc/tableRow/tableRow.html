@@ -1,11 +1,11 @@
 <template>
-    <lightning-layout class="table-row">
+    <lightning-layout class="table-row" vertical-align="center">
         <div class="rte-launcher">
             <template if:false={isEditMode}>
                 <lightning-icon onclick={renderRte} 
                                 icon-name="standard:messaging_conversation"
                                 size="xx-small"
-                                style="position: absolute; top: -.5em"></lightning-icon>
+                                style="position: absolute;"></lightning-icon>
             </template>
             <template if:true={isEditMode}>
                 <div class="rte">
@@ -43,11 +43,11 @@
                         <lightning-layout vertical-align="center">
                             <lightning-layout-item size="8">
                                 <lightning-input data-id={cell.apiName}
-                                         value={cell.value} 
-                                         type={cell.type}
-                                         read-only={cell.notEditing}
-                                         onchange={handleValueChange}></lightning-input>
-                                </lightning-layout-item>
+                                                value={cell.value} 
+                                                type={cell.type}
+                                                read-only={cell.notEditing}
+                                                onchange={handleValueChange}></lightning-input>
+                            </lightning-layout-item>
                             <lightning-layout-item size="4">
                                 <lightning-icon class="edit-icon"
                                                 onclick={initEdit} 
@@ -62,7 +62,8 @@
                                          value={cell.value} 
                                          read-only
                                          type={cell.type}
-                                         onchange={handleValueChange}></lightning-input>
+                                         onchange={handleValueChange}
+                                         vertical-align="center"></lightning-input>
                     </template>
                 </template>
             </lightning-layout-item>
