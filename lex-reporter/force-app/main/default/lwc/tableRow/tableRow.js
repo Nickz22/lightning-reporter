@@ -1,12 +1,13 @@
 import { LightningElement, api, track } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class TableRow extends NavigationMixin(LightningElement) {
 
     rteContent = "";
     isEditMode = false;
     usersPosition = "";
-    users = [];
+    @track users = [];
     bypassUserFocus = false;
     inputTypeBySfSchemaType = new Map(
         [
@@ -45,12 +46,25 @@ export default class TableRow extends NavigationMixin(LightningElement) {
         }
     }
 
+    handleRteKeyDown(event){
+        console.log('rte keydown: '+event.key);
+        // when meta + enter is pressed
+        if(event.metaKey && event.keyCode == 13){
+            this.showNotification('Note Saved', '', 'success');
+            this.renderRte();
+        }
+    }
+
     handleRteKeyUp(event){
         console.log('rte keyup: '+event.key);
+        console.log('rte keyup code: '+event.keyCode);
         // if key press is escape
         if(event.keyCode == 27){
-            this.renderRte();
-            this.users = [];
+            if(this.users.length > 0){
+                this.users = [];
+            }else{
+                this.renderRte();
+            }   
         }
         // if key press is @
         if(event.key == '@'){
@@ -72,6 +86,10 @@ export default class TableRow extends NavigationMixin(LightningElement) {
         if(event.keyCode == 13){
             this.users = [];
             this.selectLookupUser(event);
+        }
+        // if key press is escape
+        if(event.keyCode == 27){
+            this.users = [];
         }
     }
 
@@ -172,5 +190,14 @@ export default class TableRow extends NavigationMixin(LightningElement) {
                 {name: x[i], id:x[i]}
             );
         }
+    }
+
+    showNotification(title, message, variant) {
+        const evt = new ShowToastEvent({
+            title: title,
+            message: message,
+            variant: variant,
+        });
+        this.dispatchEvent(evt);
     }
 }
