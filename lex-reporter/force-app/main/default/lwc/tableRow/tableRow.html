@@ -9,8 +9,7 @@
             <template if:true={isEditMode}>
                 <div class="rte">
                     <lightning-input-rich-text value={rteContent} 
-                                               onchange={rteChange}
-                                               onkeypress={handleKeyPress}
+                                               onkeyup={handleRteKeyUp}
                                                disabled-categories="ALIGN_TEXT,FORMAT_FONT,FORMAT_BODY">
                         <!-- <lightning-rich-text-toolbar-button-group slot="toolbar"
                                                                   aria-label="First group">
@@ -27,7 +26,7 @@
                                  class="lookup-user" 
                                  onclick={selectLookupUser}
                                  tabindex="-1"
-                                 onkeydown={handleUserKeydown}>
+                                 onkeyup={handleUserKeyUp}>
                                 {user.name}
                             </div>
                         </template>

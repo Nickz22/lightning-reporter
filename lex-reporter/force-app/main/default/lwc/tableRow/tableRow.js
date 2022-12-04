@@ -7,7 +7,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     isEditMode = false;
     usersPosition = "";
     users = [];
-    
+    bypassUserFocus = false;
     inputTypeBySfSchemaType = new Map(
         [
             ['id', 'text'],
@@ -29,21 +29,6 @@ export default class TableRow extends NavigationMixin(LightningElement) {
         ]
     );
 
-    // {
-    //     type: 'standard__app',
-    //     attributes: {
-    //         appTarget: 'standard__LightningSales',
-    //         pageRef: {
-    //             type: 'standard__recordPage',
-    //             attributes: {
-    //                 recordId: '001xx000003DGg0AAG',
-    //                 objectApiName: 'Account',
-    //                 actionName: 'view'
-    //             }
-    //         }
-    //     }
-    // } need to add an onclick event to the row to open the record in a new tab
-
     @api fields = [];
     @track cells = [];
     cellSize;
@@ -51,12 +36,30 @@ export default class TableRow extends NavigationMixin(LightningElement) {
 
     renderedCallback(){
         let users = this.template.querySelectorAll('.lookup-user');
-        if(users.length > 0){
+        if(users.length > 0 && !this.bypassUserFocus){
+            console.log('focusing on first user');
             users[0].focus();
+        }
+        if(this.bypassUserFocus){
+            this.bypassUserFocus = false;
         }
     }
 
-    handleUserKeydown(event){
+    handleRteKeyUp(event){
+        console.log('rte keyup: '+event.key);
+        // if key press is escape
+        if(event.keyCode == 27){
+            this.renderRte();
+            this.users = [];
+        }
+        // if key press is @
+        if(event.key == '@'){
+            this.getUserList(event);
+        }
+    }
+
+    handleUserKeyUp(event){
+        console.log('user keydown: '+event.key);
         // if key press is down
         if(event.keyCode == 40){
             event.target.nextSibling.focus();
@@ -67,8 +70,23 @@ export default class TableRow extends NavigationMixin(LightningElement) {
         }
         // if key press is enter
         if(event.keyCode == 13){
+            this.users = [];
             this.selectLookupUser(event);
         }
+    }
+
+    selectLookupUser(event){
+
+        let rte = this.template.querySelectorAll('lightning-input-rich-text')[0];
+        let userName = event.target.childNodes[0].data;
+        console.log(userName);
+        rte.setRangeText(
+            userName, 
+            undefined, 
+            undefined,
+            'select'
+        );
+        // this.bypassUserFocus = true;
     }
         
     @api get updatedSObject(){
@@ -138,12 +156,6 @@ export default class TableRow extends NavigationMixin(LightningElement) {
         this.isEditMode = !this.isEditMode;
     }
 
-    async rteChange(event){
-        if(event.target.value.includes('@')){
-            this.getUserList(event);
-        }
-    }
-
     getUserList(event){
         console.log('getting user list');
         let x = {
@@ -160,19 +172,5 @@ export default class TableRow extends NavigationMixin(LightningElement) {
                 {name: x[i], id:x[i]}
             );
         }
-    }
-
-    selectLookupUser(event){
-
-        let rte = this.template.querySelectorAll('lightning-input-rich-text')[0];
-        let userName = event.target.childNodes[0].data;
-        console.dir(event.target)
-        console.log(userName);
-        rte.setRangeText(
-            userName, 
-            undefined, 
-            undefined,
-            'select'
-        );
     }
 }
