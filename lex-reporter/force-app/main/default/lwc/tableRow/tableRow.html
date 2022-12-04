@@ -4,7 +4,8 @@
             <template if:false={isEditMode}>
                 <lightning-icon onclick={renderRte} 
                                 icon-name="standard:messaging_conversation"
-                                size="xx-small"></lightning-icon>
+                                size="xx-small"
+                                style="position: absolute; top: -.5em"></lightning-icon>
             </template>
             <template if:true={isEditMode}>
                 <div class="rte">
@@ -39,7 +40,7 @@
                 </template>
                 <template if:false={cell.isReference}>
                     <template if:true={cell.isUpdateable}>
-                        <lightning-layout>
+                        <lightning-layout vertical-align="center">
                             <lightning-layout-item size="8">
                                 <lightning-input data-id={cell.apiName}
                                          value={cell.value} 
