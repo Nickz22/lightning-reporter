@@ -133,19 +133,36 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     set sObject(value){
 
         this._sObject = value;
-        this.sObjectName = this._sObject["Name"];
-        let i = 0;
-        this.cells = [];
+        this.sObjectName = this._sObject.Name;
+        this.cells = this.getTableCellValues();
+
+        if(value.Notes){
+            this.avatars = [];
+            for(let i = 0; i < value.Notes.length; i++){
+                let newAvatar = {
+                    "url" : value.Notes[i].CreatedBy.FullPhotoUrl,
+                    "name" : value.Notes[i].CreatedBy.Name,
+                    "body" : value.Notes[i].Body,
+                    "id" : value.Notes[i].Id,
+                    "time" : value.Notes[i].CreatedDate
+                };
+                this.avatars.push(newAvatar);
+            }
+        }
+        this.cellSize = 3;
+    }
+
+    getTableCellValues = () => {
+        let cells = [];
         
         for(let field of this.fields){
-            i++
-            this.cells.push(
+            cells.push(
                 {
                     'apiName': field.name, 
                     'label' : field.label,
                     'value': this._sObject[field.name],
                     'isUpdateable' : field.isUpdateable,
-                    'isReference' : (field.type == 'Id' || field.type == 'ID' || field.type == 'REFERENCE' || field.type == 'reference'),
+                    'isReference' : (field.type === 'Id' || field.type === 'ID' || field.type === 'REFERENCE' || field.type === 'reference'),
                     'notEditing' : true, // have to make this resolve to `true`...
                                          // cant make read-only show with a `false` boolean value
                     'type' : this.inputTypeBySfSchemaType.get(field.type),
@@ -153,20 +170,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
             );
         }
 
-        if(value.Notes){
-            this.avatars = [];
-            for(let note in value.Notes){
-                let newAvatar = {
-                    "url" : value.Notes[note].CreatedBy.FullPhotoUrl,
-                    "name" : value.Notes[note].CreatedBy.Name,
-                    "body" : value.Notes[note].Body,
-                    "id" : value.Notes[note].Id,
-                    "time" : value.Notes[note].CreatedDate
-                };
-                this.avatars.push(newAvatar);
-            }
-        }
-        this.cellSize = Math.floor(12/i);
+        return cells;
     }
 
     handleValueChange(event){
@@ -178,9 +182,9 @@ export default class TableRow extends NavigationMixin(LightningElement) {
                 clone[field] = this._sObject[field];
             }
 
-            let f = event.target["dataset"]["id"];
-            let v = event.target.value;
-            clone[f] = v;
+            let input = event.target;
+            let fieldName = input.dataset.id;
+            clone[fieldName] = input.value;
             this._updatedSObject = clone;
         }catch(e){
             console.error(e);
@@ -204,7 +208,6 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     }
 
     getUserList(event){
-        console.log('getting user list');
         let x = {
             0 : "Cornelius Rex",
             1 : "Albert Einstein",
@@ -243,22 +246,4 @@ export default class TableRow extends NavigationMixin(LightningElement) {
             tableRow.classList.add('table-row-expanded');
         }
     }
-
-    // exposeNoteTime(event){
-    //     for(let i = 0; i<event.target.childNodes.length; i++){
-    //         console.log(event.target.childNodes[i]?.classList);
-    //         if(event.target.childNodes[i]?.classList.contains('note-time')){
-    //             event.target.childNodes[i]?.classList.add('note-time-exposed');
-    //         }
-    //     }
-    // }
-
-    // hideNoteTime(event){
-    //     for(let i = 0; i<event.target.childNodes.length; i++){
-    //         console.log(event.target.childNodes[i]?.classList);
-    //         if(event.target.childNodes[i]?.classList.contains('note-time')){
-    //             event.target.childNodes[i]?.classList.remove('note-time-exposed');
-    //         }
-    //     }
-    // }
 }

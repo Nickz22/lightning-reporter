@@ -54,9 +54,14 @@ public class LightningReporterController {
                         getWhereClause(lookupsToParent, parentId);
 
         List<SObject> records = new List<SObject>();
+        Map<String, Schema.SObjectField> tokenByFieldName = Schema.getGlobalDescribe()
+                                                        .get(typeName)
+                                                        .getDescribe().fields.getMap();
         for(SObject record : Database.query(query)){
             for(String field : fieldApiNames){
-                if(record.get(field) == null){
+                // if field is editable and null, explicitly set to `null`
+                if(record.get(field) == null && 
+                    tokenByFieldName.get(field).getDescribe().isUpdateable()){
                     record.put(field, null);
                 }
             }

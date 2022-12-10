@@ -16,7 +16,7 @@ export default class TableHeader extends LightningElement {
         }
 
         this._columns = value;
-        this.cellSize = Math.floor(12/length);
+        this.cellSize = 3;
     }
 
 }
