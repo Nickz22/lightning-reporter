@@ -1,16 +1,11 @@
 import { LightningElement, api, track } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import saveNote from '@salesforce/apex/TableRowController.saveNote';
 
 export default class TableRow extends NavigationMixin(LightningElement) {
 
-    rteContent = "";
-    isEditMode = false;
-    usersPosition = "";
-    @track users = [];
-    bypassUserFocus = false;
-    inputTypeBySfSchemaType = new Map(
-        [
+    inputTypeBySfSchemaType = new Map([
             ['id', 'text'],
             ['ID', 'text'],
             ['string', 'text'],
@@ -27,31 +22,52 @@ export default class TableRow extends NavigationMixin(LightningElement) {
             ['PHONE', 'tel'],
             ['number', 'number'],
             ['NUMBER', 'number']
-        ]
-    );
+    ]);
 
     @api fields = [];
+    rteContent = "";
+    isEditMode = false;
+    usersPosition = "";
+    @track users = [];
+    @track avatars = [];
+    @track notes = [];
     @track cells = [];
+    bypassUserFocus = false;
     cellSize;
     sObjectName;
 
     renderedCallback(){
+        // "@" symbol just surfaced
         let users = this.template.querySelectorAll('.lookup-user');
-        if(users.length > 0 && !this.bypassUserFocus){
+        if(users.length > 0){
             console.log('focusing on first user');
             users[0].focus();
-        }
-        if(this.bypassUserFocus){
-            this.bypassUserFocus = false;
         }
     }
 
     handleRteKeyDown(event){
-        console.log('rte keydown: '+event.key);
         // when meta + enter is pressed
         if(event.metaKey && event.keyCode == 13){
-            this.showNotification('Note Saved', '', 'success');
             this.renderRte();
+            saveNote({
+                content: event.target.value,
+                parentId: this._sObject.Id
+            })
+            .then(result => {
+                console.log(result.CreatedBy.FullPhotoUrl);
+                let currentAvatars = this.avatars;
+                currentAvatars.push({
+                    "url" : result.CreatedBy.FullPhotoUrl,
+                    "name" : result.CreatedBy.Name,
+                    "body" : result.Body,
+                    "id" : result.Id
+                });
+                this.avatars = currentAvatars;
+                this.showNotification('Note Saved', '', 'success');
+            })
+            .catch(error => {
+                console.log('error: '+error);
+            });
         }
     }
 
@@ -104,7 +120,6 @@ export default class TableRow extends NavigationMixin(LightningElement) {
             undefined,
             'select'
         );
-        // this.bypassUserFocus = true;
     }
         
     @api get updatedSObject(){
@@ -136,6 +151,20 @@ export default class TableRow extends NavigationMixin(LightningElement) {
                     'type' : this.inputTypeBySfSchemaType.get(field.type),
                 }
             );
+        }
+
+        if(value.Notes){
+            this.avatars = [];
+            for(let note in value.Notes){
+                let newAvatar = {
+                    "url" : value.Notes[note].CreatedBy.FullPhotoUrl,
+                    "name" : value.Notes[note].CreatedBy.Name,
+                    "body" : value.Notes[note].Body,
+                    "id" : value.Notes[note].Id,
+                    "time" : value.Notes[note].CreatedDate
+                };
+                this.avatars.push(newAvatar);
+            }
         }
         this.cellSize = Math.floor(12/i);
     }
@@ -200,4 +229,36 @@ export default class TableRow extends NavigationMixin(LightningElement) {
         });
         this.dispatchEvent(evt);
     }
+
+    toggleRowComments(){
+        if(this.notes.length > 0){
+            this.notes = [];  
+            // set table row class to table-row-expanded
+            let tableRow = this.template.querySelector('.table-row');
+            tableRow.classList.remove('table-row-expanded');    
+        }else{
+            this.notes = this.avatars;
+            // set table row class to table-row-expanded
+            let tableRow = this.template.querySelector('.table-row');
+            tableRow.classList.add('table-row-expanded');
+        }
+    }
+
+    // exposeNoteTime(event){
+    //     for(let i = 0; i<event.target.childNodes.length; i++){
+    //         console.log(event.target.childNodes[i]?.classList);
+    //         if(event.target.childNodes[i]?.classList.contains('note-time')){
+    //             event.target.childNodes[i]?.classList.add('note-time-exposed');
+    //         }
+    //     }
+    // }
+
+    // hideNoteTime(event){
+    //     for(let i = 0; i<event.target.childNodes.length; i++){
+    //         console.log(event.target.childNodes[i]?.classList);
+    //         if(event.target.childNodes[i]?.classList.contains('note-time')){
+    //             event.target.childNodes[i]?.classList.remove('note-time-exposed');
+    //         }
+    //     }
+    // }
 }

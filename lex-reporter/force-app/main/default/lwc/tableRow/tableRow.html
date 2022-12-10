@@ -1,72 +1,101 @@
 <template>
-    <lightning-layout class="table-row" vertical-align="center">
-        <div class="rte-launcher">
-            <template if:false={isEditMode}>
-                <lightning-icon onclick={renderRte} 
-                                icon-name="standard:messaging_conversation"
-                                size="xx-small"
-                                style="position: absolute;"></lightning-icon>
-            </template>
-            <template if:true={isEditMode}>
-                <div class="rte">
-                    <lightning-input-rich-text value={rteContent} 
-                                               onkeyup={handleRteKeyUp}
-                                               onkeydown={handleRteKeyDown}
-                                               disabled-categories="ALIGN_TEXT,FORMAT_FONT,FORMAT_BODY">
-                    </lightning-input-rich-text>
-                    <div class="user-search" style={usersPosition}>
-                        <template for:each={users} for:item="user">
-                            <div key={user.id} 
-                                 class="lookup-user" 
-                                 onclick={selectLookupUser}
-                                 tabindex="-1"
-                                 onkeyup={handleUserKeyUp}>
-                                {user.name}
-                            </div>
-                        </template>
+    <div class="table-row">
+        <lightning-layout class="table-row-data" vertical-align="center">
+            <div class="rte-launcher">
+                <template if:false={isEditMode}>
+                    <lightning-icon onclick={renderRte} 
+                                    icon-name="standard:messaging_conversation"
+                                    size="xx-small">
+                    </lightning-icon>
+                </template>
+                <template if:true={isEditMode}>
+                    <div class="rte">
+                        <lightning-input-rich-text value={rteContent} 
+                                                onkeyup={handleRteKeyUp}
+                                                onkeydown={handleRteKeyDown}
+                                                disabled-categories="ALIGN_TEXT,FORMAT_FONT,FORMAT_BODY">
+                        </lightning-input-rich-text>
+                        <div class="user-search" style={usersPosition}>
+                            <template for:each={users} for:item="user">
+                                <div key={user.id} 
+                                    class="lookup-user" 
+                                    onclick={selectLookupUser}
+                                    tabindex="-1"
+                                    onkeyup={handleUserKeyUp}>
+                                    {user.name}
+                                </div>
+                            </template>
+                        </div>
                     </div>
-                </div>
+                </template>
+            </div>
+            <template for:each={cells} for:item="cell">
+                <lightning-layout-item size={cellSize}
+                                    key={cell.apiName}
+                                    class="cell">
+                    <!-- make this href point to https://speed-saas-841-dev-ed.lightning.force.com/{salesforce_record_id} -->
+                    <!-- 1) Ensure the Record Id is accessible in the javascript file (see the `sObjectName` variable for example)
+                        2) change the href in our anchor tag to reference the full url including the accessible `sObjectId` variable -->
+                    <template if:true={cell.isReference}>
+                        <a href="https://google.com" target="_blank">{sObjectName}</a>
+                    </template>
+                    <template if:false={cell.isReference}>
+                        <template if:true={cell.isUpdateable}>
+                            <lightning-layout vertical-align="center" horizontal-align="end">
+                                <lightning-layout-item size="10">
+                                    <lightning-input data-id={cell.apiName}
+                                                    value={cell.value} 
+                                                    type={cell.type}
+                                                    read-only={cell.notEditing}
+                                                    onchange={handleValueChange}></lightning-input>
+                                </lightning-layout-item>
+                                <lightning-layout-item size="2">
+                                    <lightning-icon class="edit-icon"
+                                                    onclick={initEdit} 
+                                                    icon-name="utility:edit" 
+                                                    data-id={cell.apiName}
+                                                    size="xx-small"></lightning-icon>
+                                </lightning-layout-item>
+                            </lightning-layout>
+                        </template>
+                        <template if:false={cell.isUpdateable}>
+                            {cell.value}
+                            <!-- <lightning-input data-id={cell.apiName}
+                                            value={cell.value} 
+                                            read-only
+                                            type={cell.type}
+                                            onchange={handleValueChange}></lightning-input> -->
+                        </template>
+                    </template>
+                </lightning-layout-item>
             </template>
-        </div>
-        <template for:each={cells} for:item="cell">
-            <lightning-layout-item size={cellSize}
-                                   key={cell.apiName}
-                                   class="cell">
-                <!-- make this href point to https://speed-saas-841-dev-ed.lightning.force.com/{salesforce_record_id} -->
-                <!-- 1) Ensure the Record Id is accessible in the javascript file (see the `sObjectName` variable for example)
-                     2) change the href in our anchor tag to reference the full url including the accessible `sObjectId` variable -->
-                <template if:true={cell.isReference}>
-                    <a href="https://google.com" target="_blank">{sObjectName}</a>
+            <div class="avatar-array">
+                <template for:each={avatars} for:item="avatar">
+                    <lightning-avatar key={avatar.url} 
+                                    src={avatar.url}
+                                    size="x-small"
+                                    variant="circle"
+                                    onclick={toggleRowComments}>
+                    </lightning-avatar>
                 </template>
-                <template if:false={cell.isReference}>
-                    <template if:true={cell.isUpdateable}>
-                        <lightning-layout vertical-align="center" horizontal-align="end">
-                            <lightning-layout-item size="10">
-                                <lightning-input data-id={cell.apiName}
-                                                value={cell.value} 
-                                                type={cell.type}
-                                                read-only={cell.notEditing}
-                                                onchange={handleValueChange}></lightning-input>
-                            </lightning-layout-item>
-                            <lightning-layout-item size="2">
-                                <lightning-icon class="edit-icon"
-                                                onclick={initEdit} 
-                                                icon-name="utility:edit" 
-                                                data-id={cell.apiName}
-                                                size="xx-small"></lightning-icon>
-                            </lightning-layout-item>
-                        </lightning-layout>
-                    </template>
-                    <template if:false={cell.isUpdateable}>
-                        {cell.value}
-                        <!-- <lightning-input data-id={cell.apiName}
-                                        value={cell.value} 
-                                        read-only
-                                        type={cell.type}
-                                        onchange={handleValueChange}></lightning-input> -->
-                    </template>
-                </template>
-            </lightning-layout-item>
-        </template>
-    </lightning-layout>
+            </div>
+        </lightning-layout>
+        <lightning-layout multiple-rows="true">
+            <template for:each={notes} for:item="note">
+                <lightning-layout-item size="12" key={note.id} class="note">
+                    <lightning-layout>
+                        <lightning-layout-item size="4" style="text-align:right;" padding="around-small">
+                            <lightning-avatar src={note.url} size="medium" variant="circle"></lightning-avatar>
+                    </lightning-layout-item>
+                    <lightning-layout-item size="8" class="note-body" onmouseenter={exposeNoteTime} onmouseout={hideNoteTime}>
+                        <lightning-formatted-rich-text value={note.body}></lightning-formatted-rich-text>
+                        <div class="note-time">
+                            {note.time}
+                        </div>
+                    </lightning-layout-item>
+                    </lightning-layout>
+                </lightning-layout-item>
+            </template>
+        </lightning-layout>
+    </div>
 </template>

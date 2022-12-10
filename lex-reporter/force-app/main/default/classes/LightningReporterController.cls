@@ -47,7 +47,9 @@ public class LightningReporterController {
             fieldApiNames.add(field.name);
         }
         
-        String query = 'SELECT '+String.join(fieldApiNames, ',')+' '+
+        String query = 'SELECT '+String.join(fieldApiNames, ',')+',(SELECT '+
+                                                                        'Body,CreatedBy.Name,CreatedBy.FullPhotoUrl,CreatedDate '+
+                                                                    'FROM Notes) '+
                         'FROM '+typeName+' '+
                         getWhereClause(lookupsToParent, parentId);
 
