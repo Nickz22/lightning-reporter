@@ -49,7 +49,7 @@ public class LightningReporterController {
         
         String query = 'SELECT '+String.join(fieldApiNames, ',')+',(SELECT '+
                                                                         'Body,CreatedBy.Name,CreatedBy.FullPhotoUrl,CreatedDate '+
-                                                                    'FROM Notes) '+
+                                                                    'FROM Notes ORDER BY CreatedDate desc) '+
                         'FROM '+typeName+' '+
                         getWhereClause(lookupsToParent, parentId);
 

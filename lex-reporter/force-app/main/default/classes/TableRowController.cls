@@ -7,6 +7,7 @@ public with sharing class TableRowController {
         return [SELECT CreatedDate,CreatedBy.Name,CreatedBy.FullPhotoUrl,Body 
                   FROM Note 
                   WHERE Id=:newNote.Id 
+                  ORDER BY CreatedDate desc
                   LIMIT 1];
     }
 }
