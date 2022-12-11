@@ -35,15 +35,8 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     bypassUserFocus = false;
     cellSize;
     sObjectName;
-
-    renderedCallback(){
-        // "@" symbol just surfaced
-        let users = this.template.querySelectorAll('.lookup-user');
-        if(users.length > 0){
-            console.log('focusing on first user');
-            users[0].focus();
-        }
-    }
+    isUserSearching = false;
+    focusAtEnd = false;
 
     handleRteKeyDown(event){
         // when meta + enter is pressed
@@ -69,6 +62,15 @@ export default class TableRow extends NavigationMixin(LightningElement) {
                 console.log('error: '+error);
             });
         }
+
+        // when down arrow pressed
+        if(event.keyCode == 40){
+            let users = this.template.querySelectorAll('.lookup-user');
+            if(users.length > 0){
+                console.log('focusing on first user');
+                users[0].focus();
+            }
+        }
     }
 
     handleRteKeyUp(event){
@@ -78,13 +80,34 @@ export default class TableRow extends NavigationMixin(LightningElement) {
         if(event.keyCode == 27){
             if(this.users.length > 0){
                 this.users = [];
+                this.isUserSearching = false;
             }else{
                 this.renderRte();
             }   
         }
         // if key press is @
-        if(event.key == '@'){
+        if(event.key == '@' && !this.isUserSearching){
             this.getUserList(event);
+            this.isUserSearching = true;
+        }else if(event.key != '@' && this.isUserSearching){
+            console.log(event.target.value);
+            // find substring between last "@" and last "</p>"
+            let lastAt = event.target.value.lastIndexOf('@');
+            let lastP = event.target.value.lastIndexOf('</p>');
+            let substring = event.target.value.substring(lastAt+1, lastP);
+            console.log(`searching users for: ${substring}`);
+            // filter users by name
+            for(let user of this.users){
+                if(!substring){
+                    user.hidden = false;
+                }
+                if(!user.name.toLowerCase().includes(substring.toLowerCase())){
+                    console.log(`hiding ${user.name}`)
+                    user.hidden = true;
+                }else{
+                    user.hidden = false;
+                }
+            }
         }
     }
 
@@ -102,6 +125,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
         if(event.keyCode == 13){
             this.users = [];
             this.selectLookupUser(event);
+            this.isUserSearching = false;
         }
         // if key press is escape
         if(event.keyCode == 27){
@@ -113,13 +137,15 @@ export default class TableRow extends NavigationMixin(LightningElement) {
 
         let rte = this.template.querySelectorAll('lightning-input-rich-text')[0];
         let userName = event.target.childNodes[0].data;
-        console.log(userName);
-        rte.setRangeText(
-            userName, 
-            undefined, 
-            undefined,
-            'select'
-        );
+
+        // set range text from last instance of "@" to end of rte value
+        let lastAt = rte.value.lastIndexOf('@');
+        let lastP = rte.value.lastIndexOf('</p>');
+        let substring = rte.value.substring(lastAt+1, lastP);
+        let range = rte.value.lastIndexOf(substring);
+        console.log("printing first half of string "+rte.value.substring(0, range));
+        rte.value = `${rte.value.substring(0, range)}<strong>${userName}</strong>${rte.value.substring(range+substring.length)}`;
+        rte.setRangeText(' ', rte.value.length, rte.value.length, 'end');
     }
         
     @api get updatedSObject(){

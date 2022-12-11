@@ -17,13 +17,15 @@
                         </lightning-input-rich-text>
                         <div class="user-search" style={usersPosition}>
                             <template for:each={users} for:item="user">
-                                <div key={user.id} 
-                                    class="lookup-user" 
-                                    onclick={selectLookupUser}
-                                    tabindex="-1"
-                                    onkeyup={handleUserKeyUp}>
-                                    {user.name}
-                                </div>
+                                <template if:false={user.hidden}>
+                                    <div key={user.id} 
+                                        class="lookup-user" 
+                                        onclick={selectLookupUser}
+                                        tabindex="-1"
+                                        onkeyup={handleUserKeyUp}>
+                                        {user.name}
+                                    </div>
+                                </template>
                             </template>
                         </div>
                     </div>
