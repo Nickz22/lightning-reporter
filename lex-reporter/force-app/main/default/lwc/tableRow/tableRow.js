@@ -143,8 +143,8 @@ export default class TableRow extends NavigationMixin(LightningElement) {
         let lastP = rte.value.lastIndexOf('</p>');
         let substring = rte.value.substring(lastAt+1, lastP);
         let range = rte.value.lastIndexOf(substring);
-        console.log("printing first half of string "+rte.value.substring(0, range));
-        rte.value = `${rte.value.substring(0, range)}<strong>${userName}</strong>${rte.value.substring(range+substring.length)}`;
+        console.log("printing first half of string "+rte.value.substring(0, range).replace("</p>", ""));
+        rte.value = `${rte.value.substring(0, range).replace("</p>", "")}<strong>${userName}</strong>${rte.value.substring(range+substring.length)}</p>`;
         rte.setRangeText(' ', rte.value.length, rte.value.length, 'end');
     }
         
