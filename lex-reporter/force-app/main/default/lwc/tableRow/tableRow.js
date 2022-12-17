@@ -30,6 +30,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     usersPosition = "";
     @track users = [];
     @track avatars = [];
+    @track previewAvatar;
     @track notes = [];
     @track cells = [];
     bypassUserFocus = false;
@@ -181,6 +182,9 @@ export default class TableRow extends NavigationMixin(LightningElement) {
                     "id" : value.Notes[i].Id,
                     "time" : value.Notes[i].CreatedDate
                 };
+                if(i == 0){
+                    this.previewAvatar = newAvatar;
+                }   
                 this.avatars.push(newAvatar);
             }
         }

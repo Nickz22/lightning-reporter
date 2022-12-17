@@ -71,16 +71,15 @@
                     </template>
                 </lightning-layout-item>
             </template>
-            <div class="avatar-array">
-                <template for:each={avatars} for:item="avatar">
-                    <lightning-avatar key={avatar.url} 
-                                    src={avatar.url}
-                                    size="x-small"
-                                    variant="circle"
-                                    onclick={toggleRowComments}>
+            <template if:true={previewAvatar}>
+                <div class="preview-avatar">
+                    <lightning-avatar src={previewAvatar.url}
+                                      size="x-small"
+                                      variant="circle"
+                                      onclick={toggleRowComments}>
                     </lightning-avatar>
-                </template>
-            </div>
+                </div>
+            </template>
         </lightning-layout>
         <lightning-layout multiple-rows="true">
             <template for:each={notes} for:item="note">
