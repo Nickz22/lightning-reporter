@@ -5,7 +5,7 @@
                                class="table-header">
             <c-table-header columns={selectedFields}></c-table-header>
         </lightning-layout-item>
-        <lightning-layout-item size="12"
+        <lightning-layout-item flexibility="auto"
                                class="table-data-container">
             <template for:each={childRecords} for:item="record">
                 <c-table-row key={record.Id}
