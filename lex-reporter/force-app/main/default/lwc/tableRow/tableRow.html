@@ -1,13 +1,22 @@
 <template>
     <div class="table-row">
         <lightning-layout class="table-row-data" vertical-align="center">
-            <div class="rte-launcher">
-                <template if:false={isEditMode}>
-                    <lightning-icon onclick={renderRte} 
-                                    icon-name="standard:messaging_conversation"
-                                    size="xx-small">
-                    </lightning-icon>
-                </template>
+            <lightning-layout-item size="1" class="rte-launcher">
+                <lightning-layout multiple-rows="true">
+                    <lightning-layout-item size="6">
+                        <lightning-avatar src={previewAvatar.url}
+                                        size="x-small"
+                                        variant="circle"
+                                        onclick={toggleRowComments}>
+                        </lightning-avatar>
+                    </lightning-layout-item>
+                    <lightning-layout-item size="6">
+                        <lightning-icon onclick={renderRte} 
+                                        icon-name="standard:messaging_conversation"
+                                        size="xx-small">
+                        </lightning-icon>
+                    </lightning-layout-item>
+                </lightning-layout>
                 <template if:true={isEditMode}>
                     <div class="rte">
                         <lightning-input-rich-text value={rteContent} 
@@ -30,11 +39,12 @@
                         </div>
                     </div>
                 </template>
-            </div>
+            </lightning-layout-item>
             <template for:each={cells} for:item="cell">
                 <lightning-layout-item size={cellSize}
                                     key={cell.apiName}
-                                    class="cell">
+                                    class="cell"
+                                    alignment-bump="top">
                     <!-- make this href point to https://speed-saas-841-dev-ed.lightning.force.com/{salesforce_record_id} -->
                     <!-- 1) Ensure the Record Id is accessible in the javascript file (see the `sObjectName` variable for example)
                         2) change the href in our anchor tag to reference the full url including the accessible `sObjectId` variable -->
@@ -43,7 +53,7 @@
                     </template>
                     <template if:false={cell.isReference}>
                         <template if:true={cell.isUpdateable}>
-                            <lightning-layout vertical-align="center" horizontal-align="end">
+                            <lightning-layout>
                                 <lightning-layout-item size="10">
                                     <lightning-input data-id={cell.apiName}
                                                     value={cell.value} 
@@ -61,7 +71,11 @@
                             </lightning-layout>
                         </template>
                         <template if:false={cell.isUpdateable}>
-                            {cell.value}
+                            <lightning-input data-id={cell.apiName}
+                                                    value={cell.value} 
+                                                    type={cell.type}
+                                                    read-only={cell.notEditing}
+                                                    onchange={handleValueChange}></lightning-input>
                             <!-- <lightning-input data-id={cell.apiName}
                                             value={cell.value} 
                                             read-only
@@ -71,24 +85,15 @@
                     </template>
                 </lightning-layout-item>
             </template>
-            <template if:true={previewAvatar}>
-                <div class="preview-avatar">
-                    <lightning-avatar src={previewAvatar.url}
-                                      size="x-small"
-                                      variant="circle"
-                                      onclick={toggleRowComments}>
-                    </lightning-avatar>
-                </div>
-            </template>
         </lightning-layout>
         <lightning-layout multiple-rows="true">
             <template for:each={notes} for:item="note">
                 <lightning-layout-item size="12" key={note.id} class="note">
                     <lightning-layout>
-                        <lightning-layout-item size="4" style="text-align:right;" padding="around-small">
+                        <lightning-layout-item size="1" style="text-align:left;" padding="around-small">
                             <lightning-avatar src={note.url} size="medium" variant="circle"></lightning-avatar>
                     </lightning-layout-item>
-                    <lightning-layout-item size="8" class="note-body" onmouseenter={exposeNoteTime} onmouseout={hideNoteTime}>
+                    <lightning-layout-item size="11" class="note-body" onmouseenter={exposeNoteTime} onmouseout={hideNoteTime}>
                         <lightning-formatted-rich-text value={note.body}></lightning-formatted-rich-text>
                         <div class="note-time">
                             {note.time}

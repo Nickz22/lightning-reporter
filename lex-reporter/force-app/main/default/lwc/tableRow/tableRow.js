@@ -181,13 +181,23 @@ export default class TableRow extends NavigationMixin(LightningElement) {
                     "body" : value.Notes[i].Body,
                     "id" : value.Notes[i].Id,
                     "time" : value.Notes[i].CreatedDate
-                };
-                if(i == 0){
-                    this.previewAvatar = newAvatar;
-                }   
+                };   
                 this.avatars.push(newAvatar);
             }
         }
+
+        if(this.avatars.length > 0){
+            this.previewAvatar = this.avatars[0];
+        }else{
+            this.previewAvatar = {
+                "url" : "",
+                "name" : "",
+                "body" : "",
+                "id" : "",
+                "time" : ""
+            };
+        }
+
         this.cellSize = 3;
     }
 
