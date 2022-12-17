@@ -38,6 +38,15 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     isUserSearching = false;
     focusAtEnd = false;
 
+    // on render callback
+    renderedCallback(){
+        // if in edit mode
+        if(this.isEditMode){
+            // focus on rte
+            this.template.querySelectorAll('lightning-input-rich-text')[0].focus();
+        }
+    }
+
     handleRteKeyDown(event){
         // when meta + enter is pressed
         if(event.metaKey && event.keyCode == 13){
