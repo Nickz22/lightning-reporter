@@ -219,7 +219,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
 
     getTableCellValues = () => {
         let cells = [];
-        
+        let baseUrl = window.location.href.substring(0, window.location.href.indexOf(".com/")+5);
         for(let field of this.fields){
             cells.push(
                 {
@@ -228,11 +228,17 @@ export default class TableRow extends NavigationMixin(LightningElement) {
                     'value': this._sObject[field.name],
                     'isUpdateable' : field.isUpdateable,
                     'isReference' : (field.type === 'Id' || field.type === 'ID' || field.type === 'REFERENCE' || field.type === 'reference'),
+                    'url' : (field.type === 'REFERENCE' || field.type === 'Id' || field.type === 'ID' || field.type === 'REFERENCE' || field.type === 'reference') ? baseUrl+this._sObject[field.name] : '',
                     'notEditing' : true, // have to make this resolve to `true`...
                                          // cant make read-only show with a `false` boolean value
                     'type' : this.inputTypeBySfSchemaType.get(field.type),
                 }
             );
+        }
+
+        // log cell urls
+        for(let cell of cells){
+            console.log(cell.url);
         }
 
         return cells;

@@ -50,7 +50,7 @@
                     <!-- 1) Ensure the Record Id is accessible in the javascript file (see the `sObjectName` variable for example)
                         2) change the href in our anchor tag to reference the full url including the accessible `sObjectId` variable -->
                     <template if:true={cell.isReference}>
-                        <a href="https://google.com" target="_blank">{sObjectName}</a>
+                        <a href={cell.url} target="_blank">{sObjectName}</a>
                     </template>
                     <template if:false={cell.isReference}>
                         <template if:true={cell.isUpdateable}>
