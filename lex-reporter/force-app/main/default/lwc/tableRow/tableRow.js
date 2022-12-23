@@ -51,7 +51,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
 
     handleRteKeyDown(event){
         // when meta + enter is pressed
-        if(event.metaKey && event.keyCode == 13){
+        if(event.metaKey && event.keyCode === 13){
             this.renderRte();
             saveNote({
                 content: event.target.value,
@@ -60,11 +60,12 @@ export default class TableRow extends NavigationMixin(LightningElement) {
             .then(result => {
                 console.log(result.CreatedBy.FullPhotoUrl);
                 let currentAvatars = this.avatars;
-                currentAvatars.push({
+                currentAvatars.splice(0,0,{
                     "url" : result.CreatedBy.FullPhotoUrl,
                     "name" : result.CreatedBy.Name,
                     "body" : result.Body,
-                    "id" : result.Id
+                    "id" : result.Id,
+                    "time" : result.CreatedDate
                 });
                 this.avatars = currentAvatars;
                 this.showNotification('Note Saved', '', 'success');
@@ -75,7 +76,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
         }
 
         // when down arrow pressed
-        if(event.keyCode == 40){
+        if(event.keyCode === 40){
             let users = this.template.querySelectorAll('.lookup-user');
             if(users.length > 0){
                 console.log('focusing on first user');
@@ -88,7 +89,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
         console.log('rte keyup: '+event.key);
         console.log('rte keyup code: '+event.keyCode);
         // if key press is escape
-        if(event.keyCode == 27){
+        if(event.keyCode === 27){
             if(this.users.length > 0){
                 this.users = [];
                 this.isUserSearching = false;
@@ -97,7 +98,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
             }   
         }
         // if key press is @
-        if(event.key == '@' && !this.isUserSearching){
+        if(event.key === '@' && !this.isUserSearching){
             this.getUserList(event);
             this.isUserSearching = true;
         }else if(event.key != '@' && this.isUserSearching){
@@ -125,21 +126,21 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     handleUserKeyUp(event){
         console.log('user keydown: '+event.key);
         // if key press is down
-        if(event.keyCode == 40){
+        if(event.keyCode === 40){
             event.target.nextSibling.focus();
         }
         // if key press is up
-        if(event.keyCode == 38){
+        if(event.keyCode === 38){
             event.target.previousSibling.focus();
         }
         // if key press is enter
-        if(event.keyCode == 13){
+        if(event.keyCode === 13){
             this.users = [];
             this.selectLookupUser(event);
             this.isUserSearching = false;
         }
         // if key press is escape
-        if(event.keyCode == 27){
+        if(event.keyCode === 27){
             this.users = [];
         }
     }
@@ -205,7 +206,9 @@ export default class TableRow extends NavigationMixin(LightningElement) {
         if(this.avatars.length > 0){
             console.log('setting avatars');
             this.previewAvatar = this.avatars[0];
-            this.notes = this.avatars
+            if(this.notes.length > 0){
+                this.notes = this.avatars
+            }
         }else{
             this.previewAvatar = {
                 "url" : "",
@@ -268,7 +271,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
         let clickedFieldName = event.target.dataset.id;
         for(let cell of this.cells){
             let isNotEditing = (
-                cell.apiName == clickedFieldName ? 
+                cell.apiName === clickedFieldName ? 
                 !cell.notEditing : // toggle pencil icon
                 cell.notEditing
             );
