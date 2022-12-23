@@ -58,8 +58,19 @@
 
 .cell{
     overflow-x: clip;
+    min-height: 4em;
+    display: flex;
+    align-items: flex-end;
+    border-bottom: 1px solid lightgrey;
+}
+
+.edit-container{
+    position: relative;
+    overflow: auto;
 }
 
 .edit-icon{
     cursor: pointer;
+    position:absolute;
+    bottom: 1.2em;
 }

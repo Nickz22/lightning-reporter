@@ -53,7 +53,8 @@
                                        class="table-container">
                     <template if:true={selectedFields}>
                         <c-table selected-fields={selectedFields}
-                                 child-records={childRecords}></c-table>
+                                 child-records={childRecords}
+                                 saved={saved}></c-table>
                     </template>
                 </lightning-layout-item>
                 <!-- START FIELDS -->

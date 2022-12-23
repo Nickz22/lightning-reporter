@@ -1,8 +1,9 @@
 <template>
     <div class="table-row">
         <lightning-layout class="table-row-data" vertical-align="center">
-            <lightning-layout-item size="1" class="rte-launcher">
-                <lightning-layout multiple-rows="true">
+            <lightning-layout-item size="1" 
+                                    class="rte-launcher">
+                <lightning-layout style="position: absolute">
                     <lightning-layout-item size="6">
                         <lightning-avatar src={previewAvatar.url}
                                         size="x-small"
@@ -53,21 +54,24 @@
                     </template>
                     <template if:false={cell.isReference}>
                         <template if:true={cell.isUpdateable}>
-                            <lightning-layout>
-                                <lightning-layout-item size="10">
+                            <lightning-layout class="edit-container"
+                                            horizontal-align="end">
+                                <lightning-layout-item size={cell.size}>
                                     <lightning-input data-id={cell.apiName}
                                                     value={cell.value} 
                                                     type={cell.type}
                                                     read-only={cell.notEditing}
                                                     onchange={handleValueChange}></lightning-input>
                                 </lightning-layout-item>
-                                <lightning-layout-item size="2">
-                                    <lightning-icon class="edit-icon"
-                                                    onclick={initEdit} 
-                                                    icon-name="utility:edit" 
-                                                    data-id={cell.apiName}
-                                                    size="xx-small"></lightning-icon>
-                                </lightning-layout-item>
+                                <template if:true={cell.notEditing}>
+                                    <lightning-layout-item size="2" alignment-bump="bottom">
+                                        <lightning-icon class="edit-icon"
+                                                        onclick={initEdit} 
+                                                        icon-name="utility:edit" 
+                                                        data-id={cell.apiName}
+                                                        size="xx-small"></lightning-icon>
+                                    </lightning-layout-item>
+                                </template> 
                             </lightning-layout>
                         </template>
                         <template if:false={cell.isUpdateable}>

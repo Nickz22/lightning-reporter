@@ -38,6 +38,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     sObjectName;
     isUserSearching = false;
     focusAtEnd = false;
+    
 
     // on render callback
     renderedCallback(){
@@ -162,6 +163,21 @@ export default class TableRow extends NavigationMixin(LightningElement) {
         return this._updatedSObject ? this._updatedSObject : this._sObject;
     }
 
+    @api get saved(){
+        return this._saved;
+    }
+
+    set saved(value){
+        console.log("handling save");
+        let newCells = [];
+        for(let cell of this.cells){
+            cell.notEditing = true;
+            cell.size = 10;
+            newCells.push(cell);
+        }
+        this.cells = newCells;
+    }
+
     @api get sObject(){
         return this._sObject;
     }
@@ -241,7 +257,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     }
 
     initEdit(event){
-        let clickedFieldName = event.target["dataset"]["id"];
+        let clickedFieldName = event.target.dataset.id;
         for(let cell of this.cells){
             let isNotEditing = (
                 cell.apiName == clickedFieldName ? 
@@ -249,6 +265,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
                 cell.notEditing
             );
             cell.notEditing = isNotEditing;
+            cell.size = 12;
         }
     }
 

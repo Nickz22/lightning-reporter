@@ -12,6 +12,7 @@ export default class LightningReporter extends LightningElement {
     selectableFields;
     selectableFieldByName = new Map();
     @track selectedFields;
+    saved = false;
     selectedType;
 
     @wire (getChildTypes, {recordId : '$recordId'})
@@ -147,6 +148,8 @@ export default class LightningReporter extends LightningElement {
             sObjects: sObjects
         }).then(result => {
             this.showNotification('Records saved successfully', '', 'success');
+            this.saved = !this.saved;
+
         }).catch(error => {
             this.showNotification('We hit a snag', error.body.message, 'error');
         })
