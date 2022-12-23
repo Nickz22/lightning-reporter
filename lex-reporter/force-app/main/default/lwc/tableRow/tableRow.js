@@ -203,7 +203,9 @@ export default class TableRow extends NavigationMixin(LightningElement) {
         }
 
         if(this.avatars.length > 0){
+            console.log('setting avatars');
             this.previewAvatar = this.avatars[0];
+            this.notes = this.avatars
         }else{
             this.previewAvatar = {
                 "url" : "",
