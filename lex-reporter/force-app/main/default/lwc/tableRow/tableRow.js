@@ -2,6 +2,8 @@ import { LightningElement, api, track } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import saveNote from '@salesforce/apex/TableRowController.saveNote';
+import saveNoteMetadata from '@salesforce/apex/TableRowController.saveNoteMetadata';
+import runningUserId from '@salesforce/user/Id';
 
 export default class TableRow extends NavigationMixin(LightningElement) {
 
@@ -322,5 +324,20 @@ export default class TableRow extends NavigationMixin(LightningElement) {
             let tableRow = this.template.querySelector('.table-row');
             tableRow.classList.add('table-row-expanded');
         }
+    }
+
+    countNoteView(event){
+        console.dir(event.target);
+        saveNoteMetadata({
+            noteMetadata: {
+                NoteId: event.target.dataset.id, 
+                NoteParentId: this._sObject.record.Id, 
+                ViewedById: runningUserId
+            }
+        }).then(() => {
+            console.log('Note Viewed');
+        }).catch(error => {
+            console.error(error);
+        });
     }
 }

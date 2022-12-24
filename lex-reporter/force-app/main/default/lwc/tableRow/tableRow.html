@@ -80,11 +80,6 @@
                                                     type={cell.type}
                                                     read-only={cell.notEditing}
                                                     onchange={handleValueChange}></lightning-input>
-                            <!-- <lightning-input data-id={cell.apiName}
-                                            value={cell.value} 
-                                            read-only
-                                            type={cell.type}
-                                            onchange={handleValueChange}></lightning-input> -->
                         </template>
                     </template>
                 </lightning-layout-item>
@@ -92,12 +87,17 @@
         </lightning-layout>
         <lightning-layout multiple-rows="true">
             <template for:each={notes} for:item="note">
-                <lightning-layout-item size="12" key={note.id} class="note">
+                <lightning-layout-item size="12" 
+                                        key={note.id} 
+                                        class="note">
                     <lightning-layout>
                         <lightning-layout-item size="1" style="text-align:left;" padding="around-small">
                             <lightning-avatar src={note.url} size="medium" variant="circle"></lightning-avatar>
                     </lightning-layout-item>
-                    <lightning-layout-item size="11" class="note-body" onmouseenter={exposeNoteTime} onmouseout={hideNoteTime}>
+                    <lightning-layout-item size="11" 
+                                            class="note-body" 
+                                            data-id={note.id}
+                                            onmouseenter={countNoteView}>
                         <lightning-formatted-rich-text value={note.body}></lightning-formatted-rich-text>
                         <div class="note-time">
                             {note.time}
