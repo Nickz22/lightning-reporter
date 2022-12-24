@@ -55,7 +55,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
             this.renderRte();
             saveNote({
                 content: event.target.value,
-                parentId: this._sObject.Id
+                parentId: this._sObject.record.Id
             })
             .then(result => {
                 console.log(result.CreatedBy.FullPhotoUrl);
@@ -150,18 +150,18 @@ export default class TableRow extends NavigationMixin(LightningElement) {
         let rte = this.template.querySelectorAll('lightning-input-rich-text')[0];
         let userName = event.target.childNodes[0].data;
 
-        // set range text from last instance of "@" to end of rte value
+
         let lastAt = rte.value.lastIndexOf('@');
         let lastP = rte.value.lastIndexOf('</p>');
         let substring = rte.value.substring(lastAt+1, lastP);
         let range = rte.value.lastIndexOf(substring);
-        console.log("printing first half of string "+rte.value.substring(0, range).replace("</p>", ""));
+
         rte.value = `${rte.value.substring(0, range).replace("</p>", "")}<strong>${userName}</strong>${rte.value.substring(range+substring.length)}</p>`;
         rte.setRangeText(' ', rte.value.length, rte.value.length, 'end');
     }
         
     @api get updatedSObject(){
-        return this._updatedSObject ? this._updatedSObject : this._sObject;
+        return this._updatedSObject ? this._updatedSObject : this._sObject.record;
     }
 
     @api get saved(){
@@ -180,24 +180,24 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     }
 
     @api get sObject(){
-        return this._sObject;
+        return this._sObject.record;
     }
 
     set sObject(value){
 
         this._sObject = value;
-        this.sObjectName = this._sObject.Name;
+        this.sObjectName = this._sObject.record.Name;
         this.cells = this.getTableCellValues();
 
-        if(value.Notes){
+        if(value.notes){
             this.avatars = [];
-            for(let i = 0; i < value.Notes.length; i++){
+            for(let i = 0; i < value.notes.length; i++){
                 let newAvatar = {
-                    "url" : value.Notes[i].CreatedBy.FullPhotoUrl,
-                    "name" : value.Notes[i].CreatedBy.Name,
-                    "body" : value.Notes[i].Body,
-                    "id" : value.Notes[i].Id,
-                    "time" : value.Notes[i].CreatedDate
+                    "url" : value.notes[i].CreatedBy.FullPhotoUrl,
+                    "name" : value.notes[i].CreatedBy.Name,
+                    "body" : value.notes[i].Body,
+                    "id" : value.notes[i].Id,
+                    "time" : value.notes[i].CreatedDate
                 };   
                 this.avatars.push(newAvatar);
             }
@@ -230,10 +230,10 @@ export default class TableRow extends NavigationMixin(LightningElement) {
                 {
                     'apiName': field.name, 
                     'label' : field.label,
-                    'value': this._sObject[field.name],
+                    'value': this._sObject.record[field.name],
                     'isUpdateable' : field.isUpdateable,
                     'isReference' : (field.type === 'Id' || field.type === 'ID' || field.type === 'REFERENCE' || field.type === 'reference'),
-                    'url' : (field.type === 'REFERENCE' || field.type === 'Id' || field.type === 'ID' || field.type === 'REFERENCE' || field.type === 'reference') ? baseUrl+this._sObject[field.name] : '',
+                    'url' : (field.type === 'REFERENCE' || field.type === 'Id' || field.type === 'ID' || field.type === 'REFERENCE' || field.type === 'reference') ? baseUrl+this._sObject.record[field.name] : '',
                     'notEditing' : true, // have to make this resolve to `true`...
                                          // cant make read-only show with a `false` boolean value
                     'type' : this.inputTypeBySfSchemaType.get(field.type),
@@ -254,8 +254,8 @@ export default class TableRow extends NavigationMixin(LightningElement) {
 
             let clone = {};
 
-            for(let field in this._sObject){
-                clone[field] = this._sObject[field];
+            for(let field in this._sObject.record){
+                clone[field] = this._sObject.record[field];
             }
 
             let input = event.target;

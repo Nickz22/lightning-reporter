@@ -38,7 +38,7 @@ public class LightningReporterController {
     }
 
     @AuraEnabled
-    public static List<SObject> getRecordsFromTypeLookingUpToId(String typeName, Id parentId, List<FieldDTO> fieldsToGet){
+    public static List<SubjectDTO> getRecordsFromTypeLookingUpToId(String typeName, Id parentId, List<FieldDTO> fieldsToGet){
 
         List<String> lookupsToParent = getLookupsPointingToParentId(typeName, parentId);
 
@@ -51,13 +51,20 @@ public class LightningReporterController {
                                                                         'Body,CreatedBy.Name,CreatedBy.FullPhotoUrl,CreatedDate '+
                                                                     'FROM Notes ORDER BY CreatedDate desc) '+
                         'FROM '+typeName+' '+
-                        getWhereClause(lookupsToParent, parentId);
+                        getWhereClause(lookupsToParent, parentId)+' '+
+                        'ORDER BY LastModifiedDate desc';
 
-        List<SObject> records = new List<SObject>();
+        List<SubjectDTO> subjects = new List<SubjectDTO>();
         Map<String, Schema.SObjectField> tokenByFieldName = Schema.getGlobalDescribe()
                                                         .get(typeName)
                                                         .getDescribe().fields.getMap();
-        for(SObject record : Database.query(query)){
+        List<SObject> records = Database.query(query);
+        Set<String> recordIds = new Set<String>();
+        for(SObject record : records){
+            recordIds.add(record.Id);
+        }
+        Map<Id, List<Lightning_Reporter_Note_Metadata__c>> noteMdByParentId = getNoteMdByParentId(recordIds);
+        for(SObject record : records){
             for(String field : fieldApiNames){
                 // if field is editable and null, explicitly set to `null`
                 if(record.get(field) == null && 
@@ -65,10 +72,28 @@ public class LightningReporterController {
                     record.put(field, null);
                 }
             }
-            records.add(record);
+            subjects.add(
+                new SubjectDTO(record, 
+                            record.getSObjects('Notes'), 
+                            noteMdByParentId.containsKey(record.Id) ? noteMdByParentId.get(record.Id) : new List<Lightning_Reporter_Note_Metadata__c>()
+            ));
         }
-        return records;
+        
+        return subjects;
     }    
+
+    private static Map<Id, List<Lightning_Reporter_Note_Metadata__c>> getNoteMdByParentId(Set<String> recordIds){
+        Map<Id, List<Lightning_Reporter_Note_Metadata__c>> noteMdByParentId = new Map<Id, List<Lightning_Reporter_Note_Metadata__c>>();
+        for(Lightning_Reporter_Note_Metadata__c noteMd : [SELECT Note_Parent_Id__c, Note_Id__c 
+                                                            FROM Lightning_Reporter_Note_Metadata__c 
+                                                            WHERE Note_Parent_Id__c IN :recordIds]){
+            if(!noteMdByParentId.containsKey(noteMd.Note_Parent_Id__c)){
+                noteMdByParentId.put(noteMd.Note_Parent_Id__c, new List<Lightning_Reporter_Note_Metadata__c>());
+            }
+            noteMdByParentId.get(noteMd.Note_Parent_Id__c).add(noteMd);
+        }
+        return noteMdByParentId;
+    }
 
     public class FieldDTO{
         @AuraEnabled public String name {get; set;}
@@ -135,5 +160,22 @@ public class LightningReporterController {
         }
 
         return whereClause.removeEnd(' OR ');
+    }
+
+    private class SubjectDTO{
+        @AuraEnabled public SObject record;
+        @AuraEnabled public List<Note> notes;
+        @AuraEnabled public Map<Id, List<Lightning_Reporter_Note_Metadata__c>> noteMdByNoteId = new Map<Id, List<Lightning_Reporter_Note_Metadata__c>>();
+
+        public SubjectDTO(SObject record, List<Note> notes, List<Lightning_Reporter_Note_Metadata__c> noteMetadata){
+            this.record = record;
+            this.notes = notes;
+            for(Lightning_Reporter_Note_Metadata__c metadata : noteMetadata){
+                if(!this.noteMdByNoteId.containsKey(metadata.Note_Id__c)){
+                    this.noteMdByNoteId.put(metadata.Note_Id__c, new List<Lightning_Reporter_Note_Metadata__c>());
+                }
+                this.noteMdByNoteId.get(metadata.Note_Id__c).add(metadata);
+            }
+        }
     }
 }

@@ -59,16 +59,20 @@ export default class LightningReporter extends LightningElement {
     }
 
     getRecords(){
+        debugger;
         getRecordsFromTypeLookingUpToId({
             typeName: this.selectedType,
             parentId: this.recordId,
             fieldsToGet: this.selectedFields
         }).then(result => {
-            // is this required?
-            for(let i=0; i<result.length; i++){
-                result['sObjectType'] = this.selectedType;
+            try{
+                for(let i=0; i<result.length; i++){
+                    result[i].record.sObjectType = this.selectedType;
+                }
+                this.childRecords = result;
+            }catch(e){
+                console.error('error getting records ['+e+']');
             }
-            this.childRecords = result;
         }).catch(error => {
             console.error('error getting records ['+error.body.message+']');
         })
