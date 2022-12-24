@@ -1,5 +1,4 @@
 /**
- * might be good to include view-count as a utility feature (better to include thread replies)
  * rte should expand on row click, but avatar should still stay as an indication that there has been convo on that row (not really v1)
  * need to guide people toward a table config creation flow 
  ** if they haven't created one yet...
@@ -7,10 +6,14 @@
  ** don't have to deal with performance implications of 
  ** looping thru all child types
  * Send salesforce notification to mentioned users on note save
- * urls are still going to google.com
  * find a way to make new comments show up in real time
  * we'll want to save table shapes like reports
  ** so if people want to pin a table or something they can...
  ** they're not going to want to reconfigure the same table on every render
  * threaded replies
+ * dont forget to change the user search component to actually search users
+ *
+ * 
+ * almost there...
+ * what else can be added tho? Might be good to reflect on the persona for whom we're creating this, what do they want to do?
  */ 
