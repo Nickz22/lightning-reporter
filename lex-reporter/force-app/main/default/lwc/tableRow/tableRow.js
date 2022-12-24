@@ -201,6 +201,17 @@ export default class TableRow extends NavigationMixin(LightningElement) {
                     "id" : value.notes[i].Id,
                     "time" : value.notes[i].CreatedDate
                 };   
+                let views = [];
+                // for each value in value.noteMdByNoteId[value.notes[i].Id], set a `leftStyle` property equal to the value of the index
+                for(let j = 0; j < value.noteMdByNoteId[value.notes[i].Id].length; j++){
+                    let view = {};
+                    for(let param in value.noteMdByNoteId[value.notes[i].Id][j]){
+                        view[param] = value.noteMdByNoteId[value.notes[i].Id][j][param];
+                    }
+                    view.leftStyle = 'left: '+j+'em;';
+                    views.push(view);
+                }
+                newAvatar.views = views;
                 this.avatars.push(newAvatar);
             }
         }
@@ -327,15 +338,12 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     }
 
     countNoteView(event){
-        console.dir(event.target);
         saveNoteMetadata({
             noteMetadata: {
                 NoteId: event.target.dataset.id, 
                 NoteParentId: this._sObject.record.Id, 
                 ViewedById: runningUserId
             }
-        }).then(() => {
-            console.log('Note Viewed');
         }).catch(error => {
             console.error(error);
         });

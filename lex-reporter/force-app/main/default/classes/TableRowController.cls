@@ -14,7 +14,7 @@ public with sharing class TableRowController {
     @AuraEnabled
     public static void saveNoteMetadata(NoteMetadataDTO noteMetadata){
         try {
-            upsert noteMetadata.convertToDbModel() Lightning_Reporter_Note_Metadata__c.Note_Id__c;
+            upsert noteMetadata.convertToDbModel() Lightning_Reporter_Note_Metadata__c.Unique_Id__c;
         } catch (Exception e) {
             throw new AuraHandledException(e.getMessage());
         }
@@ -30,6 +30,7 @@ public with sharing class TableRowController {
             noteMetadata.Note_Id__c = this.NoteId;
             noteMetadata.Note_Parent_Id__c = this.NoteParentId;
             noteMetadata.Viewed_By__c = (Id) this.ViewedById;
+            noteMetadata.Unique_Id__c = this.NoteId + this.ViewedById;
             return noteMetadata;
         }
     }

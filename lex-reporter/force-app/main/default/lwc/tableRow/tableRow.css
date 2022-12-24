@@ -49,6 +49,24 @@
     transition: all 0.1s ease-in-out;
 }
 
+.note-footer{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.viewed-by{
+    text-align: left;
+    position: relative;
+}
+
+.viewed-by > .viewed-by-avatar:nth-child(n){
+    counter-increment: viewer;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+}
+
 .note-time{
     text-align: right;
     font-size: 0.8em;

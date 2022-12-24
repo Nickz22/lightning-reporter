@@ -92,15 +92,28 @@
                                         class="note">
                     <lightning-layout>
                         <lightning-layout-item size="1" style="text-align:left;" padding="around-small">
-                            <lightning-avatar src={note.url} size="medium" variant="circle"></lightning-avatar>
+                            <lightning-avatar src={note.url} size="medium" variant="square"></lightning-avatar>
                     </lightning-layout-item>
                     <lightning-layout-item size="11" 
                                             class="note-body" 
                                             data-id={note.id}
                                             onmouseenter={countNoteView}>
                         <lightning-formatted-rich-text value={note.body}></lightning-formatted-rich-text>
-                        <div class="note-time">
-                            {note.time}
+                        <div class="note-footer">
+                            <div class="viewed-by">
+                                <template for:each={note.views} for:item="view" for:index="i">
+                                    <lightning-avatar key={view.Id} 
+                                                      src={view.Viewed_By__r.FullPhotoUrl}
+                                                      size="x-small"
+                                                      variant="circle"
+                                                      data-n={i}
+                                                      class="viewed-by-avatar"
+                                                      style={view.leftStyle}></lightning-avatar>
+                                </template>
+                            </div>
+                            <div class="note-time">
+                                {note.time}
+                            </div>
                         </div>
                     </lightning-layout-item>
                     </lightning-layout>

@@ -59,7 +59,6 @@ export default class LightningReporter extends LightningElement {
     }
 
     getRecords(){
-        debugger;
         getRecordsFromTypeLookingUpToId({
             typeName: this.selectedType,
             parentId: this.recordId,

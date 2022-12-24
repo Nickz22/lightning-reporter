@@ -18,6 +18,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Lightning_Reporter_Note_Metadata__c.Unique_Id__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Lightning_Reporter_Note_Metadata__c.Viewed_By__c</field>
         <readable>true</readable>
     </fieldPermissions>
