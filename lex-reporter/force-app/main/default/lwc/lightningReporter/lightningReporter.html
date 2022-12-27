@@ -54,6 +54,7 @@
                     <template if:true={selectedFields}>
                         <c-table selected-fields={selectedFields}
                                  child-records={childRecords}
+                                 top-most-id={recordId}
                                  saved={saved}></c-table>
                     </template>
                 </lightning-layout-item>

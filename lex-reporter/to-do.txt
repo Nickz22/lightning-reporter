@@ -1,19 +1,15 @@
 /**
- * rte should expand on row click, but avatar should still stay as an indication that there has been convo on that row (not really v1)
  * need to guide people toward a table config creation flow 
- ** if they haven't created one yet...
- ** that way I can assume those will exist and 
- ** don't have to deal with performance implications of 
- ** looping thru all child types
- * Send salesforce notification to mentioned users on note save
- * find a way to make new comments show up in real time
+ ** or default to a shape and figure out best way of enabling custom table shapes
  * we'll want to save table shapes like reports
  ** so if people want to pin a table or something they can...
  ** they're not going to want to reconfigure the same table on every render
- * threaded replies
+ * threaded replies (v2)
  * dont forget to change the user search component to actually search users
- *
- * 
+ * Note metadata upsert is erroring via unique id, should be updating records with same unique id
+ * table ordering
+ * table re-render is causing pencil icons to show up again (bubble event to top-level to stop poller while editing)
+ * remove orange ring from avatar when clicked
  * almost there...
  * what else can be added tho? Might be good to reflect on the persona for whom we're creating this, what do they want to do?
  */ 

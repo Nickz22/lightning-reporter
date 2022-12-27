@@ -1,7 +1,14 @@
 public with sharing class TableRowController {
     
     @AuraEnabled
-    public static Note saveNote(String content, String parentId){
+    /**
+     * 
+     * @param content - Note body
+     * @param parentId - immediate parent of the Note
+     * @param topMostId - `recordId` context of the Lex Reporter when this Note was saved 
+     * @return  `Note`
+     */
+    public static Note saveNote(String content, String parentId, String topMostId){
         // insert note in db
         Note newNote = new Note(Body=content,IsPrivate=false,ParentId=parentId,Title='LEX Reporter Note');
         insert newNote;
@@ -44,7 +51,7 @@ public with sharing class TableRowController {
 
         // Set the notification type and target
         notification.setNotificationTypeId(notificationType.Id);
-        notification.setTargetId(parentId);
+        notification.setTargetId(topMostId);
         
         // Actually send the notification
         notification.send(mentionedUserIds);

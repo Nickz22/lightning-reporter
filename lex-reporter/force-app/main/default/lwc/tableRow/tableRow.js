@@ -26,6 +26,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
             ['NUMBER', 'number']
     ]);
 
+    @api topMostId;
     @api fields = [];
     rteContent = "";
     isEditMode = false;
@@ -57,7 +58,8 @@ export default class TableRow extends NavigationMixin(LightningElement) {
             this.renderRte();
             saveNote({
                 content: event.target.value,
-                parentId: this._sObject.record.Id
+                parentId: this._sObject.record.Id,
+                topMostId: this.topMostId
             })
             .then(result => {
                 console.log(result.CreatedBy.FullPhotoUrl);
@@ -73,7 +75,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
                 this.showNotification('Note Saved', '', 'success');
             })
             .catch(error => {
-                console.log('error: '+error);
+                console.error('error: '+error);
             });
         }
 
