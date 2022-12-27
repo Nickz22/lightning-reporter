@@ -14,6 +14,20 @@ export default class LightningReporter extends LightningElement {
     @track selectedFields;
     saved = false;
     selectedType;
+    polling = false;
+
+    renderedCallback(){
+        if(!this.polling){
+            this.polling = true;
+            setInterval(() => {
+                try {
+                    this.getChildRecords();   
+                } catch (error) {
+                    console.error(error);
+                }
+            }, 10000);
+        }
+    }
 
     @wire (getChildTypes, {recordId : '$recordId'})
     getRecordsFromDefaultChildType({error, data}){
@@ -73,7 +87,7 @@ export default class LightningReporter extends LightningElement {
                 console.error('error getting records ['+e+']');
             }
         }).catch(error => {
-            console.error('error getting records ['+error.body.message+']');
+            console.error('error getting records ['+error+']');
         })
     }
 

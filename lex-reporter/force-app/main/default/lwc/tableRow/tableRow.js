@@ -2,7 +2,7 @@ import { LightningElement, api, track } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import saveNote from '@salesforce/apex/TableRowController.saveNote';
-import saveNoteMetadata from '@salesforce/apex/TableRowController.saveNoteMetadata';
+import countView from '@salesforce/apex/TableRowController.countView';
 import runningUserId from '@salesforce/user/Id';
 
 export default class TableRow extends NavigationMixin(LightningElement) {
@@ -199,19 +199,38 @@ export default class TableRow extends NavigationMixin(LightningElement) {
                     "name" : value.notes[i].CreatedBy.Name,
                     "body" : value.notes[i].Body,
                     "id" : value.notes[i].Id,
-                    "time" : value.notes[i].CreatedDate
+                    "time" : value.notes[i].CreatedDate,
+                    "unreadStyle" : ""
                 };   
                 let views = [];
                 // for each value in value.noteMdByNoteId[value.notes[i].Id], set a `leftStyle` property equal to the value of the index
-                for(let j = 0; j < value.noteMdByNoteId[value.notes[i].Id].length; j++){
-                    let view = {};
-                    for(let param in value.noteMdByNoteId[value.notes[i].Id][j]){
-                        view[param] = value.noteMdByNoteId[value.notes[i].Id][j][param];
+                let noteMd = value.noteMdByNoteId[value.notes[i].Id];
+                let mentionedUserIds = new Set();
+                let viewedByUserIds = new Set();
+                if(noteMd){
+                    for(let j = 0; j < noteMd.length; j++){
+                        if(noteMd[j].Type__c.toLowerCase() === 'mention'){
+                            mentionedUserIds.add(noteMd[j].Mentioned_User__c);
+                        }else if(noteMd[j].Type__c.toLowerCase() === 'view'){
+                            let view = {};
+                            for(let param in noteMd[j]){ // noteMd[j] is read-only
+                                view[param] = noteMd[j][param];
+                            }
+                            view.leftStyle = 'left: '+j+'em;';
+                            views.push(view);
+                            viewedByUserIds.add(noteMd[j].Viewed_By__c);
+                        }
                     }
-                    view.leftStyle = 'left: '+j+'em;';
-                    views.push(view);
                 }
                 newAvatar.views = views;
+                // log runningUserId
+                let holderId = runningUserId;
+                console.log('runningUserId: '+runningUserId);
+                console.log('holderId: '+holderId);
+                if(mentionedUserIds.has(runningUserId) && !viewedByUserIds.has(runningUserId)){
+                    // make newAvatar.unreadStyle an orange border
+                    newAvatar.unreadStyle = 'border: 2px solid #ff8c00;'
+                }
                 this.avatars.push(newAvatar);
             }
         }
@@ -228,7 +247,8 @@ export default class TableRow extends NavigationMixin(LightningElement) {
                 "name" : "",
                 "body" : "",
                 "id" : "",
-                "time" : ""
+                "time" : "",
+                "unreadStyle" : ""
             };
         }
 
@@ -304,10 +324,11 @@ export default class TableRow extends NavigationMixin(LightningElement) {
             2 : "Maximilion Herman Rosegrant",
             3 : "Aldous Huxley-Freud",
             4 : "Steven Solomon",
+            5 : "Another User"
         }
 
         this.usersPosition = 'top: ' + (event.target.getBoundingClientRect().top + 200) + '; left: ' + event.target.getBoundingClientRect().left + ';';
-        for(let i = 0; i<5; i++){
+        for(let i = 0; i<6; i++){
             this.users.push(
                 {name: x[i], id:x[i]}
             );
@@ -324,6 +345,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     }
 
     toggleRowComments(){
+
         if(this.notes.length > 0){
             this.notes = [];  
             // set table row class to table-row-expanded
@@ -338,7 +360,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     }
 
     countNoteView(event){
-        saveNoteMetadata({
+        countView({
             noteMetadata: {
                 NoteId: event.target.dataset.id, 
                 NoteParentId: this._sObject.record.Id, 

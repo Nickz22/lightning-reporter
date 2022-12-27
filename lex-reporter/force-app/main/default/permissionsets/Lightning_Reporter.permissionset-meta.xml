@@ -26,6 +26,16 @@
         <field>Lightning_Reporter_Note_Metadata__c.Viewed_By__c</field>
         <readable>true</readable>
     </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Lightning_Reporter_Note_Metadata__c.Mentioned_User__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Lightning_Reporter_Note_Metadata__c.Type__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
     <hasActivationRequired>false</hasActivationRequired>
     <label>Lightning Reporter</label>
     <objectPermissions>

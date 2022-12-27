@@ -2,8 +2,53 @@ public with sharing class TableRowController {
     
     @AuraEnabled
     public static Note saveNote(String content, String parentId){
+        // insert note in db
         Note newNote = new Note(Body=content,IsPrivate=false,ParentId=parentId,Title='LEX Reporter Note');
         insert newNote;
+
+        // send notifications to mentioned users
+        List<String> messageSegmentedByMention = content.split('@');
+        Set<String> userFullNames = new Set<String>();
+        for(String s : messageSegmentedByMention){
+            if(s.startsWith('<strong>')){
+                userFullNames.add(s.substring(8,s.indexOf('</strong>')));
+            }
+        }
+        
+        Set<String> mentionedUserIds = new Set<String>();
+        List<Lightning_Reporter_Note_Metadata__c> mentionedUserMd = new List<Lightning_Reporter_Note_Metadata__c>();
+        for(User u : [SELECT Id FROM User WHERE Name IN: userFullNames]){
+            mentionedUserIds.add(u.Id);
+            mentionedUserMd.add(
+                new Lightning_Reporter_Note_Metadata__c(
+                    Note_Id__c=newNote.Id,
+                    Note_Parent_Id__c=parentId,
+                    Mentioned_User__c=u.Id,
+                    Type__c='Mention'
+            ));
+        }
+        insert mentionedUserMd;
+
+        // Get the Id for our custom notification type
+        CustomNotificationType notificationType = 
+            [SELECT Id, DeveloperName 
+             FROM CustomNotificationType 
+             WHERE DeveloperName='Lex_Reporter_Notification'];
+        
+        // Create a new custom notification
+        Messaging.CustomNotification notification = new Messaging.CustomNotification();
+
+        // Set the contents for the notification
+        notification.setTitle('From '+UserInfo.getUserName());
+        notification.setBody('Click to go to note');
+
+        // Set the notification type and target
+        notification.setNotificationTypeId(notificationType.Id);
+        notification.setTargetId(parentId);
+        
+        // Actually send the notification
+        notification.send(mentionedUserIds);
+
         return [SELECT CreatedDate,CreatedBy.Name,CreatedBy.FullPhotoUrl,Body 
                   FROM Note 
                   WHERE Id=:newNote.Id 
@@ -12,7 +57,7 @@ public with sharing class TableRowController {
     }
 
     @AuraEnabled
-    public static void saveNoteMetadata(NoteMetadataDTO noteMetadata){
+    public static void countView(NoteMetadataDTO noteMetadata){
         try {
             upsert noteMetadata.convertToDbModel() Lightning_Reporter_Note_Metadata__c.Unique_Id__c;
         } catch (Exception e) {
@@ -31,6 +76,7 @@ public with sharing class TableRowController {
             noteMetadata.Note_Parent_Id__c = this.NoteParentId;
             noteMetadata.Viewed_By__c = (Id) this.ViewedById;
             noteMetadata.Unique_Id__c = this.NoteId + this.ViewedById;
+            noteMetadata.Type__c = 'View';
             return noteMetadata;
         }
     }

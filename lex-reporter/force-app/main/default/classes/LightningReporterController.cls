@@ -84,8 +84,9 @@ public class LightningReporterController {
 
     private static Map<Id, List<Lightning_Reporter_Note_Metadata__c>> getNoteMdByParentId(Set<String> recordIds){
         Map<Id, List<Lightning_Reporter_Note_Metadata__c>> noteMdByParentId = new Map<Id, List<Lightning_Reporter_Note_Metadata__c>>();
-        for(Lightning_Reporter_Note_Metadata__c noteMd : [SELECT Note_Parent_Id__c, Note_Id__c, Viewed_By__r.FullPhotoUrl 
-                                                            FROM Lightning_Reporter_Note_Metadata__c 
+        for(Lightning_Reporter_Note_Metadata__c noteMd : [SELECT Note_Parent_Id__c, Note_Id__c, Viewed_By__r.FullPhotoUrl,
+                                                                Mentioned_User__c, Type__c
+                                                            FROM Lightning_Reporter_Note_Metadata__c
                                                             WHERE Note_Parent_Id__c IN :recordIds]){
             if(!noteMdByParentId.containsKey(noteMd.Note_Parent_Id__c)){
                 noteMdByParentId.put(noteMd.Note_Parent_Id__c, new List<Lightning_Reporter_Note_Metadata__c>());
