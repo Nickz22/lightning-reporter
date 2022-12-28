@@ -40,45 +40,59 @@ public class LightningReporterController {
     @AuraEnabled
     public static List<SubjectDTO> getRecordsFromTypeLookingUpToId(String typeName, Id parentId, List<FieldDTO> fieldsToGet){
 
-        List<String> lookupsToParent = getLookupsPointingToParentId(typeName, parentId);
-
-        List<String> fieldApiNames = new List<String>();
-        for(FieldDTO field : fieldsToGet){
-            fieldApiNames.add(field.name);
-        }
-        
-        String query = 'SELECT '+String.join(fieldApiNames, ',')+',(SELECT '+
-                                                                        'Body,CreatedBy.Name,CreatedBy.FullPhotoUrl,CreatedDate '+
-                                                                    'FROM Notes ORDER BY CreatedDate desc) '+
-                        'FROM '+typeName+' '+
-                        getWhereClause(lookupsToParent, parentId)+' '+
-                        'ORDER BY LastModifiedDate desc';
-
         List<SubjectDTO> subjects = new List<SubjectDTO>();
-        Map<String, Schema.SObjectField> tokenByFieldName = Schema.getGlobalDescribe()
-                                                        .get(typeName)
-                                                        .getDescribe().fields.getMap();
-        List<SObject> records = Database.query(query);
-        Set<String> recordIds = new Set<String>();
-        for(SObject record : records){
-            recordIds.add(record.Id);
-        }
-        Map<Id, List<Lightning_Reporter_Note_Metadata__c>> noteMdByParentId = getNoteMdByParentId(recordIds);
-        for(SObject record : records){
-            for(String field : fieldApiNames){
-                // if field is editable and null, explicitly set to `null`
-                if(record.get(field) == null && 
-                    tokenByFieldName.get(field).getDescribe().isUpdateable()){
-                    record.put(field, null);
+        try {
+            List<String> lookupsToParent = getLookupsPointingToParentId(typeName, parentId);
+
+            List<String> fieldApiNames = new List<String>();
+            for(FieldDTO field : fieldsToGet){
+                fieldApiNames.add(field.name);
+                if(field.type == 'reference'){
+                    fieldApiNames.add(
+                        field.isCustom ? 
+                        field.name.replace('__c', '__r.Name') : 
+                        field.name.replace('Id', '.Name')
+                    );
                 }
             }
-            subjects.add(
-                new SubjectDTO(record, 
-                            record.getSObjects('Notes'), 
-                            noteMdByParentId.containsKey(record.Id) ? noteMdByParentId.get(record.Id) : new List<Lightning_Reporter_Note_Metadata__c>()
-            ));
+            
+            String query = 'SELECT '+String.join(fieldApiNames, ',')+',(SELECT '+
+                                                                            'Body,CreatedBy.Name,CreatedBy.FullPhotoUrl,CreatedDate '+
+                                                                        'FROM Notes ORDER BY CreatedDate desc) '+
+                            'FROM '+typeName+' '+
+                            getWhereClause(lookupsToParent, parentId)+' '+
+                            'ORDER BY LastModifiedDate desc';
+
+            Map<String, Schema.SObjectField> tokenByFieldName = Schema.getGlobalDescribe()
+                                                            .get(typeName)
+                                                            .getDescribe().fields.getMap();
+            List<SObject> records = Database.query(query);
+            Set<String> recordIds = new Set<String>();
+            for(SObject record : records){
+                recordIds.add(record.Id);
+            }
+            Map<Id, List<Lightning_Reporter_Note_Metadata__c>> noteMdByParentId = getNoteMdByParentId(recordIds);
+            for(SObject record : records){
+                for(String field : fieldApiNames){
+                    if(field.contains('.')){
+                        continue;
+                    }
+                    // if field is editable and null, explicitly set to `null`
+                    if(record.get(field) == null && 
+                        tokenByFieldName.get(field).getDescribe().isUpdateable()){
+                        record.put(field, null);
+                    }
+                }
+                subjects.add(
+                    new SubjectDTO(record, 
+                                record.getSObjects('Notes'), 
+                                noteMdByParentId.containsKey(record.Id) ? noteMdByParentId.get(record.Id) : new List<Lightning_Reporter_Note_Metadata__c>()
+                ));
+            }
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
         }
-        
+
         return subjects;
     }    
 
@@ -102,13 +116,15 @@ public class LightningReporterController {
         @AuraEnabled public String type {get; set;}
         @AuraEnabled public Boolean isUpdateable {get; set;}
         @AuraEnabled public Boolean defaultSelected {get; set;}
+        @AuraEnabled public Boolean isCustom {get; set;}
 
-        public FieldDTO(String name, String label, String type, Boolean isUpdateable, Boolean defaultSelected){
+        public FieldDTO(String name, String label, String type, Boolean isUpdateable, Boolean defaultSelected, Boolean isCustom){
             this.name = name;
             this.label = label;
             this.type = type;
             this.isUpdateable = isUpdateable;
             this.defaultSelected = defaultSelected;
+            this.isCustom = isCustom;
         }
 
         public FieldDTO(){}
@@ -140,7 +156,8 @@ public class LightningReporterController {
                 describe.getLabel(),
                 String.valueOf(describe.getType()),
                 describe.isUpdateable(),
-                defaultFields.containsIgnoreCase(fieldName)
+                defaultFields.containsIgnoreCase(fieldName),
+                describe.isCustom()
             );
             fields.add(dto);
         }

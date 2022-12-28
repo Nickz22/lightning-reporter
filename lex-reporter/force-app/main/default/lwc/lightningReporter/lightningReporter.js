@@ -82,16 +82,12 @@ export default class LightningReporter extends LightningElement {
             parentId: this.recordId,
             fieldsToGet: this.selectedFields
         }).then(result => {
-            try{
-                for(let i=0; i<result.length; i++){
-                    result[i].record.sObjectType = this.selectedType;
-                }
-                this.childRecords = result;
-            }catch(e){
-                console.error('error getting records ['+e+']');
+            for(let i=0; i<result.length; i++){
+                result[i].record.sObjectType = this.selectedType;
             }
+            this.childRecords = result;
         }).catch(error => {
-            console.error('error getting records ['+error+']');
+            throw error;
         })
     }
 

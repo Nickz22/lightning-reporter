@@ -48,13 +48,13 @@
                                     class="cell"
                                     alignment-bump="top">
                     <template if:true={cell.isReference}>
-                        <a href={cell.url} target="_blank">{sObjectDisplayName}</a>
+                        <a href={cell.url} target="_blank">{cell.label}</a>
                     </template>
                     <template if:false={cell.isReference}>
                         <template if:true={cell.isUpdateable}>
                             <lightning-layout class="edit-container"
                                             horizontal-align="end">
-                                <lightning-layout-item size={cell.size}>
+                                <lightning-layout-item size="12" padding="horizontal-small">
                                     <lightning-input data-id={cell.apiName}
                                                     value={cell.value} 
                                                     type={cell.type}
@@ -62,13 +62,11 @@
                                                     onchange={handleValueChange}></lightning-input>
                                 </lightning-layout-item>
                                 <template if:true={cell.notEditing}>
-                                    <lightning-layout-item size="2" alignment-bump="bottom">
-                                        <lightning-icon class="edit-icon"
-                                                        onclick={initEdit} 
-                                                        icon-name="utility:edit" 
-                                                        data-id={cell.apiName}
-                                                        size="xx-small"></lightning-icon>
-                                    </lightning-layout-item>
+                                    <lightning-icon class="edit-icon"
+                                                    onclick={initEdit} 
+                                                    icon-name="utility:edit" 
+                                                    data-id={cell.apiName}
+                                                    size="xx-small"></lightning-icon>
                                 </template> 
                             </lightning-layout>
                         </template>

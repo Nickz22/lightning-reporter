@@ -270,15 +270,21 @@ export default class TableRow extends NavigationMixin(LightningElement) {
         let cells = [];
         let baseUrl = window.location.href.substring(0, window.location.href.indexOf(".com/")+5);
         for(let field of this.fields){
-            let isRef = (field.type === 'Id' || field.type === 'ID' || field.type === 'REFERENCE' || field.type === 'reference');
+            let isRef = field.type.toLowerCase() === 'reference';
+            let isId = field.type.toLowerCase() === 'id';
+            let refLabelPath = isId ? 'Name' : 
+                                isRef ? field.isCustom ? field.name.replace('__c', '__r') : field.name.replace('Id', '') : ''; 
+            let refLabel = isId ? this._sObject.record[refLabelPath] : 
+                            isRef ? this._sObject.record[refLabelPath].Name : ''; 
             cells.push(
                 {
                     'apiName': field.name, 
-                    'label' : field.label,
+                    'label' : (isRef || isId) && refLabel > 15 ? refLabel.substring(0,15)+'...' : 
+                                (isRef || isId) ? refLabel : field.label,
                     'value': this._sObject.record[field.name],
                     'isUpdateable' : field.isUpdateable,
-                    'isReference' : isRef,
-                    'url' : isRef ? baseUrl+this._sObject.record[field.name] : '',
+                    'isReference' : isRef || isId,
+                    'url' : isRef || isId ? baseUrl+this._sObject.record[field.name] : '',
                     'notEditing' : true, // have to make this resolve to `true`...
                                          // cant make read-only show with a `false` boolean value
                     'type' : this.inputTypeBySfSchemaType.get(field.type),
