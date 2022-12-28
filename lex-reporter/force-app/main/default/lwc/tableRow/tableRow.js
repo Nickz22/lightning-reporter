@@ -76,7 +76,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
                 this.showNotification('Note Saved', '', 'success');
             })
             .catch(error => {
-                console.error('error: '+error);
+                throw error;
             });
         }
 
@@ -194,76 +194,67 @@ export default class TableRow extends NavigationMixin(LightningElement) {
 
     set sObject(value){
 
-        try{
-            this._sObject = value;
-            this.sObjectDisplayName = this._sObject.record.Name.length <= 15 ? 
-                                        this._sObject.record.Name :
-                                        `${this._sObject.record.Name.substring(0,15)}...`;
-            this.cells = this.getTableCellValues();
+        this._sObject = value;
+        this.cells = this.getTableCellValues();
 
-            if(value.notes){
-                this.avatars = [];
-                for(let i = 0; i < value.notes.length; i++){
-                    let newAvatar = {
-                        "url" : value.notes[i].CreatedBy.FullPhotoUrl,
-                        "name" : value.notes[i].CreatedBy.Name,
-                        "body" : value.notes[i].Body,
-                        "id" : value.notes[i].Id,
-                        "time" : value.notes[i].CreatedDate,
-                        "unreadStyle" : ""
-                    };   
-                    let views = [];
-                    // for each value in value.noteMdByNoteId[value.notes[i].Id], set a `leftStyle` property equal to the value of the index
-                    let noteMd = value.noteMdByNoteId[value.notes[i].Id];
-                    let mentionedUserIds = new Set();
-                    let viewedByUserIds = new Set();
-                    if(noteMd){
-                        for(let j = 0; j < noteMd.length; j++){
-                            if(noteMd[j].Type__c.toLowerCase() === 'mention'){
-                                mentionedUserIds.add(noteMd[j].Mentioned_User__c);
-                            }else if(noteMd[j].Type__c.toLowerCase() === 'view'){
-                                let view = {};
-                                for(let param in noteMd[j]){ // noteMd[j] is read-only
-                                    view[param] = noteMd[j][param];
-                                }
-                                view.leftStyle = 'left: '+j+'em;';
-                                views.push(view);
-                                viewedByUserIds.add(noteMd[j].Viewed_By__c);
+        if(value.notes){
+            this.avatars = [];
+            for(let i = 0; i < value.notes.length; i++){
+                let newAvatar = {
+                    "url" : value.notes[i].CreatedBy.FullPhotoUrl,
+                    "name" : value.notes[i].CreatedBy.Name,
+                    "body" : value.notes[i].Body,
+                    "id" : value.notes[i].Id,
+                    "time" : value.notes[i].CreatedDate,
+                    "unreadStyle" : ""
+                };   
+                let views = [];
+                // for each value in value.noteMdByNoteId[value.notes[i].Id], set a `leftStyle` property equal to the value of the index
+                let noteMd = value.noteMdByNoteId[value.notes[i].Id];
+                let mentionedUserIds = new Set();
+                let viewedByUserIds = new Set();
+                if(noteMd){
+                    for(let j = 0; j < noteMd.length; j++){
+                        if(noteMd[j].Type__c.toLowerCase() === 'mention'){
+                            mentionedUserIds.add(noteMd[j].Mentioned_User__c);
+                        }else if(noteMd[j].Type__c.toLowerCase() === 'view'){
+                            let view = {};
+                            for(let param in noteMd[j]){ // noteMd[j] is read-only
+                                view[param] = noteMd[j][param];
                             }
+                            view.leftStyle = 'left: '+j+'em;';
+                            views.push(view);
+                            viewedByUserIds.add(noteMd[j].Viewed_By__c);
                         }
                     }
-                    newAvatar.views = views;
-                    if(mentionedUserIds.has(runningUserId) && !viewedByUserIds.has(runningUserId)){
-                        // make newAvatar.unreadStyle an orange border
-                        newAvatar.unreadStyle = 'border: 2px solid #ff8c00;'
-                    }
-                    this.avatars.push(newAvatar);
                 }
-            }
-
-            if(this.avatars.length > 0){
-                console.log('setting avatars');
-                this.previewAvatar = this.avatars[0];
-                if(this.notes.length > 0){
-                    this.notes = this.avatars
+                newAvatar.views = views;
+                if(mentionedUserIds.has(runningUserId) && !viewedByUserIds.has(runningUserId)){
+                    // make newAvatar.unreadStyle an orange border
+                    newAvatar.unreadStyle = 'border: 2px solid #ff8c00;'
                 }
-            }else{
-                this.previewAvatar = {
-                    "url" : "",
-                    "name" : "",
-                    "body" : "",
-                    "id" : "",
-                    "time" : "",
-                    "unreadStyle" : ""
-                };
+                this.avatars.push(newAvatar);
             }
-
-            this.cellSize = 3;
-        }catch(e){
-            console.error(e);
         }
 
-        
+        if(this.avatars.length > 0){
+            console.log('setting avatars');
+            this.previewAvatar = this.avatars[0];
+            if(this.notes.length > 0){
+                this.notes = this.avatars
+            }
+        }else{
+            this.previewAvatar = {
+                "url" : "",
+                "name" : "",
+                "body" : "",
+                "id" : "",
+                "time" : "",
+                "unreadStyle" : ""
+            };
+        }
+
+        this.cellSize = 3;
     }
 
     getTableCellValues = () => {

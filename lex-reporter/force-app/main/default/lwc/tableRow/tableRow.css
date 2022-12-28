@@ -2,6 +2,7 @@
     position: relative;
     left: 2%;
     display: block;
+    cursor: pointer;
 }
 
 .rte{
@@ -102,6 +103,6 @@ input{
 .edit-icon{
     cursor: pointer;
     position:absolute;
-    bottom: 1.2em;
-    right: 1em;
+    bottom: 1em;
+    right: 1.2em;
 }

@@ -44,25 +44,27 @@ public with sharing class TableRowController {
             }
             insert mentionedUserMd;
 
-            // Get the Id for our custom notification type
-            CustomNotificationType notificationType = 
+            if(!mentionedUserIds.isEmpty()){
+                // Get the Id for our custom notification type
+                CustomNotificationType notificationType = 
                 [SELECT Id, DeveloperName 
                 FROM CustomNotificationType 
                 WHERE DeveloperName='Lex_Reporter_Notification'];
             
-            // Create a new custom notification
-            Messaging.CustomNotification notification = new Messaging.CustomNotification();
+                // Create a new custom notification
+                Messaging.CustomNotification notification = new Messaging.CustomNotification();
 
-            // Set the contents for the notification
-            notification.setTitle('From '+UserInfo.getUserName());
-            notification.setBody('Click to go to note');
+                // Set the contents for the notification
+                notification.setTitle('From '+UserInfo.getUserName());
+                notification.setBody('Click to go to note');
 
-            // Set the notification type and target
-            notification.setNotificationTypeId(notificationType.Id);
-            notification.setTargetId(topMostId);
-            
-            // Actually send the notification
-            notification.send(mentionedUserIds);
+                // Set the notification type and target
+                notification.setNotificationTypeId(notificationType.Id);
+                notification.setTargetId(topMostId);
+                
+                // Actually send the notification
+                notification.send(mentionedUserIds);
+            }   
 
             n = [SELECT CreatedDate,CreatedBy.Name,CreatedBy.FullPhotoUrl,Body 
                     FROM Note 

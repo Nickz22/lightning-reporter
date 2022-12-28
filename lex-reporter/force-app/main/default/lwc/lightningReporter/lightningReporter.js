@@ -2,7 +2,7 @@ import { LightningElement, api, wire, track } from 'lwc';
 import getChildTypes from '@salesforce/apex/LightningReporterController.getChildTypes';
 import getRecordsFromTypeLookingUpToId from '@salesforce/apex/LightningReporterController.getRecordsFromTypeLookingUpToId'
 import getFieldsFromType from '@salesforce/apex/LightningReporterController.getFieldsFromType'
-import dbUpdateRecords from '@salesforce/apex/LightningReporterController.updateRecords'
+import saveRecords from '@salesforce/apex/LightningReporterController.saveRecords'
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class LightningReporter extends LightningElement {
@@ -101,21 +101,16 @@ export default class LightningReporter extends LightningElement {
                     return [field.name, field];
             }));
 
-            this.selectedFields = [];
-            for(let i=0; i<result.length; i++){
+            this.selectedFields = new Set("Id");
+            for(let i=0; this.selectedFields.size <= 10; i++){
                 let dto = result[i];
-                if(dto.defaultSelected){
-                    this.selectedFields.push(dto);
-                }
+                this.selectedFields.push(dto);
             }
 
             this.getRecords();
         })
         .catch(error => {
-            console.error('error getting selectable fields ['+
-                                    error.body ? 
-                                    error.body.message : 
-                                    error.message+']');
+            throw error;
         })
     }
 
@@ -146,6 +141,7 @@ export default class LightningReporter extends LightningElement {
 
     handleChildTypeChange(event){
         this.selectedType = event.target.value;
+        this.getSelectableFields();
         this.getChildRecords();
     }
 
@@ -159,7 +155,7 @@ export default class LightningReporter extends LightningElement {
             sObjects.push(rows[i].updatedSObject);
         }
 
-        dbUpdateRecords({
+        saveRecords({
             sObjects: sObjects
         }).then(result => {
             this.showNotification('Records saved successfully', '', 'success');

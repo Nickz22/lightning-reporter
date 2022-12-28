@@ -1,15 +1,26 @@
 public class LightningReporterController {
     
+    /**
+     * should prioritize objects for which views have been saved 
+     * only gets child types with `Notes` child relationship
+     */
     @AuraEnabled(cacheable=true)
     public static List<String> getChildTypes(Id recordId){
         Set<String> childTypes = new Set<String>();
-        DescribeSObjectResult typeDescribe = recordId.getSobjectType().getDescribe();
-        for(Schema.ChildRelationship relationship : typeDescribe.getChildRelationships()){
-            String childTypeName = relationship.getChildSObject().getDescribe().getName();
-            // remove before releasing
-            if(childTypeName == 'Contact'){
-                childTypes.add(relationship.getChildSObject().getDescribe().getName());
-            }
+        try {
+            DescribeSObjectResult typeDescribe = recordId.getSobjectType().getDescribe();
+            for(Schema.ChildRelationship relationship : typeDescribe.getChildRelationships()){
+                SObjectType childType = relationship.getChildSObject();
+                String childTypeName = childType.getDescribe().getName();
+                for(Schema.ChildRelationship childOfChild : childType.getDescribe().getChildRelationships()){
+                    if(childOfChild.getChildSObject().getDescribe().getName() == 'Note'){
+                        childTypes.add(childTypeName);
+                        break;
+                    }
+                }
+            }   
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
         }
         
         return new List<String>(childTypes);
@@ -17,21 +28,25 @@ public class LightningReporterController {
 
     static List<String> getLookupsPointingToParentId(String childTypeName, Id parentId){
 
-        Map<String, Schema.SObjectField> fieldTokenByName = Schema.getGlobalDescribe()
+        List<String> lookupsToParent = new List<String>();
+        try {
+            Map<String, Schema.SObjectField> fieldTokenByName = Schema.getGlobalDescribe()
                                                                 .get(childTypeName)
                                                                 .getDescribe()
                                                                 .fields.getMap();
-        List<String> lookupsToParent = new List<String>();
-        for(String fieldName : fieldTokenByName.keyset()){
-            DescribeFieldResult fieldDescribe = fieldTokenByName.get(fieldName).getDescribe();
+            for(String fieldName : fieldTokenByName.keyset()){
+                DescribeFieldResult fieldDescribe = fieldTokenByName.get(fieldName).getDescribe();
 
-            if(fieldDescribe.getType() == Schema.DisplayType.REFERENCE){ 
-                SObjectType lookupTargetType = fieldDescribe.getReferenceTo()[0]; 
-                if(lookupTargetType.getDescribe().getName() == 
-                    parentId.getSobjectType().getDescribe().getName()){ // is the field lookup to `parentId`
-                    lookupsToParent.add(fieldName);
+                if(fieldDescribe.getType() == Schema.DisplayType.REFERENCE){ 
+                    SObjectType lookupTargetType = fieldDescribe.getReferenceTo()[0]; 
+                    if(lookupTargetType.getDescribe().getName() == 
+                        parentId.getSobjectType().getDescribe().getName()){ // is the field lookup to `parentId`
+                        lookupsToParent.add(fieldName);
+                    }
                 }
-            }
+            }   
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
         }
 
         return lookupsToParent;
@@ -62,6 +77,7 @@ public class LightningReporterController {
                             'FROM '+typeName+' '+
                             getWhereClause(lookupsToParent, parentId)+' '+
                             'ORDER BY LastModifiedDate desc';
+            System.debug(query);
 
             Map<String, Schema.SObjectField> tokenByFieldName = Schema.getGlobalDescribe()
                                                             .get(typeName)
@@ -134,38 +150,43 @@ public class LightningReporterController {
     public static List<FieldDTO> getFieldsFromType(String typeName){
 
         List<FieldDTO> fields = new List<FieldDTO>();
-        SObjectType typeFromName = Schema.getGlobalDescribe().get(typeName);
-        DescribeSObjectResult d = typeFromName.getDescribe();
-        Map<String, SObjectField> fieldTokenByApiName = d.fields.getMap();
-        List<String> iterableFieldNames = new List<String>(fieldTokenByApiName.keyset());
-        iterableFieldNames.sort();
-
-        List<LEX_Reporter_Table_Configuration__c> defaultConfig = [SELECT Default_Fieldset__c 
-                                                                    FROM LEX_Reporter_Table_Configuration__c
-                                                                    WHERE Object__c =: typeName];
-        String defaultFields = (
-            defaultConfig.isEmpty() ? 
-            '' : 
-            defaultConfig[0].Default_Fieldset__c
-        );
-
-        for(String fieldName : iterableFieldNames){
-            DescribeFieldResult describe = fieldTokenByApiName.get(fieldName).getDescribe();
-            FieldDTO dto = new FieldDTO(
-                describe.getName(),
-                describe.getLabel(),
-                String.valueOf(describe.getType()),
-                describe.isUpdateable(),
-                defaultFields.containsIgnoreCase(fieldName),
-                describe.isCustom()
+        try {
+            SObjectType typeFromName = Schema.getGlobalDescribe().get(typeName);
+            DescribeSObjectResult d = typeFromName.getDescribe();
+            Map<String, SObjectField> fieldTokenByApiName = d.fields.getMap();
+            List<String> iterableFieldNames = new List<String>(fieldTokenByApiName.keyset());
+            iterableFieldNames.sort();
+    
+            List<LEX_Reporter_Table_Configuration__c> defaultConfig = [SELECT Default_Fieldset__c 
+                                                                        FROM LEX_Reporter_Table_Configuration__c
+                                                                        WHERE Object__c =: typeName];
+            String defaultFields = (
+                defaultConfig.isEmpty() ? 
+                '' : 
+                defaultConfig[0].Default_Fieldset__c
             );
-            fields.add(dto);
+    
+            for(String fieldName : iterableFieldNames){
+                DescribeFieldResult describe = fieldTokenByApiName.get(fieldName).getDescribe();
+                FieldDTO dto = new FieldDTO(
+                    describe.getName(),
+                    describe.getLabel(),
+                    String.valueOf(describe.getType()),
+                    describe.isUpdateable(),
+                    defaultFields.containsIgnoreCase(fieldName),
+                    describe.isCustom()
+                );
+                fields.add(dto);
+            }            
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
         }
+
         return fields;
     }
 
     @AuraEnabled
-    public static void updateRecords(List<SObject> sObjects){
+    public static void saveRecords(List<SObject> sObjects){
         List<Database.SaveResult> results = Database.update(sObjects, false);
     }
 
