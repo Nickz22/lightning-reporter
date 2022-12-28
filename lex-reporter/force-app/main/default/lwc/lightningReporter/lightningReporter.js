@@ -15,12 +15,16 @@ export default class LightningReporter extends LightningElement {
     saved = false;
     selectedType;
     polling = false;
+    isEditingRow = false;
 
     renderedCallback(){
         if(!this.polling){
             this.polling = true;
             setInterval(() => {
                 try {
+                    if(this.isEditingRow){ 
+                        return; 
+                    }
                     this.getChildRecords();   
                 } catch (error) {
                     console.error(error);
@@ -149,7 +153,7 @@ export default class LightningReporter extends LightningElement {
         this.getChildRecords();
     }
 
-    updateRecords(event){
+    saveRecords(event){
         let sObjects = [];
 
         // use reducer here? 
@@ -168,6 +172,8 @@ export default class LightningReporter extends LightningElement {
         }).catch(error => {
             this.showNotification('We hit a snag', error.body.message, 'error');
         })
+
+        this.isEditingRow = false;
     }
 
     showNotification(title, message, variant) {
@@ -177,5 +183,10 @@ export default class LightningReporter extends LightningElement {
             variant: variant,
         });
         this.dispatchEvent(evt);
+    }
+
+    stopPoller(){
+        console.log('stopping poller');
+        this.isEditingRow = true;
     }
 }

@@ -313,6 +313,14 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     }
 
     initEdit(event){
+        this.dispatchEvent(new CustomEvent('edit', {
+            detail: {
+                'sObject' : this._sObject,
+                'updatedSObject' : this._updatedSObject
+            },
+            composed: true,
+            bubbles: true
+        }));
         let clickedFieldName = event.target.dataset.id;
         for(let cell of this.cells){
             let isNotEditing = (

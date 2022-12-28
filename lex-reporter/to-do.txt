@@ -1,11 +1,9 @@
 /**
  * Definitely use list layouts as base level options
  * Might be worth creating Lex Table Configs to hold customizations on top of layouts
- * Note metadata upsert is erroring via unique id, should be updating records with same unique id
+ *** enable pinning of views (via table config records)
  *
- * table re-render is causing pencil icons to show up again (bubble event to top-level to stop poller while editing)
  * align headers to cells
- * enable pinning of views (via table config records)
  * seems to be something intermittently wrong with user searching
  * almost there...
  *

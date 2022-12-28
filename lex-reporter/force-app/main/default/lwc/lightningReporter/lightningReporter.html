@@ -50,7 +50,7 @@
                     <lightning-button
                         label="Save"
                         variant="brand"
-                        onclick={updateRecords}>
+                        onclick={saveRecords}>
                     </lightning-button>
                 </lightning-layout-item>
                 <!-- END TABLE ACTIONS -->
@@ -62,7 +62,8 @@
                         <c-table selected-fields={selectedFields}
                                  child-records={childRecords}
                                  top-most-id={recordId}
-                                 saved={saved}></c-table>
+                                 saved={saved}
+                                 onedit={stopPoller}></c-table>
                     </template>
                 </lightning-layout-item>
                 <!-- START FIELDS -->
