@@ -1,10 +1,11 @@
 /**
- * Definitely use list layouts as base level options
- * Might be worth creating Lex Table Configs to hold customizations on top of layouts
- *** enable pinning of views (via table config records)
+ * Table layout flow ---> 
+ * 1) Select your child type
+ * 2) Select fields on right panel
+ * 3) Pin the view against this child type
+ *  ---> each new child type brings its own pinned views
  *
- * align headers to cells
- * seems to be something intermittently wrong with user searching
+ * user searching is rough, needs to be smoother (spend time)
  * almost there...
  *
  * what else can be added tho? Might be good to reflect on the persona for whom we're creating this, what do they want to do?
