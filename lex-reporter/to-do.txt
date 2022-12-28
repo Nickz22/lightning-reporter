@@ -1,17 +1,18 @@
 /**
  * Definitely use list layouts as base level options
  * Might be worth creating Lex Table Configs to hold customizations on top of layouts
- * threaded replies (v2)
- * dont forget to change the user search component to actually search users
  * Note metadata upsert is erroring via unique id, should be updating records with same unique id
- * table ordering
+ *
  * table re-render is causing pencil icons to show up again (bubble event to top-level to stop poller while editing)
- * remove orange ring from avatar when clicked
- * cleanup save + get records button
  * align headers to cells
- * maybe limit number of fields to 10
+ * enable pinning of views (via table config records)
+ * seems to be something intermittently wrong with user searching
  * almost there...
  *
  * what else can be added tho? Might be good to reflect on the persona for whom we're creating this, what do they want to do?
  * *** hotkey to expand all rows 
+ *
+ *
+ ***** table ordering (v2)
+ ***** threaded replies (v2)
  */ 

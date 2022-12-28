@@ -25,3 +25,11 @@
     text-align: center;
     max-height: 500px;
 }
+
+.button-group{
+    text-align: center;
+}
+
+.child-type-options{
+    margin-top: -1em;
+}

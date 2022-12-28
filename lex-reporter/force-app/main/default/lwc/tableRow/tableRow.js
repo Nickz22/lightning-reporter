@@ -4,6 +4,7 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import saveNote from '@salesforce/apex/TableRowController.saveNote';
 import countView from '@salesforce/apex/TableRowController.countView';
 import runningUserId from '@salesforce/user/Id';
+import fetchUsers from '@salesforce/apex/TableRowController.fetchUsers';
 
 export default class TableRow extends NavigationMixin(LightningElement) {
 
@@ -103,26 +104,30 @@ export default class TableRow extends NavigationMixin(LightningElement) {
         }
         // if key press is @
         if(event.key === '@' && !this.isUserSearching){
-            this.getUserList(event);
+            this.fetchUsers(event);
             this.isUserSearching = true;
-        }else if(event.key != '@' && this.isUserSearching){
-            console.log(event.target.value);
-            // find substring between last "@" and last "</p>"
-            let lastAt = event.target.value.lastIndexOf('@');
-            let lastP = event.target.value.lastIndexOf('</p>');
-            let substring = event.target.value.substring(lastAt+1, lastP);
-            console.log(`searching users for: ${substring}`);
-            // filter users by name
-            for(let user of this.users){
-                if(!substring){
-                    user.hidden = false;
-                }
-                if(!user.name.toLowerCase().includes(substring.toLowerCase())){
-                    console.log(`hiding ${user.name}`)
-                    user.hidden = true;
-                }else{
-                    user.hidden = false;
-                }
+        }else if(event.key !== '@' && this.isUserSearching){
+            try {
+                console.log(event.target.value);
+                // find substring between last "@" and last "</p>"
+                let lastAt = event.target.value.lastIndexOf('@');
+                let lastP = event.target.value.lastIndexOf('</p>');
+                let substring = event.target.value.substring(lastAt+1, lastP);
+                console.log(`searching users for: ${substring}`);
+                // filter users by name
+                for(let user of this.users){
+                    if(!substring){
+                        user.hidden = false;
+                    }
+                    if(!user.Name.toLowerCase().includes(substring.toLowerCase())){
+                        console.log(`hiding ${user.Name}`)
+                        user.hidden = true;
+                    }else{
+                        user.hidden = false;
+                    }
+                }   
+            } catch (error) {
+                console.error(error);
             }
         }
     }
@@ -228,10 +233,6 @@ export default class TableRow extends NavigationMixin(LightningElement) {
                         }
                     }
                     newAvatar.views = views;
-                    // log runningUserId
-                    let holderId = runningUserId;
-                    console.log('runningUserId: '+runningUserId);
-                    console.log('holderId: '+holderId);
                     if(mentionedUserIds.has(runningUserId) && !viewedByUserIds.has(runningUserId)){
                         // make newAvatar.unreadStyle an orange border
                         newAvatar.unreadStyle = 'border: 2px solid #ff8c00;'
@@ -328,22 +329,23 @@ export default class TableRow extends NavigationMixin(LightningElement) {
         this.isEditMode = !this.isEditMode;
     }
 
-    getUserList(event){
-        let x = {
-            0 : "Cornelius Rex",
-            1 : "Albert Einstein",
-            2 : "Maximilion Herman Rosegrant",
-            3 : "Aldous Huxley-Freud",
-            4 : "Steven Solomon",
-            5 : "Another User"
-        }
-
-        this.usersPosition = 'top: ' + (event.target.getBoundingClientRect().top + 200) + '; left: ' + event.target.getBoundingClientRect().left + ';';
-        for(let i = 0; i<6; i++){
-            this.users.push(
-                {name: x[i], id:x[i]}
-            );
-        }
+    fetchUsers(event){
+        console.log('fetching users');
+        fetchUsers()
+            .then(result => {
+                for(let i = 0; i < result.length; i++){
+                    let user = {};
+                    for(let param in result[i]){
+                        user[param] = result[i][param];
+                    }
+                    user.hidden = false;
+                    this.users.push(user);
+                }
+                this.usersPosition = 'top: ' + (event.target.getBoundingClientRect().top + 200) + '; left: ' + event.target.getBoundingClientRect().left + ';';
+            })
+            .catch(error => {
+                this.showNotification('Error', error.body.message, 'error');
+            });
     }
 
     showNotification(title, message, variant) {
@@ -356,7 +358,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     }
 
     toggleRowComments(){
-
+        this.previewAvatar.unreadStyle = "";
         if(this.notes.length > 0){
             this.notes = [];  
             // set table row class to table-row-expanded

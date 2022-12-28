@@ -23,25 +23,32 @@
             <lightning-layout multiple-rows>
                 <!-- TABLE ACTIONS -->
                 <lightning-layout-item size="3" 
-                                       data-id="child-type-options">
-                    <lightning-combobox
-                            name="Select Child Type"
-                            label="Select Child Type"
-                            value={selectedType}
-                            options={options}
-                            onchange={handleChildTypeChange}>
-                    </lightning-combobox>
+                                       data-id="child-type-options"
+                                       class="child-type-options">
+                    <lightning-layout vertical-align="end">
+                        <lightning-layout-item size="3" padding="horizontal-small">show</lightning-layout-item>  
+                        <lightning-layout-item size="6">
+                            <lightning-combobox
+                                name="Select Child Type"
+                                label=""
+                                value={selectedType}
+                                options={options}
+                                onchange={handleChildTypeChange}>
+                            </lightning-combobox>
+                        </lightning-layout-item>
+                        <lightning-layout-item size="3" padding="horizontal-small">records</lightning-layout-item>
+                    </lightning-layout>
                 </lightning-layout-item>
                 <lightning-layout-item size="6"></lightning-layout-item>
-                <lightning-layout-item size="3" 
-                                       padding="small-around">
+                <lightning-layout-item size="3"
+                                        class="button-group">
                     <lightning-button
-                        label="Get Records"
+                        label="Run"
                         variant="neutral"
                         onclick={getChildRecords}>
                     </lightning-button>
                     <lightning-button
-                        label="Save Records"
+                        label="Save"
                         variant="brand"
                         onclick={updateRecords}>
                     </lightning-button>

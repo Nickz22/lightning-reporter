@@ -29,12 +29,12 @@
                         <div class="user-search" style={usersPosition}>
                             <template for:each={users} for:item="user">
                                 <template if:false={user.hidden}>
-                                    <div key={user.id} 
+                                    <div key={user.Id} 
                                         class="lookup-user" 
                                         onclick={selectLookupUser}
                                         tabindex="-1"
                                         onkeyup={handleUserKeyUp}>
-                                        {user.name}
+                                        {user.Name}
                                     </div>
                                 </template>
                             </template>

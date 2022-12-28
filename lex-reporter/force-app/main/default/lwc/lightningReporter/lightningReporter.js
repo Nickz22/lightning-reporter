@@ -120,10 +120,8 @@ export default class LightningReporter extends LightningElement {
     }
 
     handleFieldClicked(evt){
-        let fieldName = evt.target["dataset"]["id"];
-        console.log('clicked :'+fieldName);
-        if(fieldName.toLowerCase() == "id" || fieldName.toLowerCase() == "name"){
-            console.log('retuning');
+        let fieldName = evt.target.dataset.id;
+        if(fieldName.toLowerCase() === "id" || fieldName.toLowerCase() === "name" || this.selectedFields.length >= 10){
             return;
         }
 
