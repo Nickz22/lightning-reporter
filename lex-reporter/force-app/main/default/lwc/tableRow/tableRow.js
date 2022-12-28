@@ -38,7 +38,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     @track cells = [];
     bypassUserFocus = false;
     cellSize;
-    sObjectName;
+    sObjectDisplayName;
     isUserSearching = false;
     focusAtEnd = false;
     
@@ -189,86 +189,95 @@ export default class TableRow extends NavigationMixin(LightningElement) {
 
     set sObject(value){
 
-        this._sObject = value;
-        this.sObjectName = this._sObject.record.Name;
-        this.cells = this.getTableCellValues();
+        try{
+            this._sObject = value;
+            this.sObjectDisplayName = this._sObject.record.Name.length <= 15 ? 
+                                        this._sObject.record.Name :
+                                        `${this._sObject.record.Name.substring(0,15)}...`;
+            this.cells = this.getTableCellValues();
 
-        if(value.notes){
-            this.avatars = [];
-            for(let i = 0; i < value.notes.length; i++){
-                let newAvatar = {
-                    "url" : value.notes[i].CreatedBy.FullPhotoUrl,
-                    "name" : value.notes[i].CreatedBy.Name,
-                    "body" : value.notes[i].Body,
-                    "id" : value.notes[i].Id,
-                    "time" : value.notes[i].CreatedDate,
-                    "unreadStyle" : ""
-                };   
-                let views = [];
-                // for each value in value.noteMdByNoteId[value.notes[i].Id], set a `leftStyle` property equal to the value of the index
-                let noteMd = value.noteMdByNoteId[value.notes[i].Id];
-                let mentionedUserIds = new Set();
-                let viewedByUserIds = new Set();
-                if(noteMd){
-                    for(let j = 0; j < noteMd.length; j++){
-                        if(noteMd[j].Type__c.toLowerCase() === 'mention'){
-                            mentionedUserIds.add(noteMd[j].Mentioned_User__c);
-                        }else if(noteMd[j].Type__c.toLowerCase() === 'view'){
-                            let view = {};
-                            for(let param in noteMd[j]){ // noteMd[j] is read-only
-                                view[param] = noteMd[j][param];
+            if(value.notes){
+                this.avatars = [];
+                for(let i = 0; i < value.notes.length; i++){
+                    let newAvatar = {
+                        "url" : value.notes[i].CreatedBy.FullPhotoUrl,
+                        "name" : value.notes[i].CreatedBy.Name,
+                        "body" : value.notes[i].Body,
+                        "id" : value.notes[i].Id,
+                        "time" : value.notes[i].CreatedDate,
+                        "unreadStyle" : ""
+                    };   
+                    let views = [];
+                    // for each value in value.noteMdByNoteId[value.notes[i].Id], set a `leftStyle` property equal to the value of the index
+                    let noteMd = value.noteMdByNoteId[value.notes[i].Id];
+                    let mentionedUserIds = new Set();
+                    let viewedByUserIds = new Set();
+                    if(noteMd){
+                        for(let j = 0; j < noteMd.length; j++){
+                            if(noteMd[j].Type__c.toLowerCase() === 'mention'){
+                                mentionedUserIds.add(noteMd[j].Mentioned_User__c);
+                            }else if(noteMd[j].Type__c.toLowerCase() === 'view'){
+                                let view = {};
+                                for(let param in noteMd[j]){ // noteMd[j] is read-only
+                                    view[param] = noteMd[j][param];
+                                }
+                                view.leftStyle = 'left: '+j+'em;';
+                                views.push(view);
+                                viewedByUserIds.add(noteMd[j].Viewed_By__c);
                             }
-                            view.leftStyle = 'left: '+j+'em;';
-                            views.push(view);
-                            viewedByUserIds.add(noteMd[j].Viewed_By__c);
                         }
                     }
+                    newAvatar.views = views;
+                    // log runningUserId
+                    let holderId = runningUserId;
+                    console.log('runningUserId: '+runningUserId);
+                    console.log('holderId: '+holderId);
+                    if(mentionedUserIds.has(runningUserId) && !viewedByUserIds.has(runningUserId)){
+                        // make newAvatar.unreadStyle an orange border
+                        newAvatar.unreadStyle = 'border: 2px solid #ff8c00;'
+                    }
+                    this.avatars.push(newAvatar);
                 }
-                newAvatar.views = views;
-                // log runningUserId
-                let holderId = runningUserId;
-                console.log('runningUserId: '+runningUserId);
-                console.log('holderId: '+holderId);
-                if(mentionedUserIds.has(runningUserId) && !viewedByUserIds.has(runningUserId)){
-                    // make newAvatar.unreadStyle an orange border
-                    newAvatar.unreadStyle = 'border: 2px solid #ff8c00;'
-                }
-                this.avatars.push(newAvatar);
             }
+
+            if(this.avatars.length > 0){
+                console.log('setting avatars');
+                this.previewAvatar = this.avatars[0];
+                if(this.notes.length > 0){
+                    this.notes = this.avatars
+                }
+            }else{
+                this.previewAvatar = {
+                    "url" : "",
+                    "name" : "",
+                    "body" : "",
+                    "id" : "",
+                    "time" : "",
+                    "unreadStyle" : ""
+                };
+            }
+
+            this.cellSize = 3;
+        }catch(e){
+            console.error(e);
         }
 
-        if(this.avatars.length > 0){
-            console.log('setting avatars');
-            this.previewAvatar = this.avatars[0];
-            if(this.notes.length > 0){
-                this.notes = this.avatars
-            }
-        }else{
-            this.previewAvatar = {
-                "url" : "",
-                "name" : "",
-                "body" : "",
-                "id" : "",
-                "time" : "",
-                "unreadStyle" : ""
-            };
-        }
-
-        this.cellSize = 3;
+        
     }
 
     getTableCellValues = () => {
         let cells = [];
         let baseUrl = window.location.href.substring(0, window.location.href.indexOf(".com/")+5);
         for(let field of this.fields){
+            let isRef = (field.type === 'Id' || field.type === 'ID' || field.type === 'REFERENCE' || field.type === 'reference');
             cells.push(
                 {
                     'apiName': field.name, 
                     'label' : field.label,
                     'value': this._sObject.record[field.name],
                     'isUpdateable' : field.isUpdateable,
-                    'isReference' : (field.type === 'Id' || field.type === 'ID' || field.type === 'REFERENCE' || field.type === 'reference'),
-                    'url' : (field.type === 'REFERENCE' || field.type === 'Id' || field.type === 'ID' || field.type === 'REFERENCE' || field.type === 'reference') ? baseUrl+this._sObject.record[field.name] : '',
+                    'isReference' : isRef,
+                    'url' : isRef ? baseUrl+this._sObject.record[field.name] : '',
                     'notEditing' : true, // have to make this resolve to `true`...
                                          // cant make read-only show with a `false` boolean value
                     'type' : this.inputTypeBySfSchemaType.get(field.type),

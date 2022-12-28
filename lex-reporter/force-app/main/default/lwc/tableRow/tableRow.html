@@ -47,11 +47,8 @@
                                     key={cell.apiName}
                                     class="cell"
                                     alignment-bump="top">
-                    <!-- make this href point to https://speed-saas-841-dev-ed.lightning.force.com/{salesforce_record_id} -->
-                    <!-- 1) Ensure the Record Id is accessible in the javascript file (see the `sObjectName` variable for example)
-                        2) change the href in our anchor tag to reference the full url including the accessible `sObjectId` variable -->
                     <template if:true={cell.isReference}>
-                        <a href={cell.url} target="_blank">{sObjectName}</a>
+                        <a href={cell.url} target="_blank">{sObjectDisplayName}</a>
                     </template>
                     <template if:false={cell.isReference}>
                         <template if:true={cell.isUpdateable}>
