@@ -5,6 +5,7 @@ import getFieldsFromType from '@salesforce/apex/LightningReporterController.getF
 import saveRecords from '@salesforce/apex/LightningReporterController.saveRecords'
 import pinLayout from '@salesforce/apex/LightningReporterController.pinLayout'
 import getPinnedViews from '@salesforce/apex/LightningReporterController.getPinnedViews';
+import deletePin from '@salesforce/apex/LightningReporterController.deletePin';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class LightningReporter extends LightningElement {
@@ -30,7 +31,7 @@ export default class LightningReporter extends LightningElement {
                     }
                     this.getChildRecords();   
                 } catch (error) {
-                    console.error(error);
+                    this.showNotification('Error', error.body.message, 'error');
                 }
             }, 10000);
         }
@@ -115,8 +116,27 @@ export default class LightningReporter extends LightningElement {
             this.selectableFields = pinnedView.defaultFields;
             this.childRecords = [];
         } catch (error) {
-            console.error(error);
+            this.showNotification('Error', error.body.message, 'error');
         }
+    }
+
+    removePin(event){
+        event.preventDefault();
+        let pinnedViews = this.pinnedViews;
+        for(let i=0; i<pinnedViews.length; i++){
+            if(pinnedViews[i].objectName === event.target.dataset.id){
+                pinnedViews.splice(i, 1);
+                break;
+            }
+        }
+
+        this.pinnedViews = pinnedViews;
+
+        deletePin({objectName: event.target.dataset.id})
+            .catch(error => {
+                this.getPinnedViews();  
+                this.showNotification('Error', error.body.message, 'error');
+            })
     }
 
     getSelectableFields(){

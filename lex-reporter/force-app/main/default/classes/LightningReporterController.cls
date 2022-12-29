@@ -234,6 +234,18 @@ public class LightningReporterController {
         }
     }
 
+    @AuraEnabled
+    public static void deletePin(String objectName){
+        try {
+            Lex_Reporter_Table_Configuration__c config = [SELECT Id FROM Lex_Reporter_Table_Configuration__c
+                                                            WHERE Object__c =: objectName
+                                                            AND CreatedById =: UserInfo.getUserId()];
+            delete config;
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
+        }
+    }
+
     // helpers
     private static String getWhereClause(List<String> lookupsToParent, Id parentId){
         
