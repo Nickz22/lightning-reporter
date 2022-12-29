@@ -33,7 +33,8 @@
                                 label=""
                                 value={selectedType}
                                 options={options}
-                                onchange={handleChildTypeChange}>
+                                onchange={handleChildTypeChange}
+                                style="margin-top: -1em;">
                             </lightning-combobox>
                         </lightning-layout-item>
                         <lightning-layout-item size="3" padding="horizontal-small">records</lightning-layout-item>
@@ -71,14 +72,14 @@
                                        data-id="field-list"
                                        class="field-list">
                     <template for:each={selectableFields} for:item="field">
-                        <template if:true={field.defaultSelected}>
+                        <template if:true={field.selected}>
                             <p key={field.name} 
                                 data-id={field.name}
                                 class="field-name field-selected"
                                 onclick={handleFieldClicked}>{field.label} ({field.type})
                             </p>
                         </template>
-                        <template if:false={field.defaultSelected}>
+                        <template if:false={field.selected}>
                             <p key={field.name} 
                                 data-id={field.name}
                                 class="field-name"

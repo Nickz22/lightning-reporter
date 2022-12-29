@@ -6,12 +6,15 @@
  *  ---> each new child type brings its own pinned views
  *
  * user searching is rough, needs to be smoother (spend time)
+ * 
  * almost there...
  *
  * what else can be added tho? Might be good to reflect on the persona for whom we're creating this, what do they want to do?
  * *** hotkey to expand all rows 
  *
- *
+ ***** field search via text would be nice (v2)
  ***** table ordering (v2)
  ***** threaded replies (v2)
+ ***** multiple table views at one time (v2) 
+ ******* make default configurations dependent on the panel, so that you can configure > 1 layout configurations per record page
  */ 

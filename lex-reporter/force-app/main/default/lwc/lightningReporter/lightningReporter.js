@@ -95,17 +95,25 @@ export default class LightningReporter extends LightningElement {
         getFieldsFromType({
             typeName: this.selectedType
         }).then(result => {
-            this.selectableFields = result;
+            this.selectableFields = [];
+            this.selectedFields = [];
+            for(let i=0; i<result.length; i++){
+                let dto = {};
+                for(let key in result[i]){
+                    dto[key] = result[i][key];
+                }
+
+                if(i < 10){
+                    dto.selected = true;
+                    this.selectedFields.push(dto);
+                }
+
+                this.selectableFields.push(dto);
+            }
             this.selectableFieldByName = new Map(
                 this.selectableFields.map(field => {
                     return [field.name, field];
             }));
-
-            this.selectedFields = new Set("Id");
-            for(let i=0; this.selectedFields.size <= 10; i++){
-                let dto = result[i];
-                this.selectedFields.push(dto);
-            }
 
             this.getRecords();
         })
@@ -114,29 +122,25 @@ export default class LightningReporter extends LightningElement {
         })
     }
 
-    handleFieldClicked(evt){
-        let fieldName = evt.target.dataset.id;
-        if(fieldName.toLowerCase() === "id" || fieldName.toLowerCase() === "name" || this.selectedFields.length >= 10){
-            return;
+    handleFieldClicked(event){
+        let fieldName = event.target.dataset.id;
+        let field = this.selectableFieldByName.get(fieldName);
+
+        if(field.selected){ // unselect field
+            field.selected = false;
+        }else if(this.selectedFields.length < 10){ // select field
+            field.selected = true
         }
 
-        // this pattern is weird and wasteful, but I'm not sure if there's
-        // a better way to do clone one list into another
-        let newSelectedFieldByName = new Map();
-        for(let i = 0; i<this.selectedFields.length; i++){
-            let selectedField = this.selectedFields[i];
-            newSelectedFieldByName.set(selectedField.name, selectedField);
-        }
-
-        if(evt.target.classList && evt.target.classList.contains("field-selected")){
-            evt.target.classList.remove("field-selected");
-            newSelectedFieldByName.delete(fieldName);
-        }else{
-            evt.target.classList.add("field-selected");
-            newSelectedFieldByName.set(fieldName, this.selectableFieldByName.get(fieldName));
-        }
-
-        this.selectedFields = Array.from(newSelectedFieldByName.values());
+        this.selectableFieldByName.set(fieldName, field);
+        // assign map valuies to this.selectedFields
+        let newSelectableFields = [];
+        this.selectableFieldByName.forEach(f => {
+            if(f.selected){
+                newSelectableFields.push(f);
+            }
+        });
+        this.selectedFields = newSelectableFields;
     }
 
     handleChildTypeChange(event){
