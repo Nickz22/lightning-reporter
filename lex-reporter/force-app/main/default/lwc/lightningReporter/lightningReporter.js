@@ -45,6 +45,7 @@ export default class LightningReporter extends LightningElement {
         if(data){
             this.childTypes = data;
             this.selectedType = this.childTypes[0];
+            this.getPinnedViews();
             this.getChildRecords();
         }else{
             console.error('no data returned from getChildTypes');

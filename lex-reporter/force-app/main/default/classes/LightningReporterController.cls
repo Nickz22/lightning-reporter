@@ -129,8 +129,7 @@ public class LightningReporterController {
                 )));
             }
         } catch (Exception e) {
-            // throw new AuraHandledException(e.getMessage());
-            throw e;
+            throw new AuraHandledException(e.getMessage());
         }
 
         return configs;
