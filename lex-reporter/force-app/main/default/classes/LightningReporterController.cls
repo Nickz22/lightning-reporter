@@ -126,26 +126,6 @@ public class LightningReporterController {
         return noteMdByParentId;
     }
 
-    public class FieldDTO{
-        @AuraEnabled public String name {get; set;}
-        @AuraEnabled public String label {get; set;}
-        @AuraEnabled public String type {get; set;}
-        @AuraEnabled public Boolean isUpdateable {get; set;}
-        @AuraEnabled public Boolean defaultSelected {get; set;}
-        @AuraEnabled public Boolean isCustom {get; set;}
-
-        public FieldDTO(String name, String label, String type, Boolean isUpdateable, Boolean defaultSelected, Boolean isCustom){
-            this.name = name;
-            this.label = label;
-            this.type = type;
-            this.isUpdateable = isUpdateable;
-            this.defaultSelected = defaultSelected;
-            this.isCustom = isCustom;
-        }
-
-        public FieldDTO(){}
-    }
-
     @AuraEnabled
     public static List<FieldDTO> getFieldsFromType(String typeName){
 
@@ -190,6 +170,22 @@ public class LightningReporterController {
         List<Database.SaveResult> results = Database.update(sObjects, false);
     }
 
+    @AuraEnabled
+    public static void pinLayout(String objectName, List<FieldDTO> fields){
+        try {
+            String commaSeparatedFields = '';
+            for(FieldDTO f : fields){
+                commaSeparatedFields += f.name + ',';
+            }
+            insert new LEX_Reporter_Table_Configuration__c(
+                Object__c = objectName,
+                Default_Fieldset__c = commaSeparatedFields.removeEnd(',')
+            );
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
+        }
+    }
+
     // helpers
     private static String getWhereClause(List<String> lookupsToParent, Id parentId){
         
@@ -201,7 +197,27 @@ public class LightningReporterController {
         return whereClause.removeEnd(' OR ');
     }
 
-    private class SubjectDTO{
+    public class FieldDTO{
+        @AuraEnabled public String name {get; set;}
+        @AuraEnabled public String label {get; set;}
+        @AuraEnabled public String type {get; set;}
+        @AuraEnabled public Boolean isUpdateable {get; set;}
+        @AuraEnabled public Boolean defaultSelected {get; set;}
+        @AuraEnabled public Boolean isCustom {get; set;}
+
+        public FieldDTO(String name, String label, String type, Boolean isUpdateable, Boolean defaultSelected, Boolean isCustom){
+            this.name = name;
+            this.label = label;
+            this.type = type;
+            this.isUpdateable = isUpdateable;
+            this.defaultSelected = defaultSelected;
+            this.isCustom = isCustom;
+        }
+
+        public FieldDTO(){}
+    }
+
+    private class SubjectDTO {
         @AuraEnabled public SObject record;
         @AuraEnabled public List<Note> notes;
         @AuraEnabled public Map<Id, List<Lightning_Reporter_Note_Metadata__c>> noteMdByNoteId = new Map<Id, List<Lightning_Reporter_Note_Metadata__c>>();
@@ -215,6 +231,27 @@ public class LightningReporterController {
                 }
                 this.noteMdByNoteId.get(metadata.Note_Id__c).add(metadata);
             }
+        }
+    }
+
+    public class TableConfigDTO{
+        @AuraEnabled public String objectName {get;set;}
+        @AuraEnabled public List<FieldDTO> defaultFields {get;set;}
+
+        public TableConfigDTO(String objectName, List<FieldDTO> defaultFields){
+            this.objectName = objectName;
+            this.defaultFields = defaultFields;
+        }
+
+        public Lex_Reporter_Table_Configuration__c convertToDbModel(){
+            Lex_Reporter_Table_Configuration__c tableConfig = new Lex_Reporter_Table_Configuration__c();
+            tableConfig.Object__c = this.objectName;
+            String defaultFields = '';
+            for(FieldDTO f : this.defaultFields){
+                defaultFields += f.name + ',';
+            }
+            tableConfig.Default_Fieldset__c = defaultFields.removeEnd(',');
+            return tableConfig;
         }
     }
 }

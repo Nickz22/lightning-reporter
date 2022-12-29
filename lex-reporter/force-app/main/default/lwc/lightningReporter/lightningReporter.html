@@ -23,8 +23,7 @@
             <lightning-layout multiple-rows>
                 <!-- TABLE ACTIONS -->
                 <lightning-layout-item size="3" 
-                                       data-id="child-type-options"
-                                       class="child-type-options">
+                                       data-id="child-type-options">
                     <lightning-layout vertical-align="end">
                         <lightning-layout-item size="3" padding="horizontal-small">show</lightning-layout-item>  
                         <lightning-layout-item size="6">
@@ -40,7 +39,19 @@
                         <lightning-layout-item size="3" padding="horizontal-small">records</lightning-layout-item>
                     </lightning-layout>
                 </lightning-layout-item>
-                <lightning-layout-item size="6"></lightning-layout-item>
+                <lightning-layout-item size="6" 
+                                      padding="horizontal-small">
+                    <div style="display:flex;">
+                        <template for:each={pinnedViews} for:item="view">
+                            <lightning-pill key={view.objectName} 
+                                            label={view.objectName} 
+                                            onclick={setView}
+                                            class="pinned-view"
+                                            variant="link"
+                                            href=""></lightning-pill>
+                        </template>
+                    </div>
+                </lightning-layout-item>
                 <lightning-layout-item size="3"
                                         class="button-group">
                     <lightning-button
@@ -52,6 +63,12 @@
                         label="Save"
                         variant="brand"
                         onclick={saveRecords}>
+                    </lightning-button>
+                    <lightning-button
+                        label=""
+                        icon-name="utility:pin"
+                        variant="neutral"
+                        onclick={pinView}>
                     </lightning-button>
                 </lightning-layout-item>
                 <!-- END TABLE ACTIONS -->

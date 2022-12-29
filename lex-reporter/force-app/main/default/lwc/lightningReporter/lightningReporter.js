@@ -3,15 +3,17 @@ import getChildTypes from '@salesforce/apex/LightningReporterController.getChild
 import getRecordsFromTypeLookingUpToId from '@salesforce/apex/LightningReporterController.getRecordsFromTypeLookingUpToId'
 import getFieldsFromType from '@salesforce/apex/LightningReporterController.getFieldsFromType'
 import saveRecords from '@salesforce/apex/LightningReporterController.saveRecords'
+import pinLayout from '@salesforce/apex/LightningReporterController.pinLayout'
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class LightningReporter extends LightningElement {
     @api recordId;
     @track childRecords;
-    childTypes;
+    @track selectedFields;
+    @track pinnedViews = [];
     selectableFields;
     selectableFieldByName = new Map();
-    @track selectedFields;
+    childTypes;
     saved = false;
     selectedType;
     polling = false;
@@ -22,7 +24,7 @@ export default class LightningReporter extends LightningElement {
             this.polling = true;
             setInterval(() => {
                 try {
-                    if(this.isEditingRow){ 
+                    if(this.isEditingRow || this.childRecords.length === 0){ 
                         return; 
                     }
                     this.getChildRecords();   
@@ -170,6 +172,36 @@ export default class LightningReporter extends LightningElement {
         })
 
         this.isEditingRow = false;
+    }
+
+    pinView(){
+        try {
+
+            for(let i=0; i<this.pinnedViews.length; i++){
+                if(this.pinnedViews[i].objectName === this.selectedType){
+                    this.showNotification('You already have a pinned view for this object', '', 'error');
+                    return;
+                }
+            }
+
+            pinLayout({
+                objectName: this.selectedType,
+                fields: this.selectedFields
+            })
+                .then(result => {
+                    this.showNotification('Layout saved successfully', '', 'success');
+                    this.pinnedViews.push({
+                        objectName: this.selectedType,
+                        fields: this.selectedFields
+                    });
+                })
+                .catch(error => {
+                    throw error;
+                })
+        }catch (error) {
+            console.error(error);
+        }
+        
     }
 
     showNotification(title, message, variant) {
