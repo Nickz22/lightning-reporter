@@ -4,6 +4,7 @@
  * help text telling name of viewed by user
  * how will I learn about users? 
  * format datetime w/out separated day/time
+ * need to open table at object for which the alert was emitted on alert click
  * almost there...
  *
  ***** each new child type brings its own pinned views (requires ability to name layouts) (v2)
