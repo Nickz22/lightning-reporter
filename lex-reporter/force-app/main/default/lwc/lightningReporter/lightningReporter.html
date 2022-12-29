@@ -46,6 +46,7 @@
                         <template for:each={pinnedViews} for:item="view">
                             <lightning-pill key={view.objectName} 
                                             label={view.objectName} 
+                                            data-id={view.objectName}
                                             onclick={setView}
                                             class="pinned-view"
                                             variant="link"

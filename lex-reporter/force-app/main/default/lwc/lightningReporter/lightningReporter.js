@@ -105,6 +105,20 @@ export default class LightningReporter extends LightningElement {
             })
     }
 
+    setView(event){
+        try {
+            this.selectedType = event.target.dataset.id;
+            this.selectedFields = [];
+            // get pinned view matching selected type
+            let pinnedView = this.pinnedViews.find(view => view.objectName === this.selectedType);
+            this.selectedFields = pinnedView.defaultFields;
+            this.selectableFields = pinnedView.defaultFields;
+            this.childRecords = [];
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
     getSelectableFields(){
         getFieldsFromType({
             typeName: this.selectedType
