@@ -26,7 +26,7 @@ public class LightningReporterController {
         return new List<String>(childTypes);
     }
 
-    static List<String> getLookupsPointingToParentId(String childTypeName, Id parentId){
+    static List<String> getLookupFieldsPointingToParentId(String childTypeName, Id parentId){
 
         List<String> lookupsToParent = new List<String>();
         try {
@@ -57,7 +57,7 @@ public class LightningReporterController {
 
         List<SubjectDTO> subjects = new List<SubjectDTO>();
         try {
-            List<String> lookupsToParent = getLookupsPointingToParentId(typeName, parentId);
+            List<String> lookupsToParent = getLookupFieldsPointingToParentId(typeName, parentId);
 
             List<String> fieldApiNames = new List<String>();
             for(FieldDTO field : fieldsToGet){
@@ -112,6 +112,30 @@ public class LightningReporterController {
         return subjects;
     }    
 
+    @AuraEnabled
+    public static List<TableConfigDTO> getPinnedViews(){
+        List<TableConfigDTO> configs = new List<TableConfigDTO>();
+        try {
+
+            List<LEX_Reporter_Table_Configuration__c> tableConfigs = [SELECT Object__c,Default_Fieldset__c
+                                                                        FROM LEX_Reporter_Table_Configuration__c
+                                                                        WHERE CreatedById = :UserInfo.getUserId()
+                                                                        ORDER BY Object__c ASC];
+
+            for(LEX_Reporter_Table_Configuration__c config : tableConfigs){
+                configs.add(new TableConfigDTO(
+                    config.Object__c, 
+                    getFieldDtos(config.Object__c, config.Default_Fieldset__c.split(',')
+                )));
+            }
+        } catch (Exception e) {
+            // throw new AuraHandledException(e.getMessage());
+            throw e;
+        }
+
+        return configs;
+    }
+
     private static Map<Id, List<Lightning_Reporter_Note_Metadata__c>> getNoteMdByParentId(Set<String> recordIds){
         Map<Id, List<Lightning_Reporter_Note_Metadata__c>> noteMdByParentId = new Map<Id, List<Lightning_Reporter_Note_Metadata__c>>();
         for(Lightning_Reporter_Note_Metadata__c noteMd : [SELECT Note_Parent_Id__c, Note_Id__c, Viewed_By__r.FullPhotoUrl,
@@ -131,11 +155,6 @@ public class LightningReporterController {
 
         List<FieldDTO> fields = new List<FieldDTO>();
         try {
-            SObjectType typeFromName = Schema.getGlobalDescribe().get(typeName);
-            DescribeSObjectResult d = typeFromName.getDescribe();
-            Map<String, SObjectField> fieldTokenByApiName = d.fields.getMap();
-            List<String> iterableFieldNames = new List<String>(fieldTokenByApiName.keyset());
-            iterableFieldNames.sort();
     
             List<LEX_Reporter_Table_Configuration__c> defaultConfig = [SELECT Default_Fieldset__c 
                                                                         FROM LEX_Reporter_Table_Configuration__c
@@ -146,20 +165,50 @@ public class LightningReporterController {
                 defaultConfig[0].Default_Fieldset__c
             );
     
-            for(String fieldName : iterableFieldNames){
+            fields = getFieldDtos(typeName, new List<String>());            
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
+        }
+
+        return fields;
+    }
+
+    private static List<FieldDTO> getFieldDtos(String objectname, List<String> fieldNamesToDto){
+
+        SObjectType sObjType = Cache.globalDescribe.get(objectname);
+        DescribeSObjectResult d = sObjType.getDescribe();
+        Map<String, SObjectField> fieldTokenByApiName = d.fields.getMap();
+        List<String> allFieldNames = new List<String>(fieldTokenByApiName.keyset());
+        allFieldNames.sort();
+        List<FieldDTO> fields = new List<FieldDTO>();
+
+        if(fieldNamesToDto.isEmpty()){
+            for(String fieldName : allFieldNames){
                 DescribeFieldResult describe = fieldTokenByApiName.get(fieldName).getDescribe();
                 FieldDTO dto = new FieldDTO(
                     describe.getName(),
                     describe.getLabel(),
                     String.valueOf(describe.getType()),
                     describe.isUpdateable(),
-                    defaultFields.containsIgnoreCase(fieldName),
+                    false,
                     describe.isCustom()
                 );
                 fields.add(dto);
-            }            
-        } catch (Exception e) {
-            throw new AuraHandledException(e.getMessage());
+            }
+        }else{
+            fieldNamesToDto.sort();
+            for(String fieldToDto : fieldNamesToDto){
+                DescribeFieldResult describe = fieldTokenByApiName.get(fieldToDto).getDescribe();
+                FieldDTO dto = new FieldDTO(
+                    describe.getName(),
+                    describe.getLabel(),
+                    String.valueOf(describe.getType()),
+                    describe.isUpdateable(),
+                    true,
+                    describe.isCustom()
+                );
+                fields.add(dto);
+            }
         }
 
         return fields;

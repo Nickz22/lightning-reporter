@@ -4,6 +4,7 @@ import getRecordsFromTypeLookingUpToId from '@salesforce/apex/LightningReporterC
 import getFieldsFromType from '@salesforce/apex/LightningReporterController.getFieldsFromType'
 import saveRecords from '@salesforce/apex/LightningReporterController.saveRecords'
 import pinLayout from '@salesforce/apex/LightningReporterController.pinLayout'
+import getPinnedViews from '@salesforce/apex/LightningReporterController.getPinnedViews';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class LightningReporter extends LightningElement {
@@ -83,14 +84,24 @@ export default class LightningReporter extends LightningElement {
             typeName: this.selectedType,
             parentId: this.recordId,
             fieldsToGet: this.selectedFields
-        }).then(result => {
-            for(let i=0; i<result.length; i++){
-                result[i].record.sObjectType = this.selectedType;
-            }
-            this.childRecords = result;
-        }).catch(error => {
-            throw error;
         })
+            .then(result => {
+                for(let i=0; i<result.length; i++){
+                    result[i].record.sObjectType = this.selectedType;
+                }
+                this.childRecords = result;
+            }).catch(error => {
+                throw error;
+            })
+    }
+
+    getPinnedViews(){
+        getPinnedViews()
+            .then(result => {
+                this.pinnedViews = result;
+            }).catch(error => {
+                throw error;
+            })
     }
 
     getSelectableFields(){
