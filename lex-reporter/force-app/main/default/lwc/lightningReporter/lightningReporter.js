@@ -47,7 +47,6 @@ export default class LightningReporter extends LightningElement {
             this.childTypes = data;
             this.selectedType = this.childTypes[0];
             this.getPinnedViews();
-            this.getChildRecords();
         }else{
             console.error('no data returned from getChildTypes');
         }
@@ -101,6 +100,17 @@ export default class LightningReporter extends LightningElement {
         getPinnedViews()
             .then(result => {
                 this.pinnedViews = result;
+                if(this.pinnedViews.length > 0){
+                    this.selectedType = this.pinnedViews[0].objectName;
+                    this.selectedFields = this.pinnedViews[0].defaultFields;
+                    this.selectableFields = this.pinnedViews[0].defaultFields;
+                    this.getChildRecords();
+                }else{
+                    this.selectedType = null;
+                    this.selectedFields = [];
+                    this.selectableFields = [];
+                    this.childRecords = [];
+                }
             }).catch(error => {
                 throw error;
             })
@@ -114,7 +124,7 @@ export default class LightningReporter extends LightningElement {
             let pinnedView = this.pinnedViews.find(view => view.objectName === this.selectedType);
             this.selectedFields = pinnedView.defaultFields;
             this.selectableFields = pinnedView.defaultFields;
-            this.childRecords = [];
+            this.getChildRecords();
         } catch (error) {
             this.showNotification('Error', error.body.message, 'error');
         }
@@ -132,9 +142,21 @@ export default class LightningReporter extends LightningElement {
 
         this.pinnedViews = pinnedViews;
 
+        if(this.pinnedViews.length === 0){
+            this.selectedType = null;
+            this.childRecords = [];
+            this.selectableFields = [];
+            this.selectedFields = [];
+        }else{
+            this.selectedType = this.pinnedViews[0].objectName;
+            this.selectedFields = this.pinnedViews[0].defaultFields;
+            this.selectableFields = this.pinnedViews[0].defaultFields;
+            this.getChildRecords();
+        }
+
         deletePin({objectName: event.target.dataset.id})
             .catch(error => {
-                this.getPinnedViews();  
+                this.getPinnedViews();
                 this.showNotification('Error', error.body.message, 'error');
             })
     }
@@ -171,24 +193,20 @@ export default class LightningReporter extends LightningElement {
     }
 
     handleFieldClicked(event){
+        debugger;
         let fieldName = event.target.dataset.id;
         let field = this.selectableFieldByName.get(fieldName);
 
+        let newSelectedFields = this.selectedFields;
         if(field.selected){ // unselect field
             field.selected = false;
+            newSelectedFields = newSelectedFields.filter(f => f.name !== field.name);
         }else if(this.selectedFields.length < 10){ // select field
             field.selected = true
+            newSelectedFields.push(field);
         }
 
-        this.selectableFieldByName.set(fieldName, field);
-        // assign map valuies to this.selectedFields
-        let newSelectableFields = [];
-        this.selectableFieldByName.forEach(f => {
-            if(f.selected){
-                newSelectableFields.push(f);
-            }
-        });
-        this.selectedFields = newSelectableFields;
+        this.selectedFields = newSelectedFields;
     }
 
     handleChildTypeChange(event){
@@ -225,7 +243,7 @@ export default class LightningReporter extends LightningElement {
 
             for(let i=0; i<this.pinnedViews.length; i++){
                 if(this.pinnedViews[i].objectName === this.selectedType){
-                    this.showNotification('You already have a pinned view for this object', '', 'error');
+                    this.showNotification('You already pinned a view for this object', 'Please remove the existing view to create a new one for this object type', 'error');
                     return;
                 }
             }
@@ -235,10 +253,10 @@ export default class LightningReporter extends LightningElement {
                 fields: this.selectedFields
             })
                 .then(result => {
-                    this.showNotification('Layout saved successfully', '', 'success');
+                    this.showNotification('Pinned', '', 'success');
                     this.pinnedViews.push({
                         objectName: this.selectedType,
-                        fields: this.selectedFields
+                        defaultFields: this.selectedFields
                     });
                 })
                 .catch(error => {
@@ -260,7 +278,6 @@ export default class LightningReporter extends LightningElement {
     }
 
     stopPoller(){
-        console.log('stopping poller');
         this.isEditingRow = true;
     }
 }

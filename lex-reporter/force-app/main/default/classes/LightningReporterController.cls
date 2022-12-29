@@ -52,7 +52,7 @@ public class LightningReporterController {
         return lookupsToParent;
     }
 
-    @AuraEnabled
+    @AuraEnabled(cacheable=true)
     public static List<SubjectDTO> getRecordsFromTypeLookingUpToId(String typeName, Id parentId, List<FieldDTO> fieldsToGet){
 
         List<SubjectDTO> subjects = new List<SubjectDTO>();
@@ -71,7 +71,7 @@ public class LightningReporterController {
                 }
             }
             
-            String query = 'SELECT '+String.join(fieldApiNames, ',')+',(SELECT '+
+            String query = 'SELECT Name,'+String.join(fieldApiNames, ',')+',(SELECT '+
                                                                             'Body,CreatedBy.Name,CreatedBy.FullPhotoUrl,CreatedDate '+
                                                                         'FROM Notes ORDER BY CreatedDate desc) '+
                             'FROM '+typeName+' '+
@@ -112,7 +112,7 @@ public class LightningReporterController {
         return subjects;
     }    
 
-    @AuraEnabled
+    @AuraEnabled(cacheable=true)
     public static List<TableConfigDTO> getPinnedViews(){
         List<TableConfigDTO> configs = new List<TableConfigDTO>();
         try {
@@ -120,7 +120,7 @@ public class LightningReporterController {
             List<LEX_Reporter_Table_Configuration__c> tableConfigs = [SELECT Object__c,Default_Fieldset__c
                                                                         FROM LEX_Reporter_Table_Configuration__c
                                                                         WHERE CreatedById = :UserInfo.getUserId()
-                                                                        ORDER BY Object__c ASC];
+                                                                        ORDER BY CreatedDate ASC];
 
             for(LEX_Reporter_Table_Configuration__c config : tableConfigs){
                 configs.add(new TableConfigDTO(
