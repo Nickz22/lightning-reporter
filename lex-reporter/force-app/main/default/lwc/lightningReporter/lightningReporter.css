@@ -42,3 +42,7 @@
 .pinned-view{
     cursor: pointer;
 }
+
+lightning-pill{
+    color: rgb(50, 50, 217);
+}

@@ -76,12 +76,12 @@ public class LightningReporterController {
                         .getDescribe()
                         .getReferenceTo()[0]
                         .getDescribe()
-                        .fields.getMap().containsKey('Name')){
-                    fieldApiNames.add(
-                        field.isCustom ? 
-                        field.name.replace('__c', '__r.Name') : 
-                        field.name.replace('Id', '.Name')
-                    );
+                        .fields.getMap().containsKey('Name') &&
+                    typeName.toLowerCase() != 'opportunity' && field.name.toLowerCase() != 'contactid'){
+                    String lookupNameField = field.isCustom ? 
+                        field.name.toLowerCase().replace('__c', '__r.name') : 
+                        field.name.toLowerCase().replace('id', '.name');
+                    fieldApiNames.add(lookupNameField);
                 }
             }
             
