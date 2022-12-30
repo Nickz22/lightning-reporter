@@ -239,7 +239,8 @@ public class LightningReporterController {
         try {
             Lex_Reporter_Table_Configuration__c config = [SELECT Id FROM Lex_Reporter_Table_Configuration__c
                                                             WHERE Object__c =: objectName
-                                                            AND CreatedById =: UserInfo.getUserId()];
+                                                            AND CreatedById =: UserInfo.getUserId()
+                                                            LIMIT 1];
             delete config;
         } catch (Exception e) {
             throw new AuraHandledException(e.getMessage());

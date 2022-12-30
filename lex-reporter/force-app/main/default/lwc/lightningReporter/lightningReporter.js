@@ -31,7 +31,7 @@ export default class LightningReporter extends LightningElement {
                     }
                     this.getChildRecords();   
                 } catch (error) {
-                    this.showNotification('Error', error.body.message, 'error');
+                    this.showNotification('Error', error.message, 'error');
                 }
             }, 10000);
         }
@@ -123,39 +123,8 @@ export default class LightningReporter extends LightningElement {
             this.selectableFields = pinnedView.defaultFields;
             this.getChildRecords();
         } catch (error) {
-            this.showNotification('Error', error.body.message, 'error');
+            this.showNotification('Error', error.message, 'error');
         }
-    }
-
-    removePin(event){
-        event.preventDefault();
-        let pinnedViews = this.pinnedViews;
-        for(let i=0; i<pinnedViews.length; i++){
-            if(pinnedViews[i].objectName === event.target.dataset.id){
-                pinnedViews.splice(i, 1);
-                break;
-            }
-        }
-
-        this.pinnedViews = pinnedViews;
-
-        if(this.pinnedViews.length === 0){
-            this.selectedType = null;
-            this.childRecords = [];
-            this.selectableFields = [];
-            this.selectedFields = [];
-        }else{
-            this.selectedType = this.pinnedViews[0].objectName;
-            this.selectedFields = this.pinnedViews[0].defaultFields;
-            this.selectableFields = this.pinnedViews[0].defaultFields;
-            this.getChildRecords();
-        }
-
-        deletePin({objectName: event.target.dataset.id})
-            .catch(error => {
-                this.getPinnedViews();
-                this.showNotification('Error', error.body.message, 'error');
-            })
     }
 
     getSelectableFields(){
@@ -249,19 +218,58 @@ export default class LightningReporter extends LightningElement {
                 fields: this.selectedFields
             })
                 .then(result => {
-                    this.showNotification('Pinned', '', 'success');
                     this.pinnedViews.push({
                         objectName: this.selectedType,
                         defaultFields: this.selectedFields
                     });
+                    this.showNotification('Pinned', '', 'success');
                 })
                 .catch(error => {
-                    throw error;
+                    // get message from error
+                    this.showNotification('Error', error.body.message, 'error');
                 })
         }catch (error) {
             console.error(error);
         }
         
+    }
+
+    removePin(event){
+        try {
+            event.preventDefault();
+            let pinnedViews = [...this.pinnedViews];
+            for(let i=0; i<pinnedViews.length; i++){
+                if(pinnedViews[i].objectName === event.target.dataset.id){
+                    pinnedViews.splice(i, 1);
+                    break;
+                }
+            }
+
+            this.pinnedViews = pinnedViews;
+
+            if(this.pinnedViews.length === 0){
+                this.selectedType = null;
+                this.childRecords = [];
+                this.selectableFields = [];
+                this.selectedFields = [];
+            }else{
+                this.selectedType = this.pinnedViews[0].objectName;
+                this.selectedFields = this.pinnedViews[0].defaultFields;
+                this.selectableFields = this.pinnedViews[0].defaultFields;
+                this.getChildRecords();
+            }
+
+            deletePin({objectName: event.target.dataset.id})
+                .then(() => {
+                    this.showNotification('Pin removed', '', 'success');
+                })
+                .catch(error => {
+                    this.getPinnedViews();
+                    this.showNotification('Error', error.body.message, 'error');
+                })
+        } catch (error) {
+            this.showNotification('Error removing pin', error.message, 'error');
+        }
     }
 
     showNotification(title, message, variant) {
