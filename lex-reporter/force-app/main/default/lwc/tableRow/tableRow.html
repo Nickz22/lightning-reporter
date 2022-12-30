@@ -26,7 +26,7 @@
                                                 onkeydown={handleRteKeyDown}
                                                 disabled-categories="ALIGN_TEXT,FORMAT_FONT,FORMAT_BODY">
                         </lightning-input-rich-text>
-                        <div class="user-search" style={usersPosition}>
+                        <div class="user-search">
                             <template for:each={users} for:item="user">
                                 <template if:false={user.hidden}>
                                     <div key={user.Id} 

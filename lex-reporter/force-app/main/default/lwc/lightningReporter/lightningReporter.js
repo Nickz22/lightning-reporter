@@ -73,7 +73,6 @@ export default class LightningReporter extends LightningElement {
 
     getChildRecords(){
         // this setup needs to be done for every fetch
-        debugger;
         if(!this.selectableFields){
             this.getSelectableFields();
         }else{
@@ -191,7 +190,6 @@ export default class LightningReporter extends LightningElement {
     }
 
     handleFieldClicked(event){
-        debugger;
         let fieldName = event.target.dataset.id;
         let field = this.selectableFieldByName.get(fieldName);
 

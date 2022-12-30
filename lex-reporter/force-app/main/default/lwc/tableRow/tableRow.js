@@ -84,23 +84,20 @@ export default class TableRow extends NavigationMixin(LightningElement) {
         if(event.keyCode === 40){
             let users = this.template.querySelectorAll('.lookup-user');
             if(users.length > 0){
-                console.log('focusing on first user');
                 users[0].focus();
             }
         }
     }
 
     handleRteKeyUp(event){
-        console.log('rte keyup: '+event.key);
-        console.log('rte keyup code: '+event.keyCode);
         // if key press is escape
         if(event.keyCode === 27){
             if(this.users.length > 0){
                 this.users = [];
-                this.isUserSearching = false;
             }else{
                 this.renderRte();
             }   
+            this.isUserSearching = false;
         }
         // if key press is @
         if(event.key === '@' && !this.isUserSearching){
@@ -108,19 +105,16 @@ export default class TableRow extends NavigationMixin(LightningElement) {
             this.isUserSearching = true;
         }else if(event.key !== '@' && this.isUserSearching){
             try {
-                console.log(event.target.value);
                 // find substring between last "@" and last "</p>"
                 let lastAt = event.target.value.lastIndexOf('@');
                 let lastP = event.target.value.lastIndexOf('</p>');
                 let substring = event.target.value.substring(lastAt+1, lastP);
-                console.log(`searching users for: ${substring}`);
                 // filter users by name
                 for(let user of this.users){
                     if(!substring){
                         user.hidden = false;
                     }
                     if(!user.Name.toLowerCase().includes(substring.toLowerCase())){
-                        console.log(`hiding ${user.Name}`)
                         user.hidden = true;
                     }else{
                         user.hidden = false;
@@ -133,7 +127,6 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     }
 
     handleUserKeyUp(event){
-        console.log('user keydown: '+event.key);
         // if key press is down
         if(event.keyCode === 40){
             event.target.nextSibling.focus();
@@ -152,21 +145,6 @@ export default class TableRow extends NavigationMixin(LightningElement) {
         if(event.keyCode === 27){
             this.users = [];
         }
-    }
-
-    selectLookupUser(event){
-
-        let rte = this.template.querySelectorAll('lightning-input-rich-text')[0];
-        let userName = event.target.childNodes[0].data;
-
-
-        let lastAt = rte.value.lastIndexOf('@');
-        let lastP = rte.value.lastIndexOf('</p>');
-        let substring = rte.value.substring(lastAt+1, lastP);
-        let range = rte.value.lastIndexOf(substring);
-
-        rte.value = `${rte.value.substring(0, range).replace("</p>", "")}<strong>${userName}</strong>${rte.value.substring(range+substring.length)}</p>`;
-        rte.setRangeText(' ', rte.value.length, rte.value.length, 'end');
     }
         
     @api get updatedSObject(){
@@ -334,8 +312,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
         this.isEditMode = !this.isEditMode;
     }
 
-    fetchUsers(event){
-        console.log('fetching users');
+    fetchUsers(){
         fetchUsers()
             .then(result => {
                 for(let i = 0; i < result.length; i++){
@@ -346,11 +323,28 @@ export default class TableRow extends NavigationMixin(LightningElement) {
                     user.hidden = false;
                     this.users.push(user);
                 }
-                this.usersPosition = 'top: ' + (event.target.getBoundingClientRect().top + 200) + '; left: ' + event.target.getBoundingClientRect().left + ';';
             })
             .catch(error => {
                 this.showNotification('Error', error.body.message, 'error');
             });
+    }
+
+    selectLookupUser(event){
+
+        let rte = this.template.querySelectorAll('lightning-input-rich-text')[0];
+        let userName = event.target.childNodes[0].data;
+
+        let lastAt = rte.value.lastIndexOf('@');
+        let lastP = rte.value.lastIndexOf('</p>');
+        let substring = rte.value.substring(lastAt+1, lastP);
+        let range = rte.value.lastIndexOf(substring);
+
+        let firstMsgSegment = rte.value.substring(0, range).replace("</p>", "");
+        let secondMsgSegment = rte.value.substring(range+substring.length);
+
+        rte.value = `${firstMsgSegment}<strong>${userName}</strong>${secondMsgSegment}`;
+        rte.setRangeText('', rte.value.length, rte.value.length, 'end');
+        rte.setFormat({bold: false});
     }
 
     showNotification(title, message, variant) {
