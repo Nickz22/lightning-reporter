@@ -73,6 +73,7 @@ export default class LightningReporter extends LightningElement {
 
     getChildRecords(){
         // this setup needs to be done for every fetch
+        debugger;
         if(!this.selectableFields){
             this.getSelectableFields();
         }else{
@@ -87,12 +88,9 @@ export default class LightningReporter extends LightningElement {
             fieldsToGet: this.selectedFields
         })
             .then(result => {
-                for(let i=0; i<result.length; i++){
-                    result[i].record.sObjectType = this.selectedType;
-                }
-                this.childRecords = result;
+                this.childRecords = result;   
             }).catch(error => {
-                throw error;
+                this.showNotification('Error getting records', error.body.message, 'error');
             })
     }
 
