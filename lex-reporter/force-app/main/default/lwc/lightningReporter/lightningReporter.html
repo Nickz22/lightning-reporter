@@ -39,21 +39,25 @@
                         <lightning-layout-item size="3" padding="horizontal-small">records</lightning-layout-item>
                     </lightning-layout>
                 </lightning-layout-item>
-                <lightning-layout-item size="6" 
+                <lightning-layout-item size="5" 
                                       padding="horizontal-small"
                                       class="pinned-views">
-                    <div style="display:flex;">
+                    <lightning-layout multiple-rows="true" 
+                                        horizontal-align="space">
                         <template for:each={pinnedViews} for:item="view">
-                            <lightning-pill key={view.objectName} 
-                                            label={view.objectName} 
-                                            data-id={view.objectName}
-                                            onclick={setView}
-                                            onremove={removePin}
-                                            class="pinned-view"
-                                            variant="link"
-                                            href=""></lightning-pill>
+                            <lightning-layout-item size="3" 
+                                                    key={view.objectName}
+                                                    class="pinned-view-container"> 
+                                <lightning-pill label={view.objectName} 
+                                                data-id={view.objectName}
+                                                onclick={setView}
+                                                onremove={removePin}
+                                                class="pinned-view"
+                                                variant="link"
+                                                href=""></lightning-pill>
+                            </lightning-layout-item>
                         </template>
-                    </div>
+                    </lightning-layout>
                 </lightning-layout-item>
                 <lightning-layout-item size="3"
                                         class="button-group">

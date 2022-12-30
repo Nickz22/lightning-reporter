@@ -1,6 +1,5 @@
 /**
  *
- * user searching is rough, needs to be smoother (spend time)
  * help text telling name of viewed by user
  * push usage metrics to a packaging org
  * format datetime w/out separated day/time

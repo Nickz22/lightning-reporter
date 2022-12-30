@@ -177,7 +177,6 @@ export default class LightningReporter extends LightningElement {
     handleChildTypeChange(event){
         this.selectedType = event.target.value;
         this.getSelectableFields();
-        this.getChildRecords();
     }
 
     saveRecords(event){
@@ -229,7 +228,7 @@ export default class LightningReporter extends LightningElement {
                     this.showNotification('Error', error.body.message, 'error');
                 })
         }catch (error) {
-            console.error(error);
+            this.showNotification('Error pinning view', error.message, 'error');
         }
         
     }

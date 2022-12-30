@@ -1,5 +1,5 @@
 public class LightningReporterController {
-    
+    final static String USER_TYPE = 'user';
     /**
      * should prioritize objects for which views have been saved 
      * only gets child types with `Notes` child relationship
@@ -12,11 +12,17 @@ public class LightningReporterController {
             for(Schema.ChildRelationship relationship : typeDescribe.getChildRelationships()){
                 SObjectType childType = relationship.getChildSObject();
                 String childTypeName = childType.getDescribe().getName();
+                if(childTypeName.toLowerCase() == USER_TYPE){ 
+                    continue; 
+                }
                 for(Schema.ChildRelationship childOfChild : childType.getDescribe().getChildRelationships()){
                     if(childOfChild.getChildSObject().getDescribe().getName() == 'Note'){
                         childTypes.add(childTypeName);
                         break;
                     }
+                }
+                if(childTypes.contains(childTypeName)){
+                    continue;
                 }
             }   
         } catch (Exception e) {
@@ -58,11 +64,19 @@ public class LightningReporterController {
         List<SubjectDTO> subjects = new List<SubjectDTO>();
         try {
             List<String> lookupsToParent = getLookupFieldsPointingToParentId(typeName, parentId);
-
+            Map<String, Schema.SObjectField> fieldsMap = Cache.globalDescribe.get(typeName).getDescribe().fields.getMap();
             List<String> fieldApiNames = new List<String>();
+            if(fieldsMap.containsKey('Name')){
+                fieldApiNames.add('Name');
+            }
             for(FieldDTO field : fieldsToGet){
                 fieldApiNames.add(field.name);
-                if(field.type == 'reference'){
+                if(field.type == 'reference' && 
+                    fieldsMap.get(field.name)
+                        .getDescribe()
+                        .getReferenceTo()[0]
+                        .getDescribe()
+                        .fields.getMap().containsKey('Name')){
                     fieldApiNames.add(
                         field.isCustom ? 
                         field.name.replace('__c', '__r.Name') : 
@@ -71,7 +85,7 @@ public class LightningReporterController {
                 }
             }
             
-            String query = 'SELECT Name,'+String.join(fieldApiNames, ',')+',(SELECT '+
+            String query = 'SELECT '+String.join(fieldApiNames, ',')+',(SELECT '+
                                                                             'Body,CreatedBy.Name,CreatedBy.FullPhotoUrl,CreatedDate '+
                                                                         'FROM Notes ORDER BY CreatedDate desc) '+
                             'FROM '+typeName+' '+
