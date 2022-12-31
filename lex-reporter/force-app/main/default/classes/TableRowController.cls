@@ -39,6 +39,7 @@ public with sharing class TableRowController {
                         Note_Id__c=newNote.Id,
                         Note_Parent_Id__c=parentId,
                         Mentioned_User__c=u.Id,
+                        Reporter_Context_Record_Id__c=topMostId,
                         Type__c='Mention'
                 ));
             }
@@ -98,12 +99,14 @@ public with sharing class TableRowController {
     public class NoteMetadataDTO{
         @AuraEnabled public String NoteId {get;set;}
         @AuraEnabled public String NoteParentId {get;set;}
+        @AuraEnabled public String TopMostId {get;set;}
         @AuraEnabled public String ViewedById {get;set;}
 
         public Lightning_Reporter_Note_Metadata__c convertToDbModel(){
             Lightning_Reporter_Note_Metadata__c noteMetadata = new Lightning_Reporter_Note_Metadata__c();
             noteMetadata.Note_Id__c = this.NoteId;
             noteMetadata.Note_Parent_Id__c = this.NoteParentId;
+            noteMetadata.Reporter_Context_Record_Id__c = this.TopMostId;
             noteMetadata.Viewed_By__c = (Id) this.ViewedById;
             noteMetadata.Unique_Id__c = this.NoteId + this.ViewedById;
             noteMetadata.Type__c = 'View';

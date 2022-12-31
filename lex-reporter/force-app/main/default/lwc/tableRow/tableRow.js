@@ -365,7 +365,8 @@ export default class TableRow extends NavigationMixin(LightningElement) {
             noteMetadata: {
                 NoteId: event.target.dataset.id, 
                 NoteParentId: this._sObject.record.Id, 
-                ViewedById: runningUserId
+                ViewedById: runningUserId,
+                TopMostId: this.topMostId
             }
         }).catch(error => {
             console.error(error);

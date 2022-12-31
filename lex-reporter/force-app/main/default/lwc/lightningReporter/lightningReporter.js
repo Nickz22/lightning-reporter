@@ -1,6 +1,6 @@
 import { LightningElement, api, wire, track } from 'lwc';
 import getChildTypes from '@salesforce/apex/LightningReporterController.getChildTypes';
-import getRecordsFromTypeLookingUpToId from '@salesforce/apex/LightningReporterController.getRecordsFromTypeLookingUpToId'
+import getContext from '@salesforce/apex/LightningReporterController.getContext'
 import getFieldsFromType from '@salesforce/apex/LightningReporterController.getFieldsFromType'
 import saveRecords from '@salesforce/apex/LightningReporterController.saveRecords'
 import pinLayout from '@salesforce/apex/LightningReporterController.pinLayout'
@@ -13,6 +13,8 @@ export default class LightningReporter extends LightningElement {
     @track childRecords;
     @track selectedFields;
     @track pinnedViews = [];
+    @track alerts = [];
+    @track alert = false;
     selectableFields;
     selectableFieldByName = new Map();
     childTypes;
@@ -25,6 +27,7 @@ export default class LightningReporter extends LightningElement {
         if(!this.polling){
             this.polling = true;
             setInterval(() => {
+                console.log('polling');
                 try {
                     if(this.isEditingRow || this.childRecords.length === 0){ 
                         return; 
@@ -81,13 +84,23 @@ export default class LightningReporter extends LightningElement {
     }
 
     getRecords(){
-        getRecordsFromTypeLookingUpToId({
+        getContext({
             typeName: this.selectedType,
             parentId: this.recordId,
             fieldsToGet: this.selectedFields
         })
-            .then(result => {
-                this.childRecords = result;   
+            .then(context => {
+                let sObjects = context.subjects;
+                for(let i=0; i<sObjects.length; i++){
+                    if(!sObjects[i].notes){
+                        continue;
+                    }
+                }
+
+                this.alerts = context.alerts;
+                this.alert = this.alerts.length > 0;
+                this.childRecords = sObjects;
+                this.showNotification('Success', 'Records retrieved', 'success');
             }).catch(error => {
                 this.showNotification('Error getting records', error.body.message, 'error');
             })
@@ -269,6 +282,10 @@ export default class LightningReporter extends LightningElement {
         } catch (error) {
             this.showNotification('Error removing pin', error.message, 'error');
         }
+    }
+
+    getAlerts(){
+        
     }
 
     showNotification(title, message, variant) {

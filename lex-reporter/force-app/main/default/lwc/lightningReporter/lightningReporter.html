@@ -25,7 +25,7 @@
                 <lightning-layout-item size="3" 
                                        data-id="child-type-options">
                     <lightning-layout vertical-align="end">
-                        <lightning-layout-item size="3" padding="horizontal-small">show</lightning-layout-item>  
+                        <lightning-layout-item size="3"></lightning-layout-item>  
                         <lightning-layout-item size="6">
                             <lightning-combobox
                                 name="Select Child Type"
@@ -36,7 +36,7 @@
                                 style="margin-top: -1em;">
                             </lightning-combobox>
                         </lightning-layout-item>
-                        <lightning-layout-item size="3" padding="horizontal-small">records</lightning-layout-item>
+                        <lightning-layout-item size="3"></lightning-layout-item>
                     </lightning-layout>
                 </lightning-layout-item>
                 <lightning-layout-item size="5" 
@@ -60,10 +60,18 @@
                     </lightning-layout>
                 </lightning-layout-item>
                 <lightning-layout-item size="1">
-                    <lightning-icon icon-name="utility:alert" 
+                    <template if:true={alert}>
+                        <lightning-icon icon-name="utility:alert" 
+                                    onclick={getAlerts}
+                                    size="small"
+                                    class="alerts red"></lightning-icon>
+                    </template>
+                    <template if:false={alert}>
+                        <lightning-icon icon-name="utility:alert" 
                                     onclick={getAlerts}
                                     size="small"
                                     class="alerts"></lightning-icon>
+                    </template>
                 </lightning-layout-item>
                 <lightning-layout-item size="3"
                                         class="button-group">

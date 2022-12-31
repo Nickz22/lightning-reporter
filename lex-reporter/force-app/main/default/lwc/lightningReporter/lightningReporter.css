@@ -50,3 +50,7 @@ lightning-pill{
 .alerts{
     cursor: pointer;
 }
+
+.red{
+    --lwc-colorTextIconDefault: red;
+}
