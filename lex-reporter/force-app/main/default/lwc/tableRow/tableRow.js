@@ -178,39 +178,28 @@ export default class TableRow extends NavigationMixin(LightningElement) {
         if(value.notes){
             this.avatars = [];
             for(let i = 0; i < value.notes.length; i++){
+                let noteDto = value.notes[i];
                 let newAvatar = {
-                    "url" : value.notes[i].CreatedBy.FullPhotoUrl,
-                    "name" : value.notes[i].CreatedBy.Name,
-                    "body" : value.notes[i].Body,
-                    "id" : value.notes[i].Id,
-                    "time" : value.notes[i].CreatedDate,
-                    "unreadStyle" : ""
+                    "url" : noteDto.note.CreatedBy.FullPhotoUrl,
+                    "name" : noteDto.note.CreatedBy.Name,
+                    "body" : noteDto.note.Body,
+                    "id" : noteDto.note.Id,
+                    "time" : noteDto.note.CreatedDate,
+                    "unreadStyle" : noteDto.alertRunningUser ? "border: 2px solid #ff8c00;" : "",
                 };   
                 let views = [];
                 // for each value in value.noteMdByNoteId[value.notes[i].Id], set a `leftStyle` property equal to the value of the index
-                let noteMd = value.noteMdByNoteId[value.notes[i].Id];
-                let mentionedUserIds = new Set();
-                let viewedByUserIds = new Set();
-                if(noteMd){
-                    for(let j = 0; j < noteMd.length; j++){
-                        if(noteMd[j].Type__c.toLowerCase() === 'mention'){
-                            mentionedUserIds.add(noteMd[j].Mentioned_User__c);
-                        }else if(noteMd[j].Type__c.toLowerCase() === 'view'){
-                            let view = {};
-                            for(let param in noteMd[j]){ // noteMd[j] is read-only
-                                view[param] = noteMd[j][param];
-                            }
-                            view.leftStyle = 'left: '+j+'em;';
-                            views.push(view);
-                            viewedByUserIds.add(noteMd[j].Viewed_By__c);
+                if(noteDto.views){
+                    for(let j = 0; j < noteDto.views.length; j++){
+                        let view = {};
+                        for(let param in noteDto.views[j]){ // noteMd[j] is read-only
+                            view[param] = noteDto.views[j][param];
                         }
+                        view.leftStyle = 'left: '+j+'em;';
+                        views.push(view);
                     }
                 }
                 newAvatar.views = views;
-                if(mentionedUserIds.has(runningUserId) && !viewedByUserIds.has(runningUserId)){
-                    // make newAvatar.unreadStyle an orange border
-                    newAvatar.unreadStyle = 'border: 2px solid #ff8c00;'
-                }
                 this.avatars.push(newAvatar);
             }
         }

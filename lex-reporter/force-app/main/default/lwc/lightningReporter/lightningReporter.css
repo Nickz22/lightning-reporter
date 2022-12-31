@@ -46,3 +46,7 @@
 lightning-pill{
     color: rgb(50, 50, 217);
 }
+
+.alerts{
+    cursor: pointer;
+}

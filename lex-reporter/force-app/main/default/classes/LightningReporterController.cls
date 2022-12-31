@@ -120,7 +120,7 @@ public class LightningReporterController {
                 ));
             }
         } catch (Exception e) {
-            throw new AuraHandledException(e.getMessage());
+            throw new AuraHandledException(e.getMessage()+ '['+e.getStackTraceString()+']');
         }
 
         return subjects;
@@ -294,18 +294,44 @@ public class LightningReporterController {
 
     private class SubjectDTO {
         @AuraEnabled public SObject record;
-        @AuraEnabled public List<Note> notes;
-        @AuraEnabled public Map<Id, List<Lightning_Reporter_Note_Metadata__c>> noteMdByNoteId = new Map<Id, List<Lightning_Reporter_Note_Metadata__c>>();
+        @AuraEnabled public List<NoteDTO> notes = new List<NoteDTO>();
 
         public SubjectDTO(SObject record, List<Note> notes, List<Lightning_Reporter_Note_Metadata__c> noteMetadata){
             this.record = record;
-            this.notes = notes;
+            Map<Id, List<Lightning_Reporter_Note_Metadata__c>> noteMdByNoteId = new Map<Id, List<Lightning_Reporter_Note_Metadata__c>>();
             for(Lightning_Reporter_Note_Metadata__c metadata : noteMetadata){
-                if(!this.noteMdByNoteId.containsKey(metadata.Note_Id__c)){
-                    this.noteMdByNoteId.put(metadata.Note_Id__c, new List<Lightning_Reporter_Note_Metadata__c>());
+                if(!noteMdByNoteId.containsKey(metadata.Note_Id__c)){
+                    noteMdByNoteId.put(metadata.Note_Id__c, new List<Lightning_Reporter_Note_Metadata__c>());
                 }
-                this.noteMdByNoteId.get(metadata.Note_Id__c).add(metadata);
+                noteMdByNoteId.get(metadata.Note_Id__c).add(metadata);
             }
+            if(notes != null && !notes.isEmpty()){
+                for(Note note : notes){
+                    this.notes.add(new NoteDTO(note, noteMdByNoteId.get(note.Id)));
+                }
+            }
+        }
+    }
+
+    private class NoteDTO{
+        @AuraEnabled public Note note;
+        @AuraEnabled public List<Lightning_Reporter_Note_Metadata__c> views = new List<Lightning_Reporter_Note_Metadata__c>();
+        @AuraEnabled public Boolean alertRunningUser;
+
+        public NoteDTO(Note note, List<Lightning_Reporter_Note_Metadata__c> metadata){
+            this.note = note;
+            Set<Id> mentionedUserIds = new Set<Id>();
+            Set<Id> viewedByUserIds = new Set<Id>();
+            for(Lightning_Reporter_Note_Metadata__c md : metadata){
+                if(md.Mentioned_User__c != null){
+                    mentionedUserIds.add(md.Mentioned_User__c);
+                }
+                if(md.Viewed_By__c != null){ // we only need views for FE
+                    viewedByUserIds.add(md.Viewed_By__c);
+                    views.add(md);
+                }
+            }
+            this.alertRunningUser = mentionedUserIds.contains(UserInfo.getUserId()) && !viewedByUserIds.contains(UserInfo.getUserId());
         }
     }
 
