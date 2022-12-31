@@ -1,6 +1,7 @@
 /**
  *
  * pinning is broken
+ * the bell is un-redding onclick even if there's still an unviewed alert in that particular object's view
  * help text telling name of viewed by user
  * replace "show records" text with an icon matching the chosen object
  * on "enter" with only 1 user available inject the user
