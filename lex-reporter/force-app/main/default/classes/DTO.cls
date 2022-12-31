@@ -42,10 +42,10 @@ public with sharing class DTO {
     }
 
     public class NoteDTO{
-        @AuraEnabled public Note note;
-        @AuraEnabled public String parentSObjectType;
+        @AuraEnabled public Note note {get; set;}
+        @AuraEnabled public String parentSObjectType {get; set;}
         @AuraEnabled public List<Lightning_Reporter_Note_Metadata__c> views = new List<Lightning_Reporter_Note_Metadata__c>();
-        @AuraEnabled public Boolean alertRunningUser;
+        @AuraEnabled public Boolean alertRunningUser {get; set;}
 
         public NoteDTO(Note note, List<Lightning_Reporter_Note_Metadata__c> metadata){
             this.note = note;

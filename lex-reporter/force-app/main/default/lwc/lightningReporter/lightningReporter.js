@@ -80,9 +80,19 @@ export default class LightningReporter extends LightningElement {
         this.getChildRecords();
     }
 
+    focusOnAlertView(event){
+        console.log('focus on alert view');
+        console.dir(event);
+        this.selectedType = event.target.dataset.id;
+        this.selectableFields = [];
+        this.selectedFields = [];
+        this.displayAlerts = false;
+        this.getChildRecords();
+    }
+
     getChildRecords(){
         // this setup needs to be done for every fetch
-        if(!this.selectableFields){
+        if(!this.selectableFields || this.selectableFields.length === 0){
             this.getSelectableFields();
         }else{
             this.getRecords();

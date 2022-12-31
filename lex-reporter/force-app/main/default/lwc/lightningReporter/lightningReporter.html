@@ -117,10 +117,12 @@
                                         </lightning-layout-item>
                                     <lightning-layout-item size="11" 
                                                             class="note-body" 
-                                                            data-id={alert.Id}
+                                                            data-id={alert.parentSObjectType}
+                                                            onclick={focusOnAlertView}
                                                             onmouseenter={countNoteView}>
-                                        <lightning-formatted-rich-text value={alert.note.Body}></lightning-formatted-rich-text>
-                                        <div class="note-footer">
+                                        <lightning-formatted-rich-text value={alert.note.Body}
+                                                                        data-id={alert.parentSObjectType}></lightning-formatted-rich-text>
+                                        <div class="note-footer" data-id={alert.parentSObjectType}>
                                             <div class="note-time">
                                                 {alert.time}
                                             </div>
