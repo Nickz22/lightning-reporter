@@ -15,6 +15,7 @@ export default class LightningReporter extends LightningElement {
     @track pinnedViews = [];
     @track alerts = [];
     @track alert = false;
+    @track displayAlerts = false;
     selectableFields;
     selectableFieldByName = new Map();
     childTypes;
@@ -34,7 +35,7 @@ export default class LightningReporter extends LightningElement {
                     }
                     this.getChildRecords();   
                 } catch (error) {
-                    this.showNotification('Error', error.message, 'error');
+                    this.showNotification('Error getting records', error.message, 'error');
                 }
             }, 10000);
         }
@@ -74,6 +75,11 @@ export default class LightningReporter extends LightningElement {
         return options;
     }
 
+    imperativeRefresh(){
+        this.imperative = true;
+        this.getChildRecords();
+    }
+
     getChildRecords(){
         // this setup needs to be done for every fetch
         if(!this.selectableFields){
@@ -97,10 +103,24 @@ export default class LightningReporter extends LightningElement {
                     }
                 }
 
-                this.alerts = context.alerts;
+                let alerts = [];
+                for(let i=0; i<context.alerts.length; i++){
+                    let alert = {};
+                    for(let key in context.alerts[i]){
+                        alert[key] = context.alerts[i][key];
+                    }
+                    alert.url = alert.note.CreatedBy.FullPhotoUrl;
+                    alert.time = alert.note.CreatedDate;
+                    alerts.push(alert);
+                }
+                this.alerts = alerts
                 this.alert = this.alerts.length > 0;
                 this.childRecords = sObjects;
-                this.showNotification('Success', 'Records retrieved', 'success');
+
+                if(this.imperative){
+                    this.showNotification('Success', 'Records retrieved', 'success');
+                    this.imperative = false;
+                }
             }).catch(error => {
                 this.showNotification('Error getting records', error.body.message, 'error');
             })
@@ -136,7 +156,7 @@ export default class LightningReporter extends LightningElement {
             this.selectableFields = pinnedView.defaultFields;
             this.getChildRecords();
         } catch (error) {
-            this.showNotification('Error', error.message, 'error');
+            this.showNotification('Error setting view', error.message, 'error');
         }
     }
 
@@ -238,7 +258,7 @@ export default class LightningReporter extends LightningElement {
                 })
                 .catch(error => {
                     // get message from error
-                    this.showNotification('Error', error.body.message, 'error');
+                    this.showNotification('Error pinning layout', error.body.message, 'error');
                 })
         }catch (error) {
             this.showNotification('Error pinning view', error.message, 'error');
@@ -277,15 +297,15 @@ export default class LightningReporter extends LightningElement {
                 })
                 .catch(error => {
                     this.getPinnedViews();
-                    this.showNotification('Error', error.body.message, 'error');
+                    this.showNotification('Error removing pin', error.body.message, 'error');
                 })
         } catch (error) {
             this.showNotification('Error removing pin', error.message, 'error');
         }
     }
 
-    getAlerts(){
-        
+    showAlerts(){
+        this.displayAlerts = true;
     }
 
     showNotification(title, message, variant) {

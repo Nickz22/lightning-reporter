@@ -62,13 +62,12 @@
                 <lightning-layout-item size="1">
                     <template if:true={alert}>
                         <lightning-icon icon-name="utility:alert" 
-                                    onclick={getAlerts}
+                                    onclick={showAlerts}
                                     size="small"
                                     class="alerts red"></lightning-icon>
                     </template>
                     <template if:false={alert}>
-                        <lightning-icon icon-name="utility:alert" 
-                                    onclick={getAlerts}
+                        <lightning-icon icon-name="utility:alert"
                                     size="small"
                                     class="alerts"></lightning-icon>
                     </template>
@@ -78,7 +77,7 @@
                     <lightning-button
                         label="Run"
                         variant="neutral"
-                        onclick={getChildRecords}>
+                        onclick={imperativeRefresh}>
                     </lightning-button>
                     <lightning-button
                         label="Save"
@@ -97,12 +96,40 @@
                                        data-id="record-table"
                                        padding="around-medium"
                                        class="table-container">
-                    <template if:true={selectedFields}>
-                        <c-table selected-fields={selectedFields}
-                                 child-records={childRecords}
-                                 top-most-id={recordId}
-                                 saved={saved}
-                                 onedit={stopPoller}></c-table>
+                    <template if:false={displayAlerts}>
+                        <template if:true={selectedFields}>
+                            <c-table selected-fields={selectedFields}
+                                     child-records={childRecords}
+                                     top-most-id={recordId}
+                                     saved={saved}
+                                     onedit={stopPoller}></c-table>
+                        </template>
+                    </template>
+                    <template if:true={displayAlerts}>
+                        <template for:each={alerts} for:item="alert">
+                            <lightning-layout multiple-rows="true" 
+                                                key={alert.Id}>
+                                <lightning-layout-item size="12" 
+                                                       class="note">
+                                    <lightning-layout>
+                                        <lightning-layout-item size="1" style="text-align:left;" padding="around-small">
+                                            <lightning-avatar src={alert.url} size="medium" variant="square"></lightning-avatar>
+                                        </lightning-layout-item>
+                                    <lightning-layout-item size="11" 
+                                                            class="note-body" 
+                                                            data-id={alert.Id}
+                                                            onmouseenter={countNoteView}>
+                                        <lightning-formatted-rich-text value={alert.note.Body}></lightning-formatted-rich-text>
+                                        <div class="note-footer">
+                                            <div class="note-time">
+                                                {alert.time}
+                                            </div>
+                                        </div>
+                                    </lightning-layout-item>
+                                    </lightning-layout>
+                                </lightning-layout-item>
+                            </lightning-layout>
+                        </template>
                     </template>
                 </lightning-layout-item>
                 <!-- START FIELDS -->

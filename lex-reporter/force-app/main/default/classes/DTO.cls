@@ -43,11 +43,13 @@ public with sharing class DTO {
 
     public class NoteDTO{
         @AuraEnabled public Note note;
+        @AuraEnabled public String parentSObjectType;
         @AuraEnabled public List<Lightning_Reporter_Note_Metadata__c> views = new List<Lightning_Reporter_Note_Metadata__c>();
         @AuraEnabled public Boolean alertRunningUser;
 
         public NoteDTO(Note note, List<Lightning_Reporter_Note_Metadata__c> metadata){
             this.note = note;
+            this.parentSObjectType = note.ParentId.getSObjectType().getDescribe().getName();
             Set<Id> mentionedUserIds = new Set<Id>();
             Set<Id> viewedByUserIds = new Set<Id>();
             for(Lightning_Reporter_Note_Metadata__c md : metadata){

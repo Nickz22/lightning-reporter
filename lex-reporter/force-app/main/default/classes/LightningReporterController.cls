@@ -32,7 +32,7 @@ public class LightningReporterController {
         return new List<String>(childTypes);
     }
 
-    @AuraEnabled
+    @AuraEnabled(cacheable=false)
     public static DTO.ContextDTO getContext(String typeName, Id parentId, List<DTO.FieldDTO> fieldsToGet){
         List<DTO.SubjectDTO> subjects = getRecordsFromTypeLookingUpToId(typeName, parentId, fieldsToGet);
         List<DTO.NoteDTO> alerts = getAlertsForUser(parentId);
@@ -69,7 +69,7 @@ public class LightningReporterController {
             alertIds.add(alert.Note_Id__c);
         }
 
-        return getNoteDtos([SELECT Id, Body, CreatedBy.Name, 
+        return getNoteDtos([SELECT Id, Body, CreatedBy.Name, ParentId,
                                     CreatedBy.FullPhotoUrl, CreatedDate
                             FROM Note
                             WHERE Id IN: alertIds], alerts);
@@ -102,7 +102,7 @@ public class LightningReporterController {
             }
             
             String query = 'SELECT '+String.join(fieldApiNames, ',')+',(SELECT '+
-                                                                            'Body,CreatedBy.Name,CreatedBy.FullPhotoUrl,CreatedDate '+
+                                                                            'Body,CreatedBy.Name,CreatedBy.FullPhotoUrl,CreatedDate,ParentId '+
                                                                         'FROM Notes ORDER BY CreatedDate desc) '+
                             'FROM '+typeName+' '+
                             getWhereClause(lookupsToParent, parentId)+' '+
