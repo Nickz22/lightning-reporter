@@ -3,7 +3,7 @@
     <description>Grants access to Lightning Reporter functionality</description>
     <fieldPermissions>
         <editable>true</editable>
-        <field>LEX_Reporter_Table_Configuration__c.Default__c</field>
+        <field>Layout_Configuration__c.Default__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -38,7 +38,7 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>Lightning_Reporter_Note_Metadata__c.Pinned__c</field>
+        <field>Layout_Configuration__c.Pinned__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <hasActivationRequired>false</hasActivationRequired>
@@ -49,7 +49,7 @@
         <allowEdit>true</allowEdit>
         <allowRead>true</allowRead>
         <modifyAllRecords>false</modifyAllRecords>
-        <object>LEX_Reporter_Table_Configuration__c</object>
+        <object>Layout_Configuration__c</object>
         <viewAllRecords>false</viewAllRecords>
     </objectPermissions>
     <objectPermissions>
@@ -62,7 +62,7 @@
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
     <tabSettings>
-        <tab>LEX_Reporter_Table_Configuration__c</tab>
+        <tab>Layout_Configuration__c</tab>
         <visibility>Available</visibility>
     </tabSettings>
 </PermissionSet>
