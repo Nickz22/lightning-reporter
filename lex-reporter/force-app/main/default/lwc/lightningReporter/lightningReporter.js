@@ -20,9 +20,18 @@ export default class LightningReporter extends LightningElement {
     selectableFieldByName = new Map();
     childTypes;
     saved = false;
-    selectedType;
+    iconName;
     polling = false;
     isEditingRow = false;
+
+    set selectedType(value){
+        this._selectedType = value;
+        this.iconName = `standard:${this._selectedType.toLowerCase()}`;
+    }
+
+    get selectedType(){
+        return this._selectedType;
+    }
 
     renderedCallback(){
         if(!this.polling){
@@ -137,7 +146,15 @@ export default class LightningReporter extends LightningElement {
     getPinnedViews(){
         getPinnedViews()
             .then(result => {
-                this.pinnedViews = result;
+                this.pinnedViews = []; 
+                // copy each param in result into new instance of pinnedView
+                for(let i=0; i<result.length; i++){
+                    let pinnedView = {};
+                    for(let key in result[i]){
+                        pinnedView[key] = result[i][key];
+                    }
+                    this.pinnedViews.push(pinnedView);
+                }
                 if(this.pinnedViews.length > 0){
                     this.selectedType = this.pinnedViews[0].objectName;
                     this.selectedFields = this.pinnedViews[0].defaultFields;
