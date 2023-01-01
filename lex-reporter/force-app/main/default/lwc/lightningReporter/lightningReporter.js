@@ -81,8 +81,6 @@ export default class LightningReporter extends LightningElement {
     }
 
     focusOnAlertView(event){
-        console.log('focus on alert view');
-        console.dir(event);
         this.selectedType = event.target.dataset.id;
         this.selectableFields = [];
         this.selectedFields = [];
@@ -102,7 +100,7 @@ export default class LightningReporter extends LightningElement {
     getRecords(){
         getContext({
             typeName: this.selectedType,
-            parentId: this.recordId,
+            contextRecordId: this.recordId,
             fieldsToGet: this.selectedFields
         })
             .then(context => {
@@ -302,9 +300,6 @@ export default class LightningReporter extends LightningElement {
             }
 
             deletePin({objectName: event.target.dataset.id})
-                .then(() => {
-                    this.showNotification('Pin removed', '', 'success');
-                })
                 .catch(error => {
                     this.getPinnedViews();
                     this.showNotification('Error removing pin', error.body.message, 'error');

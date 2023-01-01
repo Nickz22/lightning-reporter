@@ -33,40 +33,64 @@ public class LightningReporterController {
     }
 
     @AuraEnabled(cacheable=false)
-    public static DTO.ContextDTO getContext(String typeName, Id parentId, List<DTO.FieldDTO> fieldsToGet){
-        List<DTO.SubjectDTO> subjects = getRecordsFromTypeLookingUpToId(typeName, parentId, fieldsToGet);
-        List<DTO.NoteDTO> alerts = getAlertsForUser(parentId);
-        return new DTO.ContextDTO(subjects, alerts);
+    public static DTO.ContextDTO getContext(String typeName, Id contextRecordId, List<DTO.FieldDTO> fieldsToGet){
+        DTO.ContextDTO context;
+        try {
+            List<DTO.SubjectDTO> subjects = getRecordsFromTypeLookingUpToId(typeName, contextRecordId, fieldsToGet);
+            List<DTO.NoteDTO> alerts = getAlertsForUser(contextRecordId);   
+            context = new DTO.ContextDTO(subjects, alerts);
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage() +' ['+e.getStackTraceString()+']');
+        }
+        return context;
     }
 
-    private static List<DTO.NoteDTO> getAlertsForUser(Id parentId){
+    /**
+     * could still use work - currently unanswered mentions are not being caught 
+     * if a separate mention under same parent is viewed
+     */
+    private static List<DTO.NoteDTO> getAlertsForUser(Id contextRecordId){
 
+        List<Lightning_Reporter_Note_Metadata__c> noteMd = [SELECT Note_Id__c,Mentioned_User__c,Viewed_By__c,Type__c
+                                                                FROM Lightning_Reporter_Note_Metadata__c
+                                                                WHERE Reporter_Context_Record_Id__c = :contextRecordId
+                                                                ORDER BY CreatedDate DESC];
+        
+        Set<String> noteIds = new Set<String>();
+        for(Lightning_Reporter_Note_Metadata__c md : noteMd){
+            noteIds.add(md.Note_Id__c);
+        }
+
+        List<Note> notes = [SELECT ParentId FROM Note WHERE Id IN :noteIds];
+        Map<Id, List<Note>> notesByParentId = new Map<Id, List<Note>>();
+        Map<Id, Note> noteById = new Map<Id, Note>();
+        for(Note n : notes){
+            noteById.put(n.Id, n);
+            if(!notesByParentId.containsKey(n.ParentId)){
+                notesByParentId.put(n.ParentId, new List<Note>());
+            }
+            notesByParentId.get(n.ParentId).add(n);
+        }
+
+        Map<Id, List<Lightning_Reporter_Note_Metadata__c>> noteMdByNoteParentId = new Map<Id, List<Lightning_Reporter_Note_Metadata__c>>();
+        for(Lightning_Reporter_Note_Metadata__c md : noteMd){
+            if(!noteMdByNoteParentId.containsKey(noteById.get((Id)md.Note_Id__c).ParentId)){
+                noteMdByNoteParentId.put(noteById.get(md.Note_Id__c).ParentId, new List<Lightning_Reporter_Note_Metadata__c>());
+            }
+            noteMdByNoteParentId.get(noteById.get(md.Note_Id__c).ParentId).add(md);
+        }
+        
         List<Lightning_Reporter_Note_Metadata__c> alerts = new List<Lightning_Reporter_Note_Metadata__c>();
         Set<Id> alertIds = new Set<Id>();
-        List<Lightning_Reporter_Note_Metadata__c> lastView = [SELECT CreatedDate
-                                                                FROM Lightning_Reporter_Note_Metadata__c
-                                                                WHERE Viewed_By__c = :UserInfo.getUserId()
-                                                                    AND Type__c = 'View'
-                                                                    AND Reporter_Context_Record_Id__c = :parentId
-                                                                ORDER BY CreatedDate DESC
-                                                                LIMIT 1];
-        if(lastView.isEmpty()){
-            alerts = [SELECT Note_Id__c,Mentioned_User__c,Viewed_By__c
-                        FROM Lightning_Reporter_Note_Metadata__c
-                        WHERE Type__c = 'Mention'
-                            AND Reporter_Context_Record_Id__c = :parentId
-                            AND Mentioned_User__c = :UserInfo.getUserId()];
-        }else{
-            alerts = [SELECT Note_Id__c,Mentioned_User__c,Viewed_By__c
-                        FROM Lightning_Reporter_Note_Metadata__c
-                        WHERE Type__c = 'Mention'
-                            AND Reporter_Context_Record_Id__c = :parentId
-                            AND CreatedDate > :lastView[0].CreatedDate
-                            AND Mentioned_User__c = :UserInfo.getUserId()];
-        }
-        // extract note_id__c from alerts
-        for(Lightning_Reporter_Note_Metadata__c alert : alerts){
-            alertIds.add(alert.Note_Id__c);
+        for(Id noteParentId : notesByParentId.keyset()){
+            for(Lightning_Reporter_Note_Metadata__c md : noteMdByNoteParentId.get(noteParentId)){
+                if(md.Type__c == 'View'){
+                    break;
+                }else{
+                    alerts.add(md);
+                    alertIds.add(md.Note_Id__c);
+                }
+            }
         }
 
         return getNoteDtos([SELECT Id, Body, CreatedBy.Name, ParentId,
@@ -75,11 +99,11 @@ public class LightningReporterController {
                             WHERE Id IN: alertIds], alerts);
     }
 
-    private static List<DTO.SubjectDTO> getRecordsFromTypeLookingUpToId(String typeName, Id parentId, List<DTO.FieldDTO> fieldsToGet){
+    private static List<DTO.SubjectDTO> getRecordsFromTypeLookingUpToId(String typeName, Id contextRecordId, List<DTO.FieldDTO> fieldsToGet){
 
         List<DTO.SubjectDTO> subjects = new List<DTO.SubjectDTO>();
         try {
-            List<String> lookupsToParent = getLookupFieldsPointingToParentId(typeName, parentId);
+            List<String> lookupsToParent = getLookupFieldsPointingToParentId(typeName, contextRecordId);
             Map<String, Schema.SObjectField> fieldsMap = Cache.globalDescribe.get(typeName).getDescribe().fields.getMap();
             List<String> fieldApiNames = new List<String>();
             if(fieldsMap.containsKey('Name')){
@@ -105,7 +129,7 @@ public class LightningReporterController {
                                                                             'Body,CreatedBy.Name,CreatedBy.FullPhotoUrl,CreatedDate,ParentId '+
                                                                         'FROM Notes ORDER BY CreatedDate desc) '+
                             'FROM '+typeName+' '+
-                            getWhereClause(lookupsToParent, parentId)+' '+
+                            getWhereClause(lookupsToParent, contextRecordId)+' '+
                             'ORDER BY LastModifiedDate desc';
             System.debug(query);
 
@@ -256,25 +280,24 @@ public class LightningReporterController {
     private static List<String> getLookupFieldsPointingToParentId(String childTypeName, Id parentId){
 
         List<String> lookupsToParent = new List<String>();
-        try {
-            Map<String, Schema.SObjectField> fieldTokenByName = Schema.getGlobalDescribe()
-                                                                .get(childTypeName)
-                                                                .getDescribe()
-                                                                .fields.getMap();
-            for(String fieldName : fieldTokenByName.keyset()){
-                DescribeFieldResult fieldDescribe = fieldTokenByName.get(fieldName).getDescribe();
+        Map<String, Schema.SObjectField> fieldTokenByName = Schema.getGlobalDescribe()
+                                                            .get(childTypeName)
+                                                            .getDescribe()
+                                                            .fields.getMap();
+        for(String fieldName : fieldTokenByName.keyset()){
+            DescribeFieldResult fieldDescribe = fieldTokenByName.get(fieldName).getDescribe();
 
-                if(fieldDescribe.getType() == Schema.DisplayType.REFERENCE){ 
-                    SObjectType lookupTargetType = fieldDescribe.getReferenceTo()[0]; 
-                    if(lookupTargetType.getDescribe().getName() == 
-                        parentId.getSobjectType().getDescribe().getName()){ // is the field lookup to `parentId`
-                        lookupsToParent.add(fieldName);
-                    }
+            if(fieldDescribe.getType() == Schema.DisplayType.REFERENCE){ 
+                SObjectType lookupTargetType = fieldDescribe.getReferenceTo()?.get(0); 
+                if(lookupTargetType == null){ // null for `masterrecordid` field
+                    continue; 
                 }
-            }   
-        } catch (Exception e) {
-            throw new AuraHandledException(e.getMessage());
-        }
+                if(lookupTargetType.getDescribe().getName() == 
+                    parentId.getSobjectType().getDescribe().getName()){ // is the field lookup to `parentId`
+                    lookupsToParent.add(fieldName);
+                }
+            }
+        }   
 
         return lookupsToParent;
     }
