@@ -217,18 +217,18 @@ export default class TableRow extends NavigationMixin(LightningElement) {
 
         this._sObject = value;
         this.cells = this.getTableCellValues();
-
+        let hasAlert = false;
         if(value.notes){
             this.avatars = [];
             for(let i = 0; i < value.notes.length; i++){
                 let noteDto = value.notes[i];
+                hasAlert = noteDto.alertRunningUser ? true : hasAlert;
                 let newAvatar = {
                     "url" : noteDto.note.CreatedBy.FullPhotoUrl,
                     "name" : noteDto.note.CreatedBy.Name,
                     "body" : noteDto.note.Body,
                     "id" : noteDto.note.Id,
-                    "time" : noteDto.note.CreatedDate,
-                    "unreadStyle" : noteDto.alertRunningUser ? "border: 2px solid #00ff00;" : ""
+                    "time" : noteDto.note.CreatedDate
                 };   
                 let views = [];
                 // for each value in value.noteMdByNoteId[value.notes[i].Id], set a `leftStyle` property equal to the value of the index
@@ -250,6 +250,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
         if(this.avatars.length > 0){
             console.log('setting avatars');
             this.previewAvatar = this.avatars[0];
+            this.previewAvatar.unreadStyle = hasAlert ? "border: 2px solid #00ff00;" : "";
             if(this.notes.length > 0){
                 this.notes = this.avatars
             }

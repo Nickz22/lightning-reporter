@@ -53,15 +53,10 @@ public with sharing class DTO {
             Set<Id> mentionedUserIds = new Set<Id>();
             Set<Id> viewedByUserIds = new Set<Id>();
             for(Lightning_Reporter_Note_Metadata__c md : metadata){
-                if(md.Mentioned_User__c != null){
-                    mentionedUserIds.add(md.Mentioned_User__c);
-                }
                 if(md.Viewed_By__c != null){ // we only need views for FE
-                    viewedByUserIds.add(md.Viewed_By__c);
                     views.add(md);
                 }
             }
-            this.alertRunningUser = mentionedUserIds.contains(UserInfo.getUserId()) && !viewedByUserIds.contains(UserInfo.getUserId());
         }
     }
 

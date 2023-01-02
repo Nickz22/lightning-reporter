@@ -38,6 +38,20 @@ public class LightningReporterController {
         try {
             List<DTO.SubjectDTO> subjects = getRecordsFromTypeLookingUpToId(typeName, contextRecordId, fieldsToGet);
             List<DTO.NoteDTO> alerts = getAlertsForUser(contextRecordId);   
+
+            for(DTO.SubjectDTO subject : subjects){
+                for(DTO.NoteDTO note : subject.notes){
+                    for(DTO.NoteDTO alert : alerts){
+                        if(alert.note.Id == note.note.Id){
+                            note.alertRunningUser = true;
+                            continue;
+                        }
+                    }
+                }                
+            }
+
+
+
             context = new DTO.ContextDTO(subjects, alerts);
         } catch (Exception e) {
             throw new AuraHandledException(e.getMessage() +' ['+e.getStackTraceString()+']');
@@ -51,10 +65,12 @@ public class LightningReporterController {
      */
     private static List<DTO.NoteDTO> getAlertsForUser(Id contextRecordId){
 
-        List<Lightning_Reporter_Note_Metadata__c> noteMd = [SELECT Note_Id__c,Mentioned_User__c,Viewed_By__c,Type__c
-                                                                FROM Lightning_Reporter_Note_Metadata__c
-                                                                WHERE Reporter_Context_Record_Id__c = :contextRecordId
-                                                                ORDER BY CreatedDate DESC];
+        List<Lightning_Reporter_Note_Metadata__c> noteMd = [SELECT Note_Id__c,Mentioned_User__c,Mentioned_User__r.Name,
+                                                                    Viewed_By__c,Viewed_By__r.Name,Type__c
+                                                              FROM Lightning_Reporter_Note_Metadata__c
+                                                             WHERE Reporter_Context_Record_Id__c = :contextRecordId
+                                                                AND (Viewed_By__c =: UserInfo.getUserId() OR Mentioned_User__c =: UserInfo.getUserId())
+                                                            ORDER BY CreatedDate DESC];
         
         Set<String> noteIds = new Set<String>();
         for(Lightning_Reporter_Note_Metadata__c md : noteMd){
@@ -82,11 +98,12 @@ public class LightningReporterController {
         
         List<Lightning_Reporter_Note_Metadata__c> alerts = new List<Lightning_Reporter_Note_Metadata__c>();
         Set<Id> alertIds = new Set<Id>();
+        Set<Id> viewedNoteIds = new Set<Id>();
         for(Id noteParentId : notesByParentId.keyset()){
             for(Lightning_Reporter_Note_Metadata__c md : noteMdByNoteParentId.get(noteParentId)){
                 if(md.Type__c == 'View'){
-                    break;
-                }else if(md.Mentioned_User__c == UserInfo.getUserId()){
+                    viewedNoteIds.add(md.Note_Id__c);
+                }else if(md.Mentioned_User__c == UserInfo.getUserId() && !viewedNoteIds.contains(md.Note_Id__c)){
                     alerts.add(md);
                     alertIds.add(md.Note_Id__c);
                 }
@@ -306,7 +323,7 @@ public class LightningReporterController {
     private static Map<Id, List<Lightning_Reporter_Note_Metadata__c>> getNoteMdByParentId(Set<String> recordIds){
         Map<Id, List<Lightning_Reporter_Note_Metadata__c>> noteMdByParentId = new Map<Id, List<Lightning_Reporter_Note_Metadata__c>>();
         for(Lightning_Reporter_Note_Metadata__c noteMd : [SELECT Note_Parent_Id__c, Note_Id__c, Viewed_By__r.FullPhotoUrl,
-                                                                Mentioned_User__c, Type__c
+                                                                Mentioned_User__c, Type__c, Viewed_By__r.Name, Mentioned_User__r.Name
                                                             FROM Lightning_Reporter_Note_Metadata__c
                                                             WHERE Note_Parent_Id__c IN :recordIds]){
             if(!noteMdByParentId.containsKey(noteMd.Note_Parent_Id__c)){

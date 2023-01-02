@@ -117,8 +117,12 @@
                                         key={note.id} 
                                         class="note">
                     <lightning-layout>
-                        <lightning-layout-item size="1" style="text-align:left;" padding="around-small">
-                            <lightning-avatar src={note.url} size="medium" variant="square"></lightning-avatar>
+                        <lightning-layout-item size="1" 
+                                                style="text-align:left;" 
+                                                padding="around-small">
+                            <lightning-avatar src={note.url} 
+                                            size="medium" 
+                                            variant="square"></lightning-avatar>
                     </lightning-layout-item>
                     <lightning-layout-item size="11" 
                                             class="note-body" 
@@ -134,7 +138,8 @@
                                                       variant="circle"
                                                       data-n={i}
                                                       class="viewed-by-avatar"
-                                                      style={view.leftStyle}></lightning-avatar>
+                                                      style={view.leftStyle}
+                                                      alternative-text={view.Viewed_By__r.Name}></lightning-avatar>
                                 </template>
                             </div>
                             <div class="note-time">
