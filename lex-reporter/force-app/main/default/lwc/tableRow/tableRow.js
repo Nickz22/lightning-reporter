@@ -289,6 +289,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
                     'notEditing' : true, // have to make this resolve to `true`...
                                          // cant make read-only show with a `false` boolean value
                     'type' : this.inputTypeBySfSchemaType.get(field.type),
+                    'isDatetime' : this.inputTypeBySfSchemaType.get(field.type) === 'datetime',
                 }
             );
         }
@@ -320,6 +321,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     }
 
     initEdit(event){
+
         this.dispatchEvent(new CustomEvent('edit', {
             detail: {
                 'sObject' : this._sObject,
@@ -330,11 +332,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
         }));
         let clickedFieldName = event.target.dataset.id;
         for(let cell of this.cells){
-            let isNotEditing = (
-                cell.apiName === clickedFieldName ? 
-                !cell.notEditing : // toggle pencil icon
-                cell.notEditing
-            );
+            let isNotEditing = cell.apiName !== clickedFieldName 
             cell.notEditing = isNotEditing;
             cell.size = 12;
         }

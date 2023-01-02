@@ -53,29 +53,59 @@
                     <template if:false={cell.isReference}>
                         <template if:true={cell.isUpdateable}>
                             <lightning-layout class="edit-container"
-                                            horizontal-align="end">
-                                <lightning-layout-item size="12" padding="horizontal-small">
-                                    <lightning-input data-id={cell.apiName}
-                                                    value={cell.value} 
-                                                    type={cell.type}
-                                                    read-only={cell.notEditing}
-                                                    onchange={handleValueChange}></lightning-input>
+                                            horizontal-align="end"
+                                            onclick={initEdit}>
+                                <lightning-layout-item size="12" 
+                                                        padding="horizontal-small">
+                                    <template if:false={cell.isDatetime}>
+                                        <lightning-input data-id={cell.apiName}
+                                                        value={cell.value} 
+                                                        type={cell.type}
+                                                        read-only={cell.notEditing}
+                                                        onchange={handleValueChange}></lightning-input>
+                                    </template>
+                                    <template if:true={cell.isDatetime}>
+                                        <!-- if editing -->
+                                        <template if:false={cell.notEditing}>
+                                            <lightning-input data-id={cell.apiName}
+                                                            value={cell.value} 
+                                                            type={cell.type}
+                                                            read-only={cell.notEditing}
+                                                            onchange={handleValueChange}></lightning-input>
+                                        </template>
+                                        <template if:true={cell.notEditing}>
+                                            <p class="datetime">
+                                                <lightning-formatted-date-time value={cell.value} 
+                                                                                year="numeric" 
+                                                                                month="numeric" 
+                                                                                day="numeric" 
+                                                                                hour="2-digit"
+                                                                                minute="2-digit"
+                                                                                data-id={cell.apiName}></lightning-formatted-date-time>
+                                            </p>
+                                        </template>
+                                    </template>
                                 </lightning-layout-item>
-                                <template if:true={cell.notEditing}>
-                                    <lightning-icon class="edit-icon"
-                                                    onclick={initEdit} 
-                                                    icon-name="utility:edit" 
-                                                    data-id={cell.apiName}
-                                                    size="xx-small"></lightning-icon>
-                                </template> 
                             </lightning-layout>
                         </template>
                         <template if:false={cell.isUpdateable}>
-                            <lightning-input data-id={cell.apiName}
-                                                    value={cell.value} 
-                                                    type={cell.type}
-                                                    read-only={cell.notEditing}
-                                                    onchange={handleValueChange}></lightning-input>
+                            <template if:true={cell.isDatetime}>
+                                <p class="datetime">
+                                <lightning-formatted-date-time value={cell.value} 
+                                                                year="numeric" 
+                                                                month="numeric" 
+                                                                day="numeric" 
+                                                                hour="2-digit"
+                                                                minute="2-digit"></lightning-formatted-date-time>
+                                </p>
+                            </template>
+                            <template if:false={cell.isDatetime}>    
+                                <lightning-input data-id={cell.apiName}
+                                                value={cell.value} 
+                                                type={cell.type}
+                                                read-only={cell.notEditing}
+                                                onchange={handleValueChange}></lightning-input>
+                            </template>
                         </template>
                     </template>
                 </lightning-layout-item>

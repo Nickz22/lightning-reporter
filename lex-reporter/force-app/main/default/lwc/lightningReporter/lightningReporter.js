@@ -26,7 +26,7 @@ export default class LightningReporter extends LightningElement {
 
     set selectedType(value){
         this._selectedType = value;
-        this.iconName = `standard:${this._selectedType.toLowerCase()}`;
+        this.iconName = `standard:${this._selectedType?.toLowerCase()}`;
     }
 
     get selectedType(){
@@ -224,7 +224,7 @@ export default class LightningReporter extends LightningElement {
         if(field.selected){ // unselect field
             field.selected = false;
             newSelectedFields = newSelectedFields.filter(f => f.name !== field.name);
-        }else if(this.selectedFields.length < 10){ // select field
+        }else if(newSelectedFields.length < 10){ // select field
             field.selected = true
             newSelectedFields.push(field);
         }
