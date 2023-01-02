@@ -87,6 +87,13 @@ export default class TableRow extends NavigationMixin(LightningElement) {
                 users[0].focus();
             }
         }
+
+        if(event.keyCode === 13 && this.isUserSearching){
+            let users = this.template.querySelectorAll('.lookup-user');
+            if(users.length === 1){
+                this.selectLookupUser(users[0].textContent)
+            }
+        }
     }
 
     handleRteKeyUp(event){
@@ -122,11 +129,6 @@ export default class TableRow extends NavigationMixin(LightningElement) {
                 }   
             } catch (error) {
                 console.error(error);
-            }
-        }else if(event.keyCode === 13 && this.isUserSearching){
-            let users = this.template.querySelectorAll('.lookup-user');
-            if(users.length === 1){
-                this.selectLookupUser(users[0].textContent)
             }
         }
     }
