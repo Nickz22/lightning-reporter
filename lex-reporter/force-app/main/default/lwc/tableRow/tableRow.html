@@ -31,7 +31,7 @@
                                 <template if:false={user.hidden}>
                                     <div key={user.Id} 
                                         class="lookup-user" 
-                                        onclick={selectLookupUser}
+                                        onclick={handleUserSelect}
                                         tabindex="-1"
                                         onkeyup={handleUserKeyUp}>
                                         {user.Name}

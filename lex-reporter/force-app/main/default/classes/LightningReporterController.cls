@@ -86,7 +86,7 @@ public class LightningReporterController {
             for(Lightning_Reporter_Note_Metadata__c md : noteMdByNoteParentId.get(noteParentId)){
                 if(md.Type__c == 'View'){
                     break;
-                }else{
+                }else if(md.Mentioned_User__c == UserInfo.getUserId()){
                     alerts.add(md);
                     alertIds.add(md.Note_Id__c);
                 }
@@ -102,68 +102,64 @@ public class LightningReporterController {
     private static List<DTO.SubjectDTO> getRecordsFromTypeLookingUpToId(String typeName, Id contextRecordId, List<DTO.FieldDTO> fieldsToGet){
 
         List<DTO.SubjectDTO> subjects = new List<DTO.SubjectDTO>();
-        try {
-            List<String> lookupsToParent = getLookupFieldsPointingToParentId(typeName, contextRecordId);
-            Map<String, Schema.SObjectField> fieldsMap = Cache.globalDescribe.get(typeName).getDescribe().fields.getMap();
-            List<String> fieldApiNames = new List<String>();
-            if(fieldsMap.containsKey('Name')){
-                fieldApiNames.add('Name');
+        List<String> lookupsToParent = getLookupFieldsPointingToParentId(typeName, contextRecordId);
+        Map<String, Schema.SObjectField> fieldsMap = Cache.globalDescribe.get(typeName).getDescribe().fields.getMap();
+        List<String> fieldApiNames = new List<String>();
+        if(fieldsMap.containsKey('Name')){
+            fieldApiNames.add('Name');
+        }
+        for(DTO.FieldDTO field : fieldsToGet){
+            fieldApiNames.add(field.name);
+            if(field.type == 'reference' && 
+                fieldsMap.get(field.name)
+                    .getDescribe()
+                    .getReferenceTo()[0]
+                    .getDescribe()
+                    .fields.getMap().containsKey('Name') &&
+                typeName.toLowerCase() != 'opportunity' && field.name.toLowerCase() != 'contactid'){
+                String lookupNameField = field.isCustom ? 
+                    field.name.toLowerCase().replace('__c', '__r.name') : 
+                    field.name.toLowerCase().replace('id', '.name');
+                fieldApiNames.add(lookupNameField);
             }
-            for(DTO.FieldDTO field : fieldsToGet){
-                fieldApiNames.add(field.name);
-                if(field.type == 'reference' && 
-                    fieldsMap.get(field.name)
-                        .getDescribe()
-                        .getReferenceTo()[0]
-                        .getDescribe()
-                        .fields.getMap().containsKey('Name') &&
-                    typeName.toLowerCase() != 'opportunity' && field.name.toLowerCase() != 'contactid'){
-                    String lookupNameField = field.isCustom ? 
-                        field.name.toLowerCase().replace('__c', '__r.name') : 
-                        field.name.toLowerCase().replace('id', '.name');
-                    fieldApiNames.add(lookupNameField);
-                }
-            }
-            
-            String query = 'SELECT '+String.join(fieldApiNames, ',')+',(SELECT '+
-                                                                            'Body,CreatedBy.Name,CreatedBy.FullPhotoUrl,CreatedDate,ParentId '+
-                                                                        'FROM Notes ORDER BY CreatedDate desc) '+
-                            'FROM '+typeName+' '+
-                            getWhereClause(lookupsToParent, contextRecordId)+' '+
-                            'ORDER BY LastModifiedDate desc';
-            System.debug(query);
+        }
+        
+        String query = 'SELECT '+String.join(fieldApiNames, ',')+',(SELECT '+
+                                                                        'Body,CreatedBy.Name,CreatedBy.FullPhotoUrl,CreatedDate,ParentId '+
+                                                                    'FROM Notes ORDER BY CreatedDate desc) '+
+                        'FROM '+typeName+' '+
+                        getWhereClause(lookupsToParent, contextRecordId)+' '+
+                        'ORDER BY LastModifiedDate desc';
+        System.debug(query);
 
-            Map<String, Schema.SObjectField> tokenByFieldName = Schema.getGlobalDescribe()
-                                                            .get(typeName)
-                                                            .getDescribe().fields.getMap();
-            List<SObject> records = Database.query(query);
-            Set<String> recordIds = new Set<String>();
-            for(SObject record : records){
-                recordIds.add(record.Id);
-            }
-            Map<Id, List<Lightning_Reporter_Note_Metadata__c>> noteMdByParentId = getNoteMdByParentId(recordIds);
-            for(SObject record : records){
-                for(String field : fieldApiNames){
-                    if(field.contains('.')){
-                        continue;
-                    }
-                    // if field is editable and null, explicitly set to `null`
-                    if(record.get(field) == null && 
-                        tokenByFieldName.get(field).getDescribe().isUpdateable()){
-                        record.put(field, null);
-                    }
+        Map<String, Schema.SObjectField> tokenByFieldName = Schema.getGlobalDescribe()
+                                                        .get(typeName)
+                                                        .getDescribe().fields.getMap();
+        List<SObject> records = Database.query(query);
+        Set<String> recordIds = new Set<String>();
+        for(SObject record : records){
+            recordIds.add(record.Id);
+        }
+        Map<Id, List<Lightning_Reporter_Note_Metadata__c>> noteMdByParentId = getNoteMdByParentId(recordIds);
+        for(SObject record : records){
+            for(String field : fieldApiNames){
+                if(field.contains('.')){
+                    continue;
                 }
-                subjects.add(new DTO.SubjectDTO(
-                    record, 
-                    getNoteDtos(
-                        record.getSObjects('Notes'), 
-                        noteMdByParentId.containsKey(record.Id) ? 
-                            noteMdByParentId.get(record.Id) : 
-                            new List<Lightning_Reporter_Note_Metadata__c>()
-                )));
+                // if field is editable and null, explicitly set to `null`
+                if(record.get(field) == null && 
+                    tokenByFieldName.get(field).getDescribe().isUpdateable()){
+                    record.put(field, null);
+                }
             }
-        } catch (Exception e) {
-            throw new AuraHandledException(e.getMessage()+ '['+e.getStackTraceString()+']');
+            subjects.add(new DTO.SubjectDTO(
+                record, 
+                getNoteDtos(
+                    record.getSObjects('Notes'), 
+                    noteMdByParentId.containsKey(record.Id) ? 
+                        noteMdByParentId.get(record.Id) : 
+                        new List<Lightning_Reporter_Note_Metadata__c>()
+            )));
         }
 
         return subjects;
@@ -261,7 +257,12 @@ public class LightningReporterController {
         }
         if(notes != null && !notes.isEmpty()){
             for(Note note : notes){
-                noteDtos.add(new DTO.NoteDTO(note, noteMdByNoteId.get(note.Id)));
+                noteDtos.add(new DTO.NoteDTO(
+                    note, 
+                    noteMdByNoteId.containsKey(note.Id) ? 
+                    noteMdByNoteId.get(note.Id) : 
+                    new List<Lightning_Reporter_Note_Metadata__c>()
+                ));
             }
         }
         return noteDtos;    

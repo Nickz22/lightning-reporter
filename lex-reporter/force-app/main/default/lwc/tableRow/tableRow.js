@@ -103,7 +103,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
         if(event.key === '@' && !this.isUserSearching){
             this.fetchUsers(event);
             this.isUserSearching = true;
-        }else if(event.key !== '@' && this.isUserSearching){
+        }else if(event.key !== '@' && event.keyCode !== 13 && this.isUserSearching){ // if key press is not @ or enter
             try {
                 // find substring between last "@" and last "</p>"
                 let lastAt = event.target.value.lastIndexOf('@');
@@ -123,7 +123,51 @@ export default class TableRow extends NavigationMixin(LightningElement) {
             } catch (error) {
                 console.error(error);
             }
+        }else if(event.keyCode === 13 && this.isUserSearching){
+            let users = this.template.querySelectorAll('.lookup-user');
+            if(users.length === 1){
+                this.selectLookupUser(users[0].textContent)
+            }
         }
+    }
+
+    fetchUsers(){
+        fetchUsers()
+            .then(result => {
+                for(let i = 0; i < result.length; i++){
+                    let user = {};
+                    for(let param in result[i]){
+                        user[param] = result[i][param];
+                    }
+                    user.hidden = false;
+                    this.users.push(user);
+                }
+            })
+            .catch(error => {
+                this.showNotification('Error', error.body.message, 'error');
+            });
+    }
+
+    handleUserSelect(event){
+        this.selectLookupUser(event.target.childNodes[0].data);
+    }
+
+    selectLookupUser(userName){
+
+        let rte = this.template.querySelectorAll('lightning-input-rich-text')[0];
+        let lastAt = rte.value.lastIndexOf('@');
+        let lastP = rte.value.lastIndexOf('</p>');
+        let substring = rte.value.substring(lastAt+1, lastP);
+        let range = rte.value.lastIndexOf(substring);
+
+        let firstMsgSegment = rte.value.substring(0, range).replace("</p>", "");
+        let secondMsgSegment = rte.value.substring(range+substring.length);
+
+        rte.value = `${firstMsgSegment}<strong>${userName}</strong>${secondMsgSegment}`;
+        rte.setRangeText('', rte.value.length, rte.value.length, 'end');
+        rte.setFormat({bold: false});
+        this.isUserSearching = false;
+        this.users = [];
     }
 
     handleUserKeyUp(event){
@@ -138,8 +182,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
         // if key press is enter
         if(event.keyCode === 13){
             this.users = [];
-            this.selectLookupUser(event);
-            this.isUserSearching = false;
+            this.handleUserSelect(event);
         }
         // if key press is escape
         if(event.keyCode === 27){
@@ -185,7 +228,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
                     "body" : noteDto.note.Body,
                     "id" : noteDto.note.Id,
                     "time" : noteDto.note.CreatedDate,
-                    "unreadStyle" : noteDto.alertRunningUser ? "border: 2px solid #ff8c00;" : "",
+                    "unreadStyle" : noteDto.alertRunningUser ? "border: 2px solid #00ff00;" : ""
                 };   
                 let views = [];
                 // for each value in value.noteMdByNoteId[value.notes[i].Id], set a `leftStyle` property equal to the value of the index
@@ -299,41 +342,6 @@ export default class TableRow extends NavigationMixin(LightningElement) {
 
     renderRte(){
         this.isEditMode = !this.isEditMode;
-    }
-
-    fetchUsers(){
-        fetchUsers()
-            .then(result => {
-                for(let i = 0; i < result.length; i++){
-                    let user = {};
-                    for(let param in result[i]){
-                        user[param] = result[i][param];
-                    }
-                    user.hidden = false;
-                    this.users.push(user);
-                }
-            })
-            .catch(error => {
-                this.showNotification('Error', error.body.message, 'error');
-            });
-    }
-
-    selectLookupUser(event){
-
-        let rte = this.template.querySelectorAll('lightning-input-rich-text')[0];
-        let userName = event.target.childNodes[0].data;
-
-        let lastAt = rte.value.lastIndexOf('@');
-        let lastP = rte.value.lastIndexOf('</p>');
-        let substring = rte.value.substring(lastAt+1, lastP);
-        let range = rte.value.lastIndexOf(substring);
-
-        let firstMsgSegment = rte.value.substring(0, range).replace("</p>", "");
-        let secondMsgSegment = rte.value.substring(range+substring.length);
-
-        rte.value = `${firstMsgSegment}<strong>${userName}</strong>${secondMsgSegment}`;
-        rte.setRangeText('', rte.value.length, rte.value.length, 'end');
-        rte.setFormat({bold: false});
     }
 
     showNotification(title, message, variant) {

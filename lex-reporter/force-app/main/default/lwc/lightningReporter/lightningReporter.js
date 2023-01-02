@@ -39,7 +39,7 @@ export default class LightningReporter extends LightningElement {
             setInterval(() => {
                 console.log('polling');
                 try {
-                    if(this.isEditingRow || this.childRecords.length === 0){ 
+                    if(this.isEditingRow || this.childRecords?.length === 0){ 
                         return; 
                     }
                     this.getChildRecords();   

@@ -110,7 +110,8 @@
                     <template if:true={displayAlerts}>
                         <template for:each={alerts} for:item="alert">
                             <lightning-layout multiple-rows="true" 
-                                                key={alert.Id}>
+                                                key={alert.Id}
+                                                style="overflow:auto">
                                 <lightning-layout-item size="12" 
                                                        class="note">
                                     <lightning-layout>
