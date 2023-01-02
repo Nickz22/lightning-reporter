@@ -189,8 +189,8 @@ export default class LightningReporter extends LightningElement {
         getFieldsFromType({
             typeName: this.selectedType
         }).then(result => {
-            this.selectableFields = [];
-            this.selectedFields = [];
+            let selectableFields = [];
+            let selectedFields = [];
             for(let i=0; i<result.length; i++){
                 let dto = {};
                 for(let key in result[i]){
@@ -199,16 +199,18 @@ export default class LightningReporter extends LightningElement {
 
                 if(i < 10){
                     dto.selected = true;
-                    this.selectedFields.push(dto);
+                    selectedFields.push(dto);
                 }
 
-                this.selectableFields.push(dto);
+                selectableFields.push(dto);
             }
             this.selectableFieldByName = new Map(
-                this.selectableFields.map(field => {
+                selectableFields.map(field => {
                     return [field.name, field];
             }));
 
+            this.selectableFields = selectableFields;
+            this.selectedFields = selectedFields;
             this.getRecords();
         })
         .catch(error => {
@@ -219,8 +221,8 @@ export default class LightningReporter extends LightningElement {
     handleFieldClicked(event){
         let fieldName = event.target.dataset.id;
         let field = this.selectableFieldByName.get(fieldName);
+        let newSelectedFields = this.selectedFields.slice();
 
-        let newSelectedFields = this.selectedFields;
         if(field.selected){ // unselect field
             field.selected = false;
             newSelectedFields = newSelectedFields.filter(f => f.name !== field.name);
