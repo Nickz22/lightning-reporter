@@ -1,21 +1,3 @@
-<!-- 
-    BUGS (ordered by severity descending)
-    - Buttons need to wrap better
-    - rows are not aligned to header
- -->
-
- <!-- QA
-    - Check date/time fields are committing to DB
--->
-
-<!-- 
-    TODO (Features) (ordered by complexity descending)
-    - see all child records, see all parents of each row
-    - front end filter search
-    - Filter by current user in any user lookup
-    - Link out to record in Salesforce when reference fields are showing
-    - better styling
- -->
 <template>
     <lightning-card>
         <!-- classes not allowed on lightning-card -->
@@ -99,12 +81,18 @@
                                        padding="around-medium"
                                        class="table-container">
                     <template if:false={displayAlerts}>
-                        <template if:true={selectedFields}>
-                            <c-table selected-fields={selectedFields}
-                                     child-records={childRecords}
-                                     top-most-id={recordId}
-                                     saved={saved}
-                                     onedit={stopPoller}></c-table>
+                        <template if:true={isLoading}>
+                            <lightning-spinner alternative-text="Loading"
+                                                onclick={checkForSpinnerHardEscape}></lightning-spinner>
+                        </template>
+                        <template if:false={isLoading}>
+                            <template if:true={selectedFields}>
+                                <c-table selected-fields={selectedFields}
+                                        child-records={childRecords}
+                                        top-most-id={recordId}
+                                        saved={saved}
+                                        onedit={stopPoller}></c-table>
+                            </template>
                         </template>
                     </template>
                     <template if:true={displayAlerts}>

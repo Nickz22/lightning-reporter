@@ -6,7 +6,7 @@ public with sharing class DTO {
         @AuraEnabled public List<NoteDTO> alerts {get; set;} 
 
         public ContextDTO(List<SubjectDTO> subjects, List<NoteDTO> alerts){
-            this.subjects = subjects;
+            this.subjects = subjects.isEmpty() ? new List<SubjectDTO>() : subjects;
             this.alerts = alerts;
         }
     }

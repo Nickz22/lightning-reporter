@@ -16,6 +16,7 @@ export default class LightningReporter extends LightningElement {
     @track alerts = [];
     @track alert = false;
     @track displayAlerts = false;
+    @track isLoading = false;
     selectableFields;
     selectableFieldByName = new Map();
     childTypes;
@@ -25,8 +26,10 @@ export default class LightningReporter extends LightningElement {
     isEditingRow = false;
 
     set selectedType(value){
-        this._selectedType = value;
-        this.iconName = `standard:${this._selectedType?.toLowerCase()}`;
+        if(value !== this._selectedType){ 
+            this._selectedType = value;
+            this.iconName = `standard:${this._selectedType?.toLowerCase()}`;
+        }
     }
 
     get selectedType(){
@@ -42,9 +45,10 @@ export default class LightningReporter extends LightningElement {
                     if(this.isEditingRow || this.childRecords?.length === 0){ 
                         return; 
                     }
-                    this.getChildRecords();   
+                    this.getChildRecords(false);
                 } catch (error) {
                     this.showNotification('Error getting records', error.message, 'error');
+                    this.isLoading = false;
                 }
             }, 10000);
         }
@@ -58,7 +62,6 @@ export default class LightningReporter extends LightningElement {
         }
         if(data){
             this.childTypes = data;
-            this.selectedType = this.childTypes[0];
             this.getPinnedViews();
         }else{
             console.error('no data returned from getChildTypes');
@@ -86,7 +89,8 @@ export default class LightningReporter extends LightningElement {
 
     imperativeRefresh(){
         this.imperative = true;
-        this.getChildRecords();
+        this.isLoading = true;
+        this.getChildRecords(true);
     }
 
     focusOnAlertView(event){
@@ -94,10 +98,11 @@ export default class LightningReporter extends LightningElement {
         this.selectableFields = [];
         this.selectedFields = [];
         this.displayAlerts = false;
-        this.getChildRecords();
+        this.getChildRecords(true);
     }
 
-    getChildRecords(){
+    getChildRecords(isLoading){
+        this.isLoading = isLoading;
         // this setup needs to be done for every fetch
         if(!this.selectableFields || this.selectableFields.length === 0){
             this.getSelectableFields();
@@ -113,33 +118,39 @@ export default class LightningReporter extends LightningElement {
             fieldsToGet: this.selectedFields
         })
             .then(context => {
-                let sObjects = context.subjects;
-                for(let i=0; i<sObjects.length; i++){
-                    if(!sObjects[i].notes){
-                        continue;
+                try {
+                    let sObjects = context.subjects;
+                    for(let i=0; i<sObjects.length; i++){
+                        if(!sObjects[i].notes){
+                            continue;
+                        }
                     }
-                }
 
-                let alerts = [];
-                for(let i=0; i<context.alerts.length; i++){
-                    let alert = {};
-                    for(let key in context.alerts[i]){
-                        alert[key] = context.alerts[i][key];
+                    let alerts = [];
+                    for(let i=0; i<context.alerts.length; i++){
+                        let alert = {};
+                        for(let key in context.alerts[i]){
+                            alert[key] = context.alerts[i][key];
+                        }
+                        alert.url = alert.note.CreatedBy.FullPhotoUrl;
+                        alert.time = alert.note.CreatedDate;
+                        alerts.push(alert);
                     }
-                    alert.url = alert.note.CreatedBy.FullPhotoUrl;
-                    alert.time = alert.note.CreatedDate;
-                    alerts.push(alert);
-                }
-                this.alerts = alerts
-                this.alert = this.alerts.length > 0;
-                this.childRecords = sObjects;
+                    this.alerts = alerts
+                    this.alert = this.alerts.length > 0;
+                    this.childRecords = sObjects;
 
-                if(this.imperative){
-                    this.showNotification('Success', 'Records retrieved', 'success');
-                    this.imperative = false;
+                    if(this.imperative){
+                        this.showNotification('Success', 'Records retrieved', 'success');
+                        this.imperative = false;
+                    }
+                    this.isLoading = false;
+                } catch (error) {
+                    console.log('error');
                 }
             }).catch(error => {
-                this.showNotification('Error getting records', error.body.message, 'error');
+                this.isLoading = false;
+                this.showNotification('Error getting records', error.body?.message, 'error');
             })
     }
 
@@ -159,7 +170,7 @@ export default class LightningReporter extends LightningElement {
                     this.selectedType = this.pinnedViews[0].objectName;
                     this.selectedFields = this.pinnedViews[0].defaultFields;
                     this.selectableFields = this.pinnedViews[0].defaultFields;
-                    this.getChildRecords();
+                    this.getChildRecords(true);
                 }else{
                     this.selectedType = null;
                     this.selectedFields = [];
@@ -179,7 +190,7 @@ export default class LightningReporter extends LightningElement {
             let pinnedView = this.pinnedViews.find(view => view.objectName === this.selectedType);
             this.selectedFields = pinnedView.defaultFields;
             this.selectableFields = pinnedView.defaultFields;
-            this.getChildRecords();
+            this.getChildRecords(true);
         } catch (error) {
             this.showNotification('Error setting view', error.message, 'error');
         }
@@ -236,6 +247,8 @@ export default class LightningReporter extends LightningElement {
 
     handleChildTypeChange(event){
         this.selectedType = event.target.value;
+        this.isLoading = true;
+        this.childRecords = [];
         this.getSelectableFields();
     }
 
@@ -256,7 +269,7 @@ export default class LightningReporter extends LightningElement {
             this.saved = !this.saved;
 
         }).catch(error => {
-            this.showNotification('We hit a snag', error.body.message, 'error');
+            this.showNotification('We hit a snag', error.body?.message, 'error');
         })
 
         this.isEditingRow = false;
@@ -285,7 +298,7 @@ export default class LightningReporter extends LightningElement {
                 })
                 .catch(error => {
                     // get message from error
-                    this.showNotification('Error pinning layout', error.body.message, 'error');
+                    this.showNotification('Error pinning layout', error.body?.message, 'error');
                 })
         }catch (error) {
             this.showNotification('Error pinning view', error.message, 'error');
@@ -315,13 +328,14 @@ export default class LightningReporter extends LightningElement {
                 this.selectedType = this.pinnedViews[0].objectName;
                 this.selectedFields = this.pinnedViews[0].defaultFields;
                 this.selectableFields = this.pinnedViews[0].defaultFields;
-                this.getChildRecords();
+                this.isLoading = true;
+                this.getChildRecords(true);
             }
 
             deletePin({objectName: event.target.dataset.id})
                 .catch(error => {
                     this.getPinnedViews();
-                    this.showNotification('Error removing pin', error.body.message, 'error');
+                    this.showNotification('Error removing pin', error.body?.message, 'error');
                 })
         } catch (error) {
             this.showNotification('Error removing pin', error.message, 'error');
@@ -335,7 +349,7 @@ export default class LightningReporter extends LightningElement {
     showNotification(title, message, variant) {
         const evt = new ShowToastEvent({
             title: title,
-            message: message,
+            message: message ? message : 'unhandled exception',
             variant: variant,
         });
         this.dispatchEvent(evt);
@@ -343,5 +357,9 @@ export default class LightningReporter extends LightningElement {
 
     stopPoller(){
         this.isEditingRow = true;
+    }
+
+    checkForSpinnerHardEscape(event){
+        event.target.classList.add('slds-hide');
     }
 }
