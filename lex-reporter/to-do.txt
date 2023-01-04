@@ -1,6 +1,5 @@
 /**
  *
- * still having issues with selectable fields not changing with selected type
  * header / cells are misaligned again (not sure how to repro)
  * push usage metrics to a packaging org
  * optimize a bit to see how low the render time can get
