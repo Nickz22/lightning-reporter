@@ -24,7 +24,9 @@
                         <lightning-input-rich-text value={rteContent} 
                                                 onkeyup={handleRteKeyUp}
                                                 onkeydown={handleRteKeyDown}
-                                                disabled-categories="ALIGN_TEXT,FORMAT_FONT,FORMAT_BODY">
+                                                disabled-categories="ALIGN_TEXT,FORMAT_FONT,FORMAT_BODY"
+                                                placeholder="ESC to close | CMD+ENTER to save | FN for emojis"
+                                                variant="bottom-toolbar">
                         </lightning-input-rich-text>
                         <div class="user-search">
                             <template for:each={users} for:item="user">

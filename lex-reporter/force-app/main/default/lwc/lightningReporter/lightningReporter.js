@@ -249,6 +249,8 @@ export default class LightningReporter extends LightningElement {
         this.selectedType = event.target.value;
         this.isLoading = true;
         this.childRecords = [];
+        this.selectableFields = [];
+        this.selectedFields = [];
         this.getSelectableFields();
     }
 
@@ -349,7 +351,7 @@ export default class LightningReporter extends LightningElement {
     showNotification(title, message, variant) {
         const evt = new ShowToastEvent({
             title: title,
-            message: message ? message : 'unhandled exception',
+            message: message != null ? message : 'unhandled exception',
             variant: variant,
         });
         this.dispatchEvent(evt);
