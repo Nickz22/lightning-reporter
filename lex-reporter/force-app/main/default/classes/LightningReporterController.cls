@@ -1,9 +1,6 @@
 public class LightningReporterController {
     final static String USER_TYPE = 'user';
-    /**
-     * should prioritize objects for which views have been saved 
-     * only gets child types with `Notes` child relationship
-     */
+    
     @AuraEnabled(cacheable=true)
     public static List<String> getChildTypes(Id recordId){
         Set<String> childTypes = new Set<String>();
@@ -26,7 +23,7 @@ public class LightningReporterController {
                 }
             }   
         } catch (Exception e) {
-            throw new AuraHandledException(e.getMessage());
+            throwAuraException(e);
         }
         
         return new List<String>(childTypes);
@@ -49,12 +46,10 @@ public class LightningReporterController {
                     }
                 }                
             }
-
-
-
+            
             context = new DTO.ContextDTO(subjects, alerts);
         } catch (Exception e) {
-            throw new AuraHandledException(e.getMessage() +' ['+e.getStackTraceString()+']');
+            throwAuraException(e);
         }
         return context;
     }
@@ -122,9 +117,6 @@ public class LightningReporterController {
         List<String> lookupsToParent = getLookupFieldsPointingToParentId(typeName, contextRecordId);
         Map<String, Schema.SObjectField> fieldsMap = Cache.globalDescribe.get(typeName).getDescribe().fields.getMap();
         List<String> fieldApiNames = new List<String>();
-        if(fieldsMap.containsKey('Name')){
-            fieldApiNames.add('Name');
-        }
         for(DTO.FieldDTO field : fieldsToGet){
             fieldApiNames.add(field.name);
             if(field.type == 'reference' && 
@@ -134,26 +126,33 @@ public class LightningReporterController {
                     .getDescribe()
                     .fields.getMap().containsKey('Name') &&
                 typeName.toLowerCase() != 'opportunity' && field.name.toLowerCase() != 'contactid'){
+                    
+                // replace last instance of 'id' in field.name with '.name'
                 String lookupNameField = field.isCustom ? 
-                    field.name.toLowerCase().replace('__c', '__r.name') : 
-                    field.name.toLowerCase().replace('id', '.name');
+                                            field.name.toLowerCase().replace('__c', '__r.name') : 
+                                            field.name.substring(0, field.name.length()-2)+'.Name';
                 fieldApiNames.add(lookupNameField);
             }
         }
-        
+        if(fieldsMap.containsKey('Name') && !fieldApiNames.contains('Name')){
+            fieldApiNames.add('Name');
+        }
+        String whereClause = getWhereClause(lookupsToParent, contextRecordId);
+        System.debug(JSON.serialize(fieldApiNames));
+        System.debug(JSON.serialize(whereClause));
         String query = 'SELECT '+String.join(fieldApiNames, ',')+',(SELECT '+
                                                                         'Body,CreatedBy.Name,CreatedBy.FullPhotoUrl,CreatedDate,ParentId '+
                                                                     'FROM Notes ORDER BY CreatedDate desc) '+
                         'FROM '+typeName+' '+
-                        getWhereClause(lookupsToParent, contextRecordId)+' '+
+                        whereClause+' '+
                         'ORDER BY LastModifiedDate desc';
         System.debug(query);
 
-        Map<String, Schema.SObjectField> tokenByFieldName = Schema.getGlobalDescribe()
-                                                        .get(typeName)
-                                                        .getDescribe().fields.getMap();
         List<SObject> records = Database.query(query);
         Set<String> recordIds = new Set<String>();
+        Map<String, Schema.SObjectField> tokenByFieldName = Schema.getGlobalDescribe()
+                                                            .get(typeName)
+                                                            .getDescribe().fields.getMap();
         for(SObject record : records){
             recordIds.add(record.Id);
         }
@@ -199,7 +198,7 @@ public class LightningReporterController {
                 )));
             }
         } catch (Exception e) {
-            throw new AuraHandledException(e.getMessage());
+            throwAuraException(e);
         }
 
         return configs;
@@ -222,7 +221,7 @@ public class LightningReporterController {
     
             fields = getFieldDTOs(typeName, new List<String>());            
         } catch (Exception e) {
-            throw new AuraHandledException(e.getMessage());
+            throwAuraException(e);
         }
 
         return fields;
@@ -245,7 +244,7 @@ public class LightningReporterController {
                 Default_Fieldset__c = commaSeparatedFields.removeEnd(',')
             );
         } catch (Exception e) {
-            throw new AuraHandledException(e.getMessage());
+            throwAuraException(e);
         }
     }
 
@@ -258,7 +257,7 @@ public class LightningReporterController {
                                                             LIMIT 1];
             delete config;
         } catch (Exception e) {
-            throw new AuraHandledException(e.getMessage());
+            throwAuraException(e);
         }
     }
 
@@ -373,5 +372,11 @@ public class LightningReporterController {
         }
 
         return fields;
+    }
+
+    private static void throwAuraException(Exception e){
+        AuraHandledException ae = new AuraHandledException(e.getMessage() + '['+e.getStackTraceString()+']');
+        ae.setMessage(e.getMessage() + '['+e.getStackTraceString()+']');
+        throw ae;
     }
 }
