@@ -151,7 +151,8 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     }
 
     handleUserSelect(event){
-        this.selectLookupUser(event.target.childNodes[0].data);
+        console.dir(event.target.childNodes[1]);
+        this.selectLookupUser(event.target.childNodes[1].textContent);
     }
 
     selectLookupUser(userName){

@@ -36,7 +36,8 @@
                                         onclick={handleUserSelect}
                                         tabindex="-1"
                                         onkeyup={handleUserKeyUp}>
-                                        {user.Name}
+                                        <lightning-avatar src={user.FullPhotoUrl} size="x-small"></lightning-avatar>
+                                        <p>{user.Name}</p>
                                     </div>
                                 </template>
                             </template>

@@ -22,6 +22,15 @@
 .lookup-user{
     border-bottom: 1px solid black;
     cursor: pointer;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 0.5em;
+    background-color: white;
+}
+
+.lookup-user > p {
+    padding-left: .5em;
 }
 
 .lookup-user:hover{
