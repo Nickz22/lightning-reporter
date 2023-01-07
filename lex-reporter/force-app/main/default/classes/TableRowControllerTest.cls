@@ -20,13 +20,13 @@ public class TableRowControllerTest {
         Contact con = [SELECT Id FROM Contact LIMIT 1];
 
         Test.startTest();
-        Note n = TableRowController.saveNote(noteBody, con.Id, acc.Id);
+        DTO.NoteDTO n = TableRowController.saveNote(noteBody, con.Id, acc.Id);
         Test.stopTest();
 
-        System.assertEquals(noteBody, n.Body);
+        System.assertEquals(noteBody, n.note.Body);
         System.assertEquals(1, [SELECT count() 
                                   FROM Lightning_Reporter_Note_Metadata__c 
-                                  WHERE Note_Id__c = :n.Id
+                                  WHERE Note_Id__c = :n.note.Id
                                         AND Mentioned_User__c = :UserInfo.getUserId()]);
     }
 
@@ -39,13 +39,13 @@ public class TableRowControllerTest {
         Contact con = [SELECT Id FROM Contact LIMIT 1];
 
         Test.startTest();
-        Note n = TableRowController.saveNote(noteBody, con.Id, acc.Id);
+        DTO.NoteDTO n = TableRowController.saveNote(noteBody, con.Id, acc.Id);
         Test.stopTest();
 
-        System.assertEquals(noteBody, n.Body);
+        System.assertEquals(noteBody, n.note.Body);
         System.assertEquals(0, [SELECT count() 
                                   FROM Lightning_Reporter_Note_Metadata__c 
-                                  WHERE Note_Id__c = :n.Id
+                                  WHERE Note_Id__c = :n.note.Id
                                         AND Mentioned_User__c = :UserInfo.getUserId()]);
     }
 
@@ -57,11 +57,11 @@ public class TableRowControllerTest {
         Account acc = [SELECT Id FROM Account LIMIT 1];
         Contact con = [SELECT Id FROM Contact LIMIT 1];
 
-        Note n = TableRowController.saveNote(noteBody, con.Id, acc.Id);
+        DTO.NoteDTO n = TableRowController.saveNote(noteBody, con.Id, acc.Id);
         DTO.NoteMetadataDTO view = new DTO.NoteMetadataDTO();
-        view.NoteId = n.Id;
+        view.NoteId = n.note.Id;
         view.ViewedById = UserInfo.getUserId();
-        view.NoteParentId = n.ParentId;
+        view.NoteParentId = n.note.ParentId;
         view.TopMostId = acc.Id;
 
         Test.startTest();

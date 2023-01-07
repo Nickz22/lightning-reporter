@@ -4,10 +4,10 @@ public with sharing class TableRowController {
      * @param content - Note body
      * @param parentId - immediate parent of the Note
      * @param topMostId - `recordId` context of the Lex Reporter when this Note was saved 
-     * @return  `Note`
+     * @return  `DTO.NoteDTO`
      */
     @AuraEnabled
-    public static Note saveNote(String content, String parentId, String topMostId){
+    public static DTO.NoteDTO saveNote(String content, String parentId, String topMostId){
 
         Note n;
         try {
@@ -59,7 +59,7 @@ public with sharing class TableRowController {
         } catch (Exception e) {
             throwAuraException(e);
         }
-        return n;
+        return new DTO.NoteDTO(n, new List<Lightning_Reporter_Note_Metadata__c>());
     }
 
     @AuraEnabled

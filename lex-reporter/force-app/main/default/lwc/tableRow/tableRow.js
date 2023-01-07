@@ -62,15 +62,14 @@ export default class TableRow extends NavigationMixin(LightningElement) {
                 parentId: this._sObject.record.Id,
                 topMostId: this.topMostId
             })
-            .then(result => {
-                console.log(result.CreatedBy.FullPhotoUrl);
+            .then(noteDTO => {
                 let currentAvatars = this.avatars;
                 currentAvatars.splice(0,0,{
-                    "url" : result.CreatedBy.FullPhotoUrl,
-                    "name" : result.CreatedBy.Name,
-                    "body" : result.Body,
-                    "id" : result.Id,
-                    "time" : result.CreatedDate
+                    "url" : noteDTO.note.CreatedBy.FullPhotoUrl,
+                    "name" : noteDTO.note.CreatedBy.Name,
+                    "body" : noteDTO.note.Body,
+                    "id" : noteDTO.note.Id,
+                    "time" : noteDTO.localCreatedDate
                 });
                 this.avatars = currentAvatars;
                 this.showNotification('Note Saved', '', 'success');
