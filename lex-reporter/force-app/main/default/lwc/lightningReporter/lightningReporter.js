@@ -7,7 +7,6 @@ import pinLayout from '@salesforce/apex/LightningReporterController.pinLayout'
 import getPinnedViews from '@salesforce/apex/LightningReporterController.getPinnedViews';
 import deletePin from '@salesforce/apex/LightningReporterController.deletePin';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import { getJsTime } from 'c/util';
 
 export default class LightningReporter extends LightningElement {
     @api recordId;

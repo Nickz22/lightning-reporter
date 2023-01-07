@@ -1,15 +1,20 @@
 /**
+ * Security implementation 
+ ** FLS checks everywhere
  *
- * header / cells are misaligned again (not sure how to repro)
- * push usage metrics to a packaging org
- * optimize a bit to see how low the render time can get
- * almost there...
+ * Usage Measurement
+ ** how many users are pinning views
+ ** how many users are commenting
+ ** how often are users saving record changes
  *
- ***** each new child type brings its own pinned views (requires ability to name layouts) (v2)
- ***** hotkey for all functions (v2) (ultra-key-driven-navigation)
- ***** field search via text would be nice (v2)
- ***** table ordering (v2)
- ***** threaded replies (v2)
- ***** multiple table views at one time (v2) 
- ******* make default configurations dependent on the panel, so that you can configure > 1 layout configurations per record page
+ * Jest at some point
+ * 
+ * V2
+ ***** support for Notes under Tasks 
+ ***** hotkey for all functions
+ ***** field search via text would be nice
+ ***** table ordering
+ ***** threaded replies
+ ***** multiple table views at one time
+ ***** access children of children from parent (i.e. opportunity line items from opportunity.account page)
  */ 
