@@ -79,7 +79,7 @@
 
 .note-time{
     text-align: right;
-    font-size: 0.8em;
+    font-size: .8em;
     color: lightgray;
     transition: all 0.1s ease-in-out;
 }

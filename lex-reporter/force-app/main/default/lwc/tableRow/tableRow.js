@@ -217,7 +217,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     }
 
     set sObject(value){
-
+        debugger;
         this._sObject = value;
         this.cells = this.getTableCellValues();
         let hasAlert = false;
@@ -231,7 +231,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
                     "name" : noteDto.note.CreatedBy.Name,
                     "body" : noteDto.note.Body,
                     "id" : noteDto.note.Id,
-                    "time" : noteDto.note.CreatedDate
+                    "time" : new Date(noteDto.localCreatedDate)
                 };   
                 let views = [];
                 // for each value in value.noteMdByNoteId[value.notes[i].Id], set a `leftStyle` property equal to the value of the index
@@ -356,17 +356,22 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     }
 
     toggleRowComments(){
-        this.previewAvatar.unreadStyle = "";
-        if(this.notes.length > 0){
-            this.notes = [];  
-            // set table row class to table-row-expanded
-            let tableRow = this.template.querySelector('.table-row');
-            tableRow.classList.remove('table-row-expanded');    
-        }else{
-            this.notes = this.avatars;
-            // set table row class to table-row-expanded
-            let tableRow = this.template.querySelector('.table-row');
-            tableRow.classList.add('table-row-expanded');
+
+        try {
+            this.previewAvatar.unreadStyle = "";
+            if(this.notes.length > 0){
+                this.notes = [];  
+                // set table row class to table-row-expanded
+                let tableRow = this.template.querySelector('.table-row');
+                tableRow.classList.remove('table-row-expanded');    
+            }else{
+                this.notes = this.avatars;
+                // set table row class to table-row-expanded
+                let tableRow = this.template.querySelector('.table-row');
+                tableRow.classList.add('table-row-expanded');
+            }   
+        } catch (error) {
+            this.showNotification('Error', error.message, 'error');
         }
     }
 

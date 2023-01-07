@@ -7,6 +7,7 @@ import pinLayout from '@salesforce/apex/LightningReporterController.pinLayout'
 import getPinnedViews from '@salesforce/apex/LightningReporterController.getPinnedViews';
 import deletePin from '@salesforce/apex/LightningReporterController.deletePin';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { getJsTime } from 'c/util';
 
 export default class LightningReporter extends LightningElement {
     @api recordId;
@@ -133,7 +134,8 @@ export default class LightningReporter extends LightningElement {
                             alert[key] = context.alerts[i][key];
                         }
                         alert.url = alert.note.CreatedBy.FullPhotoUrl;
-                        alert.time = alert.note.CreatedDate;
+                        alert.time = new Date(alert.localCreatedDate);
+                        alert.timeStamp = alert.note.localCreatedDate;
                         alerts.push(alert);
                     }
                     this.alerts = alerts
@@ -146,7 +148,7 @@ export default class LightningReporter extends LightningElement {
                     }
                     this.isLoading = false;
                 } catch (error) {
-                    console.log('error');
+                    this.showNotification('Error getting records', error.message, 'error');
                 }
             }).catch(error => {
                 this.isLoading = false;
@@ -157,15 +159,7 @@ export default class LightningReporter extends LightningElement {
     getPinnedViews(){
         getPinnedViews()
             .then(result => {
-                this.pinnedViews = []; 
-                // copy each param in result into new instance of pinnedView
-                for(let i=0; i<result.length; i++){
-                    let pinnedView = {};
-                    for(let key in result[i]){
-                        pinnedView[key] = result[i][key];
-                    }
-                    this.pinnedViews.push(pinnedView);
-                }
+                this.pinnedViews = [...result]; 
                 if(this.pinnedViews.length > 0){
                     this.selectedType = this.pinnedViews[0].objectName;
                     this.selectedFields = this.pinnedViews[0].defaultFields;
@@ -282,7 +276,7 @@ export default class LightningReporter extends LightningElement {
 
             for(let i=0; i<this.pinnedViews.length; i++){
                 if(this.pinnedViews[i].objectName === this.selectedType){
-                    this.showNotification('You already pinned a view for this object', 'Please remove the existing view to create a new one for this object type', 'error');
+                    this.showNotification('View already exists', 'Please remove the existing view to create a new view for this object', 'error');
                     return;
                 }
             }

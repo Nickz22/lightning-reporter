@@ -115,7 +115,7 @@
                                                                         data-id={alert.parentSObjectType}></lightning-formatted-rich-text>
                                         <div class="note-footer" data-id={alert.parentSObjectType}>
                                             <div class="note-time">
-                                                {alert.time}
+                                                <lightning-relative-date-time value={alert.time}></lightning-relative-date-time>
                                             </div>
                                         </div>
                                     </lightning-layout-item>

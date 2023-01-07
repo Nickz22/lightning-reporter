@@ -138,8 +138,7 @@ public class LightningReporterController {
             fieldApiNames.add('Name');
         }
         String whereClause = getWhereClause(lookupsToParent, contextRecordId);
-        System.debug(JSON.serialize(fieldApiNames));
-        System.debug(JSON.serialize(whereClause));
+
         String query = 'SELECT '+String.join(fieldApiNames, ',')+',(SELECT '+
                                                                         'Body,CreatedBy.Name,CreatedBy.FullPhotoUrl,CreatedDate,ParentId '+
                                                                     'FROM Notes ORDER BY CreatedDate desc) '+
@@ -150,24 +149,15 @@ public class LightningReporterController {
 
         List<SObject> records = Database.query(query);
         Set<String> recordIds = new Set<String>();
-        Map<String, Schema.SObjectField> tokenByFieldName = Schema.getGlobalDescribe()
+        Map<String, Schema.SObjectField> tokenByFieldName = Cache.globalDescribe
                                                             .get(typeName)
-                                                            .getDescribe().fields.getMap();
+                                                            .getDescribe()
+                                                            .fields.getMap();
         for(SObject record : records){
             recordIds.add(record.Id);
         }
         Map<Id, List<Lightning_Reporter_Note_Metadata__c>> noteMdByParentId = getNoteMdByParentId(recordIds);
         for(SObject record : records){
-            for(String field : fieldApiNames){
-                if(field.contains('.')){
-                    continue;
-                }
-                // if field is editable and null, explicitly set to `null`
-                if(record.get(field) == null && 
-                    tokenByFieldName.get(field).getDescribe().isUpdateable()){
-                    record.put(field, null);
-                }
-            }
             subjects.add(new DTO.SubjectDTO(
                 record, 
                 getNoteDtos(
@@ -185,13 +175,10 @@ public class LightningReporterController {
     public static List<DTO.TableConfigDTO> getPinnedViews(){
         List<DTO.TableConfigDTO> configs = new List<DTO.TableConfigDTO>();
         try {
-
-            List<Layout_Configuration__c> tableConfigs = [SELECT Object__c,Default_Fieldset__c
-                                                                        FROM Layout_Configuration__c
-                                                                        WHERE CreatedById = :UserInfo.getUserId()
-                                                                        ORDER BY CreatedDate ASC];
-
-            for(Layout_Configuration__c config : tableConfigs){
+            for(Layout_Configuration__c config : [SELECT Object__c,Default_Fieldset__c
+                                                    FROM Layout_Configuration__c
+                                                    WHERE CreatedById = :UserInfo.getUserId()
+                                                    ORDER BY CreatedDate ASC]){
                 configs.add(new DTO.TableConfigDTO(
                     config.Object__c, 
                     getFieldDTOs(config.Object__c, config.Default_Fieldset__c.split(',')
@@ -211,8 +198,8 @@ public class LightningReporterController {
         try {
     
             List<Layout_Configuration__c> defaultConfig = [SELECT Default_Fieldset__c 
-                                                                        FROM Layout_Configuration__c
-                                                                        WHERE Object__c =: typeName];
+                                                            FROM Layout_Configuration__c
+                                                            WHERE Object__c =: typeName];
             String defaultFields = (
                 defaultConfig.isEmpty() ? 
                 '' : 
@@ -229,7 +216,11 @@ public class LightningReporterController {
 
     @AuraEnabled
     public static void saveRecords(List<SObject> sObjects){
-        List<Database.SaveResult> results = Database.update(sObjects, false);
+        try{
+            update sObjects;
+        } catch (Exception e) {
+            throwAuraException(e);
+        }
     }
 
     @AuraEnabled
@@ -251,10 +242,11 @@ public class LightningReporterController {
     @AuraEnabled
     public static void deletePin(String objectName){
         try {
-            Layout_Configuration__c config = [SELECT Id FROM Layout_Configuration__c
-                                                            WHERE Object__c =: objectName
-                                                            AND CreatedById =: UserInfo.getUserId()
-                                                            LIMIT 1];
+            Layout_Configuration__c config = [SELECT Id 
+                                                FROM Layout_Configuration__c
+                                                WHERE Object__c =: objectName
+                                                    AND CreatedById =: UserInfo.getUserId()
+                                                LIMIT 1];
             delete config;
         } catch (Exception e) {
             throwAuraException(e);
@@ -297,7 +289,7 @@ public class LightningReporterController {
     private static List<String> getLookupFieldsPointingToParentId(String childTypeName, Id parentId){
 
         List<String> lookupsToParent = new List<String>();
-        Map<String, Schema.SObjectField> fieldTokenByName = Schema.getGlobalDescribe()
+        Map<String, Schema.SObjectField> fieldTokenByName = Cache.globalDescribe
                                                             .get(childTypeName)
                                                             .getDescribe()
                                                             .fields.getMap();
