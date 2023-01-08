@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Viewed_By__c</fullName>
+    <fullName>Mentioned_User__c</fullName>
     <deleteConstraint>SetNull</deleteConstraint>
     <externalId>false</externalId>
-    <inlineHelpText>Tracks who viewed a Note in the Lightning Reporter component</inlineHelpText>
-    <label>Viewed By</label>
+    <inlineHelpText>A user who was mentioned in a Lex Reporter Note</inlineHelpText>
+    <label>Mentioned User</label>
     <referenceTo>User</referenceTo>
-    <relationshipName>Lightning_Reporter_Note_Metadata</relationshipName>
+    <relationshipName>Note_Metadata1</relationshipName>
     <required>false</required>
     <trackTrending>false</trackTrending>
     <type>Lookup</type>
