@@ -25,7 +25,7 @@ public class TableRowControllerTest {
 
         System.assertEquals(noteBody, n.note.Body);
         System.assertEquals(1, [SELECT count() 
-                                  FROM Lightning_Reporter_Note_Metadata__c 
+                                  FROM Note_Metadata__c 
                                   WHERE Note_Id__c = :n.note.Id
                                         AND Mentioned_User__c = :UserInfo.getUserId()]);
     }
@@ -44,7 +44,7 @@ public class TableRowControllerTest {
 
         System.assertEquals(noteBody, n.note.Body);
         System.assertEquals(0, [SELECT count() 
-                                  FROM Lightning_Reporter_Note_Metadata__c 
+                                  FROM Note_Metadata__c 
                                   WHERE Note_Id__c = :n.note.Id
                                         AND Mentioned_User__c = :UserInfo.getUserId()]);
     }
@@ -69,7 +69,7 @@ public class TableRowControllerTest {
         Test.stopTest();
 
         System.assertEquals(1, [SELECT count()
-                                FROM Lightning_Reporter_Note_Metadata__c
+                                FROM Note_Metadata__c
                                 WHERE Viewed_By__c=: UserInfo.getUserId()]);
     }
 }

@@ -8,32 +8,32 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>Lightning_Reporter_Note_Metadata__c.Note_Id__c</field>
+        <field>Note_Metadata__c.Note_Id__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>Lightning_Reporter_Note_Metadata__c.Note_Parent_Id__c</field>
+        <field>Note_Metadata__c.Note_Parent_Id__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>Lightning_Reporter_Note_Metadata__c.Unique_Id__c</field>
+        <field>Note_Metadata__c.Unique_Id__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>Lightning_Reporter_Note_Metadata__c.Viewed_By__c</field>
+        <field>Note_Metadata__c.Viewed_By__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>Lightning_Reporter_Note_Metadata__c.Mentioned_User__c</field>
+        <field>Note_Metadata__c.Mentioned_User__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>Lightning_Reporter_Note_Metadata__c.Type__c</field>
+        <field>Note_Metadata__c.Type__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -58,7 +58,7 @@
         <allowEdit>true</allowEdit>
         <allowRead>true</allowRead>
         <modifyAllRecords>true</modifyAllRecords>
-        <object>Lightning_Reporter_Note_Metadata__c</object>
+        <object>Note_Metadata__c</object>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
     <tabSettings>

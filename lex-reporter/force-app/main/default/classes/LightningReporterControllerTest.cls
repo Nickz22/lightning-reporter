@@ -40,10 +40,10 @@ public with sharing class LightningReporterControllerTest {
     static void givenContactListOnAccountPageWithAlerts_verifyContextData(){
         Account testAccount = [SELECT Id, (SELECT Id FROM Contacts LIMIT 1) FROM Account LIMIT 1];
         List<Note> notes = [SELECT Id, ParentId FROM Note];
-        List<Lightning_Reporter_Note_Metadata__c> noteMetadata = new List<Lightning_Reporter_Note_Metadata__c>();
+        List<Note_Metadata__c> noteMetadata = new List<Note_Metadata__c>();
         for(Note note : notes){
             noteMetadata.add(
-                new Lightning_Reporter_Note_Metadata__c(
+                new Note_Metadata__c(
                     Note_Id__c = note.Id,
                     Mentioned_User__c = UserInfo.getUserId(),
                     Type__c = 'Mention',

@@ -2,6 +2,13 @@
     <lightning-card>
         <!-- classes not allowed on lightning-card -->
         <div class="report-box"> 
+            <!-- if {hasPermission} is false, show text explainer -->
+            <template if:false={hasPermission}>
+                <div class="no-permission">
+                    <h1>Permission Required</h1>
+                    <p>You need the Lightning Reporter permission set to view this page.</p>
+                </div>
+            </template>
             <lightning-layout multiple-rows>
                 <!-- TABLE ACTIONS -->
                 <lightning-layout-item size="3" 

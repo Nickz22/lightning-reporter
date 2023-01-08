@@ -1,4 +1,5 @@
 import { LightningElement, api, wire, track } from 'lwc';
+import userHasPermission from '@salesforce/apex/LightningReporterController.userHasPermission';
 import getChildTypes from '@salesforce/apex/LightningReporterController.getChildTypes';
 import getContext from '@salesforce/apex/LightningReporterController.getContext'
 import getFieldsFromType from '@salesforce/apex/LightningReporterController.getFieldsFromType'
@@ -40,7 +41,6 @@ export default class LightningReporter extends LightningElement {
         if(!this.polling){
             this.polling = true;
             setInterval(() => {
-                console.log('polling');
                 try {
                     if(this.isEditingRow || this.childRecords?.length === 0){ 
                         return; 
@@ -60,12 +60,21 @@ export default class LightningReporter extends LightningElement {
             console.error('error getting default child records: '+error)
             return;
         }
-        if(data){
-            this.childTypes = data;
-            this.getPinnedViews();
-        }else{
-            console.error('no data returned from getChildTypes');
-        }
+        userHasPermission()
+            .then(hasPermission => {
+                this.hasPermission = hasPermission;
+                if(hasPermission){
+                    if(data){
+                        this.childTypes = data;
+                        this.getPinnedViews();
+                    }else{
+                        console.error('no data returned from getChildTypes');
+                    }
+                }
+            })
+            .catch(error => {
+                this.showNotification('Error getting permissions', error.body?.message, 'error');
+            })
     }
 
     get options() {

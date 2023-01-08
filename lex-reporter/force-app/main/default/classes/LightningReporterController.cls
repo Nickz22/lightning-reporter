@@ -1,5 +1,20 @@
 public class LightningReporterController {
     final static String USER_TYPE = 'user';
+
+    @AuraEnabled
+    public static Boolean userHasPermission(){
+        Boolean hasPermission = false;
+        try {
+            hasPermission = [SELECT count() 
+                               FROM PermissionSetAssignment 
+                               WHERE PermissionSet.Name = 'Lightning_Reporter' 
+                                    AND AssigneeId = :UserInfo.getUserId()] > 0;
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
+        }
+
+        return hasPermission;
+    }
     
     @AuraEnabled(cacheable=true)
     public static List<String> getChildTypes(Id recordId){
@@ -13,13 +28,10 @@ public class LightningReporterController {
                     continue; 
                 }
                 for(Schema.ChildRelationship childOfChild : childType.getDescribe().getChildRelationships()){
-                    if(childOfChild.getChildSObject().getDescribe().getName() == 'Note'){
+                    if(childOfChild.getChildSObject().getDescribe().getName() == 'Note' && childType.getDescribe().isAccessible()){
                         childTypes.add(childTypeName);
                         break;
                     }
-                }
-                if(childTypes.contains(childTypeName)){
-                    continue;
                 }
             }   
         } catch (Exception e) {
@@ -54,25 +66,97 @@ public class LightningReporterController {
         return context;
     }
 
-    /**
-     * could still use work - currently unanswered mentions are not being caught 
-     * if a separate mention under same parent is viewed
-     */
-    private static List<DTO.NoteDTO> getAlertsForUser(Id contextRecordId){
-
-        List<Lightning_Reporter_Note_Metadata__c> noteMd = [SELECT Note_Id__c,Mentioned_User__c,Mentioned_User__r.Name,
-                                                                    Viewed_By__c,Viewed_By__r.Name,Type__c
-                                                              FROM Lightning_Reporter_Note_Metadata__c
-                                                             WHERE Reporter_Context_Record_Id__c = :contextRecordId
-                                                                AND (Viewed_By__c =: UserInfo.getUserId() OR Mentioned_User__c =: UserInfo.getUserId())
-                                                            ORDER BY CreatedDate DESC];
-        
-        Set<String> noteIds = new Set<String>();
-        for(Lightning_Reporter_Note_Metadata__c md : noteMd){
-            noteIds.add(md.Note_Id__c);
+    @AuraEnabled(cacheable=true)
+    public static List<DTO.TableConfigDTO> getPinnedViews(){
+        List<DTO.TableConfigDTO> configs = new List<DTO.TableConfigDTO>();
+        try {
+            for(Layout_Configuration__c config : new LayoutConfigurationSelector().selectConfigurationsCreatedByCurrentUser()){
+                configs.add(new DTO.TableConfigDTO(
+                    config.Object__c, 
+                    getFieldDTOs(config.Object__c, config.Default_Fieldset__c.split(',')
+                )));
+            }
+        } catch (Exception e) {
+            throwAuraException(e);
         }
 
-        List<Note> notes = [SELECT ParentId FROM Note WHERE Id IN :noteIds];
+        return configs;
+    }
+
+    @AuraEnabled
+    public static List<DTO.FieldDTO> getFieldsFromType(String typeName){
+
+        List<DTO.FieldDTO> fields = new List<DTO.FieldDTO>();
+        try {
+            fields = getFieldDTOs(typeName, new List<String>());            
+        } catch (Exception e) {
+            throwAuraException(e);
+        }
+
+        return fields;
+    }
+
+    @AuraEnabled
+    public static void saveRecords(List<SObject> sObjects){
+        try{
+            for(SObject record : sObjects){
+                if(record.getSObjectType().getDescribe().isUpdateable()){
+                    continue;
+                }else{
+                    throw new LightningReporterException('Update denied on ' + record.getSObjectType().getDescribe().getName());
+                }
+            }
+            update SecurityUtil.sanitizeForUpdate(sObjects);
+        } catch (Exception e) {
+            throwAuraException(e);
+        }
+    }
+
+    @AuraEnabled
+    public static void pinLayout(String objectName, List<DTO.FieldDTO> fields){
+        try {
+            String commaSeparatedFields = '';
+            for(DTO.FieldDTO f : fields){
+                commaSeparatedFields += f.name + ',';
+            }
+            if(Layout_Configuration__c.getSObjectType().getDescribe().isCreateable()){
+                insert new Layout_Configuration__c(
+                    Object__c = objectName,
+                    Default_Fieldset__c = commaSeparatedFields.removeEnd(',')
+                );
+            }else{
+                throw new LightningReporterException('Creation of Lightning Reporter Layout Configuration denied.');
+            }
+        } catch (Exception e) {
+            throwAuraException(e);
+        }
+    }
+
+    @AuraEnabled
+    public static void deletePin(String objectName){
+        try {
+            Layout_Configuration__c config = new LayoutConfigurationSelector().selectConfigurationByObjectAndCreatedByCurrentUser(objectName)[0];
+            if(Layout_Configuration__c.getSObjectType().getDescribe().isDeletable()){
+                delete config;
+            }else{
+                throw new LightningReporterException('Deletion of Lightning Reporter Layout Configuration denied.');
+            }
+        } catch (Exception e) {
+            throwAuraException(e);
+        }
+    }
+
+    // helpers
+    private static List<DTO.NoteDTO> getAlertsForUser(Id contextRecordId){
+
+        List<Note_Metadata__c> noteMd = new NoteMetadataSelector().selectByContextIdAndViewedOrMentionedByCurrentUser(contextRecordId);
+        
+        Set<Id> noteIds = new Set<Id>();
+        for(Note_Metadata__c md : noteMd){
+            noteIds.add((Id)md.Note_Id__c);
+        }
+
+        List<Note> notes = new NoteSelector().selectByIds(noteIds);
         Map<Id, List<Note>> notesByParentId = new Map<Id, List<Note>>();
         Map<Id, Note> noteById = new Map<Id, Note>();
         for(Note n : notes){
@@ -83,19 +167,19 @@ public class LightningReporterController {
             notesByParentId.get(n.ParentId).add(n);
         }
 
-        Map<Id, List<Lightning_Reporter_Note_Metadata__c>> noteMdByNoteParentId = new Map<Id, List<Lightning_Reporter_Note_Metadata__c>>();
-        for(Lightning_Reporter_Note_Metadata__c md : noteMd){
+        Map<Id, List<Note_Metadata__c>> noteMdByNoteParentId = new Map<Id, List<Note_Metadata__c>>();
+        for(Note_Metadata__c md : noteMd){
             if(!noteMdByNoteParentId.containsKey(noteById.get((Id)md.Note_Id__c).ParentId)){
-                noteMdByNoteParentId.put(noteById.get(md.Note_Id__c).ParentId, new List<Lightning_Reporter_Note_Metadata__c>());
+                noteMdByNoteParentId.put(noteById.get(md.Note_Id__c).ParentId, new List<Note_Metadata__c>());
             }
             noteMdByNoteParentId.get(noteById.get(md.Note_Id__c).ParentId).add(md);
         }
         
-        List<Lightning_Reporter_Note_Metadata__c> alerts = new List<Lightning_Reporter_Note_Metadata__c>();
+        List<Note_Metadata__c> alerts = new List<Note_Metadata__c>();
         Set<Id> alertIds = new Set<Id>();
         Set<Id> viewedNoteIds = new Set<Id>();
         for(Id noteParentId : notesByParentId.keyset()){
-            for(Lightning_Reporter_Note_Metadata__c md : noteMdByNoteParentId.get(noteParentId)){
+            for(Note_Metadata__c md : noteMdByNoteParentId.get(noteParentId)){
                 if(md.Type__c == 'View'){
                     viewedNoteIds.add(md.Note_Id__c);
                 }else if(md.Mentioned_User__c == UserInfo.getUserId() && !viewedNoteIds.contains(md.Note_Id__c)){
@@ -105,10 +189,7 @@ public class LightningReporterController {
             }
         }
 
-        return getNoteDtos([SELECT Id, Body, CreatedBy.Name, ParentId,
-                                    CreatedBy.FullPhotoUrl, CreatedDate
-                            FROM Note
-                            WHERE Id IN: alertIds], alerts);
+        return getNoteDtos(new NoteSelector().selectByIds(alertIds), alerts);
     }
 
     private static List<DTO.SubjectDTO> getRecordsFromTypeLookingUpToId(String typeName, Id contextRecordId, List<DTO.FieldDTO> fieldsToGet){
@@ -125,7 +206,8 @@ public class LightningReporterController {
                     .getReferenceTo()[0]
                     .getDescribe()
                     .fields.getMap().containsKey('Name') &&
-                typeName.toLowerCase() != 'opportunity' && field.name.toLowerCase() != 'contactid'){
+                typeName.toLowerCase() != 'opportunity' && field.name.toLowerCase() != 'contactid' &&
+                fieldsMap.get(field.name).getDescribe().isAccessible()){
                     
                 // replace last instance of 'id' in field.name with '.name'
                 String lookupNameField = field.isCustom ? 
@@ -156,7 +238,7 @@ public class LightningReporterController {
         for(SObject record : records){
             recordIds.add(record.Id);
         }
-        Map<Id, List<Lightning_Reporter_Note_Metadata__c>> noteMdByParentId = getNoteMdByParentId(recordIds);
+        Map<Id, List<Note_Metadata__c>> noteMdByParentId = getNoteMdByParentId(recordIds);
         for(SObject record : records){
             subjects.add(new DTO.SubjectDTO(
                 record, 
@@ -164,102 +246,19 @@ public class LightningReporterController {
                     record.getSObjects('Notes'), 
                     noteMdByParentId.containsKey(record.Id) ? 
                         noteMdByParentId.get(record.Id) : 
-                        new List<Lightning_Reporter_Note_Metadata__c>()
+                        new List<Note_Metadata__c>()
             )));
         }
 
         return subjects;
     }    
 
-    @AuraEnabled(cacheable=true)
-    public static List<DTO.TableConfigDTO> getPinnedViews(){
-        List<DTO.TableConfigDTO> configs = new List<DTO.TableConfigDTO>();
-        try {
-            for(Layout_Configuration__c config : [SELECT Object__c,Default_Fieldset__c
-                                                    FROM Layout_Configuration__c
-                                                    WHERE CreatedById = :UserInfo.getUserId()
-                                                    ORDER BY CreatedDate ASC]){
-                configs.add(new DTO.TableConfigDTO(
-                    config.Object__c, 
-                    getFieldDTOs(config.Object__c, config.Default_Fieldset__c.split(',')
-                )));
-            }
-        } catch (Exception e) {
-            throwAuraException(e);
-        }
-
-        return configs;
-    }
-
-    @AuraEnabled
-    public static List<DTO.FieldDTO> getFieldsFromType(String typeName){
-
-        List<DTO.FieldDTO> fields = new List<DTO.FieldDTO>();
-        try {
-    
-            List<Layout_Configuration__c> defaultConfig = [SELECT Default_Fieldset__c 
-                                                            FROM Layout_Configuration__c
-                                                            WHERE Object__c =: typeName];
-            String defaultFields = (
-                defaultConfig.isEmpty() ? 
-                '' : 
-                defaultConfig[0].Default_Fieldset__c
-            );
-    
-            fields = getFieldDTOs(typeName, new List<String>());            
-        } catch (Exception e) {
-            throwAuraException(e);
-        }
-
-        return fields;
-    }
-
-    @AuraEnabled
-    public static void saveRecords(List<SObject> sObjects){
-        try{
-            update sObjects;
-        } catch (Exception e) {
-            throwAuraException(e);
-        }
-    }
-
-    @AuraEnabled
-    public static void pinLayout(String objectName, List<DTO.FieldDTO> fields){
-        try {
-            String commaSeparatedFields = '';
-            for(DTO.FieldDTO f : fields){
-                commaSeparatedFields += f.name + ',';
-            }
-            insert new Layout_Configuration__c(
-                Object__c = objectName,
-                Default_Fieldset__c = commaSeparatedFields.removeEnd(',')
-            );
-        } catch (Exception e) {
-            throwAuraException(e);
-        }
-    }
-
-    @AuraEnabled
-    public static void deletePin(String objectName){
-        try {
-            Layout_Configuration__c config = [SELECT Id 
-                                                FROM Layout_Configuration__c
-                                                WHERE Object__c =: objectName
-                                                    AND CreatedById =: UserInfo.getUserId()
-                                                LIMIT 1];
-            delete config;
-        } catch (Exception e) {
-            throwAuraException(e);
-        }
-    }
-
-    // helpers
-    private static List<DTO.NoteDTO> getNoteDtos(List<Note> notes, List<Lightning_Reporter_Note_Metadata__c> noteMetadata){
+    private static List<DTO.NoteDTO> getNoteDtos(List<Note> notes, List<Note_Metadata__c> noteMetadata){
         List<DTO.NoteDTO> noteDtos = new List<DTO.NoteDTO>();
-        Map<Id, List<Lightning_Reporter_Note_Metadata__c>> noteMdByNoteId = new Map<Id, List<Lightning_Reporter_Note_Metadata__c>>();
-        for(Lightning_Reporter_Note_Metadata__c metadata : noteMetadata){
+        Map<Id, List<Note_Metadata__c>> noteMdByNoteId = new Map<Id, List<Note_Metadata__c>>();
+        for(Note_Metadata__c metadata : noteMetadata){
             if(!noteMdByNoteId.containsKey(metadata.Note_Id__c)){
-                noteMdByNoteId.put(metadata.Note_Id__c, new List<Lightning_Reporter_Note_Metadata__c>());
+                noteMdByNoteId.put(metadata.Note_Id__c, new List<Note_Metadata__c>());
             }
             noteMdByNoteId.get(metadata.Note_Id__c).add(metadata);
         }
@@ -269,7 +268,7 @@ public class LightningReporterController {
                     note, 
                     noteMdByNoteId.containsKey(note.Id) ? 
                     noteMdByNoteId.get(note.Id) : 
-                    new List<Lightning_Reporter_Note_Metadata__c>()
+                    new List<Note_Metadata__c>()
                 ));
             }
         }
@@ -301,8 +300,8 @@ public class LightningReporterController {
                 if(lookupTargetType == null){ // null for `masterrecordid` field
                     continue; 
                 }
-                if(lookupTargetType.getDescribe().getName() == 
-                    parentId.getSobjectType().getDescribe().getName()){ // is the field lookup to `parentId`
+                if(lookupTargetType.getDescribe().getName() == parentId.getSobjectType().getDescribe().getName() // is the field lookup to `parentId`
+                    && fieldDescribe.isAccessible()){ 
                     lookupsToParent.add(fieldName);
                 }
             }
@@ -311,14 +310,11 @@ public class LightningReporterController {
         return lookupsToParent;
     }
 
-    private static Map<Id, List<Lightning_Reporter_Note_Metadata__c>> getNoteMdByParentId(Set<String> recordIds){
-        Map<Id, List<Lightning_Reporter_Note_Metadata__c>> noteMdByParentId = new Map<Id, List<Lightning_Reporter_Note_Metadata__c>>();
-        for(Lightning_Reporter_Note_Metadata__c noteMd : [SELECT Note_Parent_Id__c, Note_Id__c, Viewed_By__r.FullPhotoUrl,
-                                                                Mentioned_User__c, Type__c, Viewed_By__r.Name, Mentioned_User__r.Name
-                                                            FROM Lightning_Reporter_Note_Metadata__c
-                                                            WHERE Note_Parent_Id__c IN :recordIds]){
+    private static Map<Id, List<Note_Metadata__c>> getNoteMdByParentId(Set<String> recordIds){
+        Map<Id, List<Note_Metadata__c>> noteMdByParentId = new Map<Id, List<Note_Metadata__c>>();
+        for(Note_Metadata__c noteMd : new NoteMetadataSelector().selectByNoteParentIds(recordIds)){
             if(!noteMdByParentId.containsKey(noteMd.Note_Parent_Id__c)){
-                noteMdByParentId.put(noteMd.Note_Parent_Id__c, new List<Lightning_Reporter_Note_Metadata__c>());
+                noteMdByParentId.put(noteMd.Note_Parent_Id__c, new List<Note_Metadata__c>());
             }
             noteMdByParentId.get(noteMd.Note_Parent_Id__c).add(noteMd);
         }

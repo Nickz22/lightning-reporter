@@ -30,8 +30,8 @@ public with sharing class TableRowController {
             }
             
             Set<String> mentionedUserIds = new Set<String>();
-            List<Lightning_Reporter_Note_Metadata__c> noteMd = getMentions(userFullNames, newNote, parentId, topMostId);
-            for(Lightning_Reporter_Note_Metadata__c md : noteMd){
+            List<Note_Metadata__c> noteMd = getMentions(userFullNames, newNote, parentId, topMostId);
+            for(Note_Metadata__c md : noteMd){
                 mentionedUserIds.add(md.Mentioned_User__c);
             }
             insert noteMd;
@@ -59,13 +59,13 @@ public with sharing class TableRowController {
         } catch (Exception e) {
             throwAuraException(e);
         }
-        return new DTO.NoteDTO(n, new List<Lightning_Reporter_Note_Metadata__c>());
+        return new DTO.NoteDTO(n, new List<Note_Metadata__c>());
     }
 
     @AuraEnabled
     public static void countView(DTO.NoteMetadataDTO noteMetadata){
         try {
-            upsert noteMetadata.convertToDbModel() Lightning_Reporter_Note_Metadata__c.Unique_Id__c;
+            upsert noteMetadata.convertToDbModel() Note_Metadata__c.Unique_Id__c;
         } catch (Exception e) {
             throwAuraException(e);
         }
@@ -84,11 +84,11 @@ public with sharing class TableRowController {
     }
 
     // helpers
-    private static List<Lightning_Reporter_Note_Metadata__c> getMentions(Set<String> userFullNames, Note newNote, String parentId, String topMostId){
-        List<Lightning_Reporter_Note_Metadata__c> mentionedUserMd = new List<Lightning_Reporter_Note_Metadata__c>();
+    private static List<Note_Metadata__c> getMentions(Set<String> userFullNames, Note newNote, String parentId, String topMostId){
+        List<Note_Metadata__c> mentionedUserMd = new List<Note_Metadata__c>();
         for(User u : [SELECT Id FROM User WHERE Name IN: userFullNames]){
             mentionedUserMd.add(
-                new Lightning_Reporter_Note_Metadata__c(
+                new Note_Metadata__c(
                     Note_Id__c=newNote.Id,
                     Note_Parent_Id__c=parentId,
                     Mentioned_User__c=u.Id,
