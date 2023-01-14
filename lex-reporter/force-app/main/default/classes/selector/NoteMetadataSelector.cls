@@ -2,7 +2,7 @@ public with sharing class NoteMetadataSelector {
     public NoteMetadataSelector() {}
 
     public List<Note_Metadata__c> selectByNoteParentIds(Set<String> parentIds){
-        List<Note_Metadata__c> noteMd = [SELECT Note_Parent_Id__c, Note_Id__c, Viewed_By__r.FullPhotoUrl,
+        List<Note_Metadata__c> noteMd = [SELECT Note_Parent_Id__c, Note_Id__c, Viewed_By__r.FullPhotoUrl,Viewed_By__c,
                                                 Mentioned_User__c, Type__c, Viewed_By__r.Name, Mentioned_User__r.Name
                                         FROM Note_Metadata__c
                                         WHERE Note_Parent_Id__c IN :parentIds];

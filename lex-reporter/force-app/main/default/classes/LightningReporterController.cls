@@ -206,8 +206,11 @@ public class LightningReporterController {
                     .getReferenceTo()[0]
                     .getDescribe()
                     .fields.getMap().containsKey('Name') &&
-                typeName.toLowerCase() != 'opportunity' && field.name.toLowerCase() != 'contactid' &&
                 fieldsMap.get(field.name).getDescribe().isAccessible()){
+
+                if(typeName.toLowerCase() == 'opportunity' && field.name.toLowerCase() == 'contactid'){
+                    continue;
+                }
                     
                 // replace last instance of 'id' in field.name with '.name'
                 String lookupNameField = field.isCustom ? 
