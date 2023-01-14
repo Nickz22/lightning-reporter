@@ -20,6 +20,11 @@ public with sharing class TableRowController {
             );
             insert newNote;
 
+            insert new Usage_Metric__c(
+                Action__c = C.USAGE_COMMENT,
+                Object__c = ((Id) parentId).getSObjectType().getDescribe().getName()
+            );
+
             // send notifications to mentioned users
             List<String> messageSegmentedByMention = content.split('@');
             Set<String> userFullNames = new Set<String>();

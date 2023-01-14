@@ -7,7 +7,7 @@ public class LightningReporterController {
         try {
             hasPermission = [SELECT count() 
                                FROM PermissionSetAssignment 
-                               WHERE PermissionSet.Name = 'Lightning_Reporter' 
+                               WHERE PermissionSet.Name =: C.LIGHTNING_REPORTER_PERMISSION 
                                     AND AssigneeId = :UserInfo.getUserId()] > 0;
         } catch (Exception e) {
             throw new AuraHandledException(e.getMessage());
@@ -99,6 +99,10 @@ public class LightningReporterController {
     @AuraEnabled
     public static void saveRecords(List<SObject> sObjects){
         try{
+            insert new Usage_Metric__c(
+                Action__c = C.USAGE_SAVE,
+                Object__c = sObjects[0]?.Id?.getSObjectType()?.getDescribe()?.getName()
+            );
             for(SObject record : sObjects){
                 if(record.getSObjectType().getDescribe().isUpdateable()){
                     continue;
@@ -123,6 +127,10 @@ public class LightningReporterController {
                 insert new Layout_Configuration__c(
                     Object__c = objectName,
                     Default_Fieldset__c = commaSeparatedFields.removeEnd(',')
+                );
+                insert new Usage_Metric__c(
+                    Action__c = C.USAGE_PIN,
+                    Object__c = objectName
                 );
             }else{
                 throw new LightningReporterException('Creation of Lightning Reporter Layout Configuration denied.');

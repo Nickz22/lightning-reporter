@@ -3,24 +3,28 @@ public with sharing class LightningReporterControllerTest {
 
     @TestSetup
     static void makeData(){
-        Account testAccount = new Account(Name = 'Test Account');
-        insert testAccount;
-        
-        Contact testContact = new Contact(FirstName = 'Test', LastName = 'Contact', AccountId = testAccount.Id);
-        insert testContact;
+        System.runAs(TestUtil.lightningReporterAdmin){
+            Test.startTest();
+            Account testAccount = new Account(Name = 'Test Account');
+            insert testAccount;
+            
+            Contact testContact = new Contact(FirstName = 'Test', LastName = 'Contact', AccountId = testAccount.Id);
+            insert testContact;
 
-        List<Note> notes = new List<Note>();
-        notes.add(new Note(
-            Title = 'Test Note',
-            ParentId = testContact.Id,
-            Body = 'Test Note Body'
-        ));
-        notes.add(new Note(
-            Title = 'Test Note 2',
-            ParentId = testContact.Id,
-            Body = 'Test Note Body 2'
-        ));
-        insert notes;
+            List<Note> notes = new List<Note>();
+            notes.add(new Note(
+                Title = 'Test Note',
+                ParentId = testContact.Id,
+                Body = 'Test Note Body'
+            ));
+            notes.add(new Note(
+                Title = 'Test Note 2',
+                ParentId = testContact.Id,
+                Body = 'Test Note Body 2'
+            ));
+            insert notes;
+            Test.stopTest();
+        }
     }
 
     @isTest
@@ -38,26 +42,28 @@ public with sharing class LightningReporterControllerTest {
 
     @isTest
     static void givenContactListOnAccountPageWithAlerts_verifyContextData(){
-        Account testAccount = [SELECT Id, (SELECT Id FROM Contacts LIMIT 1) FROM Account LIMIT 1];
-        List<Note> notes = [SELECT Id, ParentId FROM Note];
-        List<Note_Metadata__c> noteMetadata = new List<Note_Metadata__c>();
-        for(Note note : notes){
-            noteMetadata.add(
-                new Note_Metadata__c(
-                    Note_Id__c = note.Id,
-                    Mentioned_User__c = UserInfo.getUserId(),
-                    Type__c = 'Mention',
-                    Note_Parent_Id__c = testAccount.Contacts.get(0).Id,
-                    Reporter_Context_Record_Id__c = testAccount.Id
-            ));
+        System.runAs(TestUtil.lightningReporterAdmin){
+            Account testAccount = [SELECT Id, (SELECT Id FROM Contacts LIMIT 1) FROM Account LIMIT 1];
+            List<Note> notes = [SELECT Id, ParentId FROM Note];
+            List<Note_Metadata__c> noteMetadata = new List<Note_Metadata__c>();
+            for(Note note : notes){
+                noteMetadata.add(
+                    new Note_Metadata__c(
+                        Note_Id__c = note.Id,
+                        Mentioned_User__c = UserInfo.getUserId(),
+                        Type__c = 'Mention',
+                        Note_Parent_Id__c = testAccount.Contacts.get(0).Id,
+                        Reporter_Context_Record_Id__c = testAccount.Id
+                ));
+            }
+            insert noteMetadata;
+
+            List<DTO.FieldDTO> contactFields = LightningReporterController.getFieldsFromType('Contact');
+            DTO.ContextDTO context = LightningReporterController.getContext('Contact', testAccount.Id, contactFields);
+
+            System.assertEquals(1, context.subjects.size());
+            System.assertEquals(2, context.alerts.size());
         }
-        insert noteMetadata;
-
-        List<DTO.FieldDTO> contactFields = LightningReporterController.getFieldsFromType('Contact');
-        DTO.ContextDTO context = LightningReporterController.getContext('Contact', testAccount.Id, contactFields);
-
-        System.assertEquals(1, context.subjects.size());
-        System.assertEquals(2, context.alerts.size());
     }
 
     @isTest

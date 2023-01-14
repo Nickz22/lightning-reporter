@@ -11,7 +11,7 @@ public with sharing class NoteMetadataSelector {
 
     public List<Note_Metadata__c> selectByContextIdAndViewedOrMentionedByCurrentUser(Id contextRecordId){
         List<Note_Metadata__c> noteMd = [SELECT Note_Id__c,Mentioned_User__c,Mentioned_User__r.Name,
-                                                Viewed_By__c,Viewed_By__r.Name,Type__c
+                                                Viewed_By__c,Viewed_By__r.Name,Type__c,Note_Parent_Id__c
                                             FROM Note_Metadata__c
                                             WHERE Reporter_Context_Record_Id__c = :contextRecordId
                                             AND (Viewed_By__c =: UserInfo.getUserId() OR Mentioned_User__c =: UserInfo.getUserId())
