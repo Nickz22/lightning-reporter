@@ -9,24 +9,20 @@ public class LightningReporterControllerTest2 {
         );
     }
 
-    /**
-     * TODO: 
-     * add a test case for 0 default table config records
-     */
-
     @isTest
     static void givenDefaultTableConfiguration_verifyDefaultDTOs(){
         Layout_Configuration__c config = [SELECT Default_Fieldset__C, Object__c
-                                                        FROM Layout_Configuration__c 
-                                                        WHERE Object__c = 'Contact'
-                                                        LIMIT 1][0];
+                                            FROM Layout_Configuration__c 
+                                            WHERE Object__c = 'Contact'
+                                            LIMIT 1][0];
         String contactType = config.Object__c;
         String defaultFields = config.Default_Fieldset__c;
-        // invoke LightningReporterController.getFieldsFromType()
-        List<DTO.FieldDTO> dtos = LightningReporterController.getFieldsFromType(contactType);
+
+        List<DTO.TableConfigDTO> dtos = LightningReporterController.getPinnedViews();
+        System.assertEquals(1, dtos.size());
 
         Integer numAssertions = 0;
-        for(DTO.FieldDTO dto : dtos){            
+        for(DTO.FieldDTO dto : dtos[0].defaultFields){            
             if(defaultFields.containsIgnoreCase(dto.name)){
                 System.assert(dto.defaultSelected);
                 numAssertions++;
@@ -34,7 +30,7 @@ public class LightningReporterControllerTest2 {
         }
 
         List<String> defaultFieldsArray = defaultFields.split(',');
-        System.assert(defaultFieldsArray.size()==2);
-        System.assert(defaultFieldsArray.size()==numAssertions);       
+        System.assertEquals(2, defaultFieldsArray.size());
+        System.assertEquals(numAssertions, defaultFieldsArray.size());
     }
 }

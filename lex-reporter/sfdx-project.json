@@ -13,6 +13,7 @@
     "sfdcLoginUrl": "https://login.salesforce.com",
     "sourceApiVersion": "55.0",
     "packageAliases": {
-        "Lightning Reporter": "0HoDn000000wkCVKAY"
+        "Lightning Reporter": "0HoDn000000wkCVKAY",
+        "Lightning Reporter@0.1.0-1": "04tDn000000uMqjIAE"
     }
 }
