@@ -216,58 +216,62 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     }
 
     set sObject(value){
-        debugger;
-        this._sObject = value;
-        this.cells = this.getTableCellValues();
-        let hasAlert = false;
-        if(value.notes){
-            this.avatars = [];
-            for(let i = 0; i < value.notes.length; i++){
-                let noteDto = value.notes[i];
-                hasAlert = noteDto.alertRunningUser ? true : hasAlert;
-                let newAvatar = {
-                    "url" : noteDto.note.CreatedBy.FullPhotoUrl,
-                    "name" : noteDto.note.CreatedBy.Name,
-                    "body" : noteDto.note.Body,
-                    "id" : noteDto.note.Id,
-                    "time" : new Date(noteDto.localCreatedDate)
-                };   
-                let views = [];
-                // for each value in value.noteMdByNoteId[value.notes[i].Id], set a `leftStyle` property equal to the value of the index
-                if(noteDto.views){
-                    for(let j = 0; j < noteDto.views.length; j++){
-                        let view = {};
-                        for(let param in noteDto.views[j]){ // noteMd[j] is read-only
-                            view[param] = noteDto.views[j][param];
+        try {
+            debugger;
+            this._sObject = value;
+            this.cells = this.getTableCellValues();
+            let hasAlert = false;
+            if(value.notes){
+                this.avatars = [];
+                for(let i = 0; i < value.notes.length; i++){
+                    let noteDto = value.notes[i];
+                    hasAlert = noteDto.alertRunningUser ? true : hasAlert;
+                    let newAvatar = {
+                        "url" : noteDto.note.CreatedBy.FullPhotoUrl,
+                        "name" : noteDto.note.CreatedBy.Name,
+                        "body" : noteDto.note.Body,
+                        "id" : noteDto.note.Id,
+                        "time" : new Date(noteDto.localCreatedDate)
+                    };   
+                    let views = [];
+                    // for each value in value.noteMdByNoteId[value.notes[i].Id], set a `leftStyle` property equal to the value of the index
+                    if(noteDto.views){
+                        for(let j = 0; j < noteDto.views.length; j++){
+                            let view = {};
+                            for(let param in noteDto.views[j]){ // noteMd[j] is read-only
+                                view[param] = noteDto.views[j][param];
+                            }
+                            view.leftStyle = 'left: '+j+'em;';
+                            views.push(view);
                         }
-                        view.leftStyle = 'left: '+j+'em;';
-                        views.push(view);
                     }
+                    newAvatar.views = views;
+                    this.avatars.push(newAvatar);
                 }
-                newAvatar.views = views;
-                this.avatars.push(newAvatar);
             }
-        }
 
-        if(this.avatars.length > 0){
-            console.log('setting avatars');
-            this.previewAvatar = this.avatars[0];
-            this.previewAvatar.unreadStyle = hasAlert ? "border: 2px solid #00ff00;" : "";
-            if(this.notes.length > 0){
-                this.notes = this.avatars
+            if(this.avatars.length > 0){
+                console.log('setting avatars');
+                this.previewAvatar = this.avatars[0];
+                this.previewAvatar.unreadStyle = hasAlert ? "border: 2px solid #00ff00;" : "";
+                if(this.notes.length > 0){
+                    this.notes = this.avatars
+                }
+            }else{
+                this.previewAvatar = {
+                    "url" : "",
+                    "name" : "",
+                    "body" : "",
+                    "id" : "",
+                    "time" : "",
+                    "unreadStyle" : ""
+                };
             }
-        }else{
-            this.previewAvatar = {
-                "url" : "",
-                "name" : "",
-                "body" : "",
-                "id" : "",
-                "time" : "",
-                "unreadStyle" : ""
-            };
-        }
 
-        this.cellSize = 3;
+            this.cellSize = 3;   
+        } catch (error) {
+            this.showNotification('Error', error.message, 'error');
+        }
     }
 
     getTableCellValues = () => {
@@ -279,7 +283,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
             let refLabelPath = isId ? 'Name' : 
                                 isRef ? field.isCustom ? field.name.replace('__c', '__r') : field.name.replace('Id', '') : ''; 
             let refLabel = isId ? this._sObject.record[refLabelPath] : 
-                            isRef ? this._sObject.record[refLabelPath].Name : ''; 
+                            isRef ? this._sObject.record[refLabelPath]?.Name : ''; 
             cells.push(
                 {
                     'apiName': field.name, 
