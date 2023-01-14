@@ -1,13 +1,13 @@
 /**
- * Security implementation 
- ** FLS checks everywhere
+ * BUGS
+ ** fields aren't resetting after removing pinned view
  *
  * Usage Measurement
- ** how many users are pinning views
- ** how many users are commenting
  ** how often are users saving record changes
  *
- * Jest at some point
+ * Front end testing at some point
+ * 
+ * Error logging to a Salesforce Log object
  * 
  * V2
  ***** support for Notes under Tasks 
@@ -17,4 +17,5 @@
  ***** threaded replies
  ***** multiple table views at one time
  ***** access children of children from parent (i.e. opportunity line items from opportunity.account page)
+ ***** ability to edit lookup values
  */ 
