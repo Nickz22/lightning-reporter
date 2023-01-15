@@ -4,11 +4,13 @@ public with sharing class PushUsageMetricsBatch implements Database.Batchable<SO
 
     public Database.QueryLocator start(Database.BatchableContext BC){
         return Database.getQueryLocator(
-            'SELECT Action__c,Object__c,User_Profile__c FROM Usage_Metric__c'
+            'SELECT Action__c,Object__c,CreatedById FROM Usage_Metric__c'
         );
     }
 
     public void execute(Database.BatchableContext BC, List<sObject> scope){
+
+        List<Usage_Metric__c> enrichedMetrics = this.enrichUserData(scope);
         // initialize HTTP call
         Http http = new Http();
         HttpRequest req = new HttpRequest();
@@ -16,7 +18,7 @@ public with sharing class PushUsageMetricsBatch implements Database.Batchable<SO
         req.setMethod('POST');
         req.setHeader('Content-Type','application/json');
         UsagePayload payload = new UsagePayload(
-            (List<Usage_Metric__c>)scope, 
+            enrichedMetrics, 
             new PermissionSetAssignmentSelector().selectLightningReporterUsers().size()
         );
         req.setBody(JSON.serialize(new Map<String, String>{'payload' => JSON.serialize(payload)}));
@@ -28,6 +30,24 @@ public with sharing class PushUsageMetricsBatch implements Database.Batchable<SO
         } else {
             System.debug('FAILURE [' + res.getStatusCode() + ']: ' + res.getBody());
         }
+    }
+
+    private List<Usage_Metric__c> enrichUserData(List<Usage_Metric__c> metrics){
+
+        Set<Id> userIds = new Set<Id>();
+        // extract createdbyid from metrics
+        for(Usage_Metric__c m : metrics){
+            userIds.add(m.CreatedById);
+        }
+
+        Map<Id, User> userById = new Map<Id, User>([SELECT Profile.Name,UserRole.Name FROM User WHERE Id IN: userIds]);
+    
+        for(Usage_Metric__c m : metrics){
+            m.Tracked_User_Profile__c = userById.get(m.CreatedById).Profile.Name;
+            m.Tracked_User_Role__c = userById.get(m.CreatedById).UserRole.Name;
+        }
+
+        return metrics;
     }
 
     public void finish(Database.BatchableContext BC){}
