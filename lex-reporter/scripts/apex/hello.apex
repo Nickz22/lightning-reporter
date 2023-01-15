@@ -3,11 +3,12 @@ HttpRequest req = new HttpRequest();
 req.setEndpoint('callout:Usage_Metric_Endpoint/services/apexrest/Reporter/lightningreporter/usage');
 req.setMethod('POST');
 req.setHeader('Content-Type','application/json');
-String payload = JSON.serialize(new PushUsageMetricsBatch.UsagePayload(
+PushUsageMetricsBatch.UsagePayload payload = new PushUsageMetricsBatch.UsagePayload(
     Database.query('SELECT Action__c,Object__c,CreatedBy.Name,CreatedById,User_Profile__c FROM Usage_Metric__c'), 
     new PermissionSetAssignmentSelector().selectLightningReporterUsers().size()
-));
-req.setBody(JSON.serialize(new Map<String, String>{'payload' => payload}));
+);
+System.debug(JSON.serializePretty(payload));
+req.setBody(JSON.serialize(new Map<String, String>{'payload' => JSON.serialize(payload)}));
 // send HTTP call
 HttpResponse res = http.send(req);
 System.debug('endpoint: ' + req.getEndpoint());

@@ -3,7 +3,7 @@
  ** fields aren't resetting after removing pinned view
  *
  * Usage Measurement
- ** how often are users saving record changes
+ ** break Usage batch into separate package under "Reporter" namespace
  *
  * Front end testing at some point
  * 

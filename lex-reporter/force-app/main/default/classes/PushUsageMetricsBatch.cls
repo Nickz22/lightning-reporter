@@ -12,21 +12,21 @@ public with sharing class PushUsageMetricsBatch implements Database.Batchable<SO
         // initialize HTTP call
         Http http = new Http();
         HttpRequest req = new HttpRequest();
-        req.setEndpoint('callout:Usage_Metrics');
+        req.setEndpoint('callout:Usage_Metric_Endpoint/services/apexrest/Reporter/lightningreporter/usage');
         req.setMethod('POST');
         req.setHeader('Content-Type','application/json');
-        String payload = JSON.serialize(new UsagePayload(
+        UsagePayload payload = new UsagePayload(
             (List<Usage_Metric__c>)scope, 
             new PermissionSetAssignmentSelector().selectLightningReporterUsers().size()
-        ));
-        req.setBody(JSON.serialize(new Map<String, String>{'payload' => payload}));
+        );
+        req.setBody(JSON.serialize(new Map<String, String>{'payload' => JSON.serialize(payload)}));
         // send HTTP call
         HttpResponse res = http.send(req);
         // process response
-        if(res.getStatusCode() == 201){
-            // success
+        if(res.getStatusCode() == 201 || res.getStatusCode() == 200){
+            System.debug('SUCCESS');
         } else {
-            // failure
+            System.debug('FAILURE [' + res.getStatusCode() + ']: ' + res.getBody());
         }
     }
 
