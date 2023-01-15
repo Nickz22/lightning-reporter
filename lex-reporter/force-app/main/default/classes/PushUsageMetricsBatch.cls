@@ -45,6 +45,7 @@ public with sharing class PushUsageMetricsBatch implements Database.Batchable<SO
         for(Usage_Metric__c m : metrics){
             m.Tracked_User_Profile__c = userById.get(m.CreatedById).Profile.Name;
             m.Tracked_User_Role__c = userById.get(m.CreatedById).UserRole.Name;
+            m.Tracked_User_Id__c = m.CreatedById;
         }
 
         return metrics;

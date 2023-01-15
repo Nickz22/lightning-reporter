@@ -58,6 +58,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Usage_Metric__c.Tracked_User_Id__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Usage_Metric__c.Tracked_User_Profile__c</field>
         <readable>true</readable>
     </fieldPermissions>
