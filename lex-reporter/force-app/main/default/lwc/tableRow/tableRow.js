@@ -29,7 +29,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
 
     @api topMostId;
     @api fields = [];
-    rteContent = "";
+    @track rteContent;
     isEditMode = false;
     usersPosition = "";
     @track users = [];
@@ -111,6 +111,15 @@ export default class TableRow extends NavigationMixin(LightningElement) {
             this.isUserSearching = true;
         }else if(event.key !== '@' && event.keyCode !== 13 && this.isUserSearching){ // if key press is not @ or enter
             try {
+                console.dir(event.target);
+                console.log(`value from event : ${event.target.value}`);
+                console.log(`value from innerText : ${event.target.innerText}`);
+                console.log(`num children: ${event.target.childNodes.length}`);
+                // loop through event.target child nodes and log their innerText
+                for(let i = 0; i < event.target.childNodes.length; i++){
+                    console.log(`value from child node ${i} : ${event.target.childNodes[i].innerText}`);
+                }
+                    
                 // find substring between last "@" and last "</p>"
                 let lastAt = event.target.value.lastIndexOf('@');
                 let lastP = event.target.value.lastIndexOf('</p>');
@@ -127,7 +136,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
                     }
                 }   
             } catch (error) {
-                console.error(error);
+                console.error(error.message);
             }
         }
     }
@@ -217,7 +226,6 @@ export default class TableRow extends NavigationMixin(LightningElement) {
 
     set sObject(value){
         try {
-            debugger;
             this._sObject = value;
             this.cells = this.getTableCellValues();
             let hasAlert = false;
@@ -301,11 +309,6 @@ export default class TableRow extends NavigationMixin(LightningElement) {
             );
         }
 
-        // log cell urls
-        for(let cell of cells){
-            console.log(cell.url);
-        }
-
         return cells;
     }
 
@@ -380,7 +383,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
 
     countNoteView(event){
         countView({
-            noteMetadata: {
+            metadata: {
                 NoteId: event.target.dataset.id, 
                 NoteParentId: this._sObject.record.Id, 
                 ViewedById: runningUserId,
