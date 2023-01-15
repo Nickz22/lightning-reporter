@@ -15,11 +15,11 @@ public with sharing class PushUsageMetricsBatch implements Database.Batchable<SO
         req.setEndpoint('callout:Usage_Metrics');
         req.setMethod('POST');
         req.setHeader('Content-Type','application/json');
-        req.setBody(JSON.serialize(
-            new UsagePayload(
-                (List<Usage_Metric__c>)scope, 
-                new PermissionSetAssignmentSelector().selectLightningReporterUsers().size()
-        )));
+        String payload = JSON.serialize(new UsagePayload(
+            (List<Usage_Metric__c>)scope, 
+            new PermissionSetAssignmentSelector().selectLightningReporterUsers().size()
+        ));
+        req.setBody(JSON.serialize(new Map<String, String>{'payload' => payload}));
         // send HTTP call
         HttpResponse res = http.send(req);
         // process response
@@ -32,11 +32,12 @@ public with sharing class PushUsageMetricsBatch implements Database.Batchable<SO
 
     public void finish(Database.BatchableContext BC){}
 
-    class UsagePayload{
+    public class UsagePayload{
         List<Usage_Metric__c> pinUsage = new List<Usage_Metric__c>();
         List<Usage_Metric__c> saveUsage = new List<Usage_Metric__c>();
         List<Usage_Metric__c> commentUsage = new List<Usage_Metric__c>();
         Integer totalLicensedUsers = 0;
+        String organizationName = UserInfo.getOrganizationName();
 
         public UsagePayload(List<Usage_Metric__c> usage, Integer totalLicensedUsers){
             // segment usage by Action__c value
