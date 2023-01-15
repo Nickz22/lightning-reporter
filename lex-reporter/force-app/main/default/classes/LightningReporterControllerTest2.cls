@@ -18,11 +18,11 @@ public class LightningReporterControllerTest2 {
         String contactType = config.Object__c;
         String defaultFields = config.Default_Fieldset__c;
 
-        List<DTO.TableConfigDTO> dtos = LightningReporterController.getPinnedViews();
+        List<TableConfigDTO> dtos = LightningReporterController.getPinnedViews();
         System.assertEquals(1, dtos.size());
 
         Integer numAssertions = 0;
-        for(DTO.FieldDTO dto : dtos[0].defaultFields){            
+        for(FieldDTO dto : dtos[0].defaultFields){            
             if(defaultFields.containsIgnoreCase(dto.name)){
                 System.assert(dto.defaultSelected);
                 numAssertions++;

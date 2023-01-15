@@ -30,13 +30,13 @@ public with sharing class LightningReporterControllerTest {
     @isTest
     static void givenContactListOnAccountPageWithNoAlerts_verifyContextData(){
         Account testAccount = [SELECT Id FROM Account LIMIT 1];
-        List<DTO.FieldDTO> contactFields = LightningReporterController.getFieldsFromType('Contact');
-        DTO.ContextDTO context = LightningReporterController.getContext('Contact', testAccount.Id, contactFields);
+        List<FieldDTO> contactFields = LightningReporterController.getFieldsFromType('Contact');
+        ContextDTO context = LightningReporterController.getContext('Contact', testAccount.Id, contactFields);
 
         System.assertEquals(1, context.subjects.size());
         System.assertEquals(0, context.alerts.size());
 
-        DTO.SubjectDTO subject = context.subjects[0];
+        SubjectDTO subject = context.subjects[0];
         System.assertEquals(2, subject.notes.size());
     }
 
@@ -58,8 +58,8 @@ public with sharing class LightningReporterControllerTest {
             }
             insert noteMetadata;
 
-            List<DTO.FieldDTO> contactFields = LightningReporterController.getFieldsFromType('Contact');
-            DTO.ContextDTO context = LightningReporterController.getContext('Contact', testAccount.Id, contactFields);
+            List<FieldDTO> contactFields = LightningReporterController.getFieldsFromType('Contact');
+            ContextDTO context = LightningReporterController.getContext('Contact', testAccount.Id, contactFields);
 
             System.assertEquals(1, context.subjects.size());
             System.assertEquals(2, context.alerts.size());
@@ -72,7 +72,7 @@ public with sharing class LightningReporterControllerTest {
         String sObjectType = 'Contact';
 
         // when getFieldsFromType is called
-        List<DTO.FieldDTO> fields = LightningReporterController.getFieldsFromType(sObjectType);
+        List<FieldDTO> fields = LightningReporterController.getFieldsFromType(sObjectType);
 
         // then all fields in the Contact schema are returned
         System.assertEquals(contact.SObjectType.getDescribe().fields.getMap().size(), fields.size());
@@ -101,18 +101,18 @@ public with sharing class LightningReporterControllerTest {
 
     @isTest
     static void givenFields_verifyPinnedViewAndViewRetrieval(){
-        List<DTO.FieldDTO> fields = LightningReporterController.getFieldsFromType('Contact');
-        List<DTO.FieldDTO> allowableFields = new List<DTO.FieldDTO>();
+        List<FieldDTO> fields = LightningReporterController.getFieldsFromType('Contact');
+        List<FieldDTO> allowableFields = new List<FieldDTO>();
         for(Integer i = 0; i < 10; i++){
             allowableFields.add(fields[i]);
         }
 
         LightningReporterController.pinLayout('Contact', allowableFields);
         
-        List<DTO.TableConfigDTO> layouts = LightningReporterController.getPinnedViews();
+        List<TableConfigDTO> layouts = LightningReporterController.getPinnedViews();
         System.assertEquals(1, layouts.size());
 
-        for(DTO.TableConfigDTO layout : layouts){
+        for(TableConfigDTO layout : layouts){
             System.assertEquals('Contact', layout.objectName);
             System.assertEquals(allowableFields.size(), layout.defaultFields.size());
         }

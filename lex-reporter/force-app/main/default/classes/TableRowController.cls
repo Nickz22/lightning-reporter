@@ -4,10 +4,10 @@ public with sharing class TableRowController {
      * @param content - Note body
      * @param parentId - immediate parent of the Note
      * @param topMostId - `recordId` context of the Lex Reporter when this Note was saved 
-     * @return  `DTO.NoteDTO`
+     * @return  `NoteDTO`
      */
     @AuraEnabled
-    public static DTO.NoteDTO saveNote(String content, String parentId, String topMostId){
+    public static NoteDTO saveNote(String content, String parentId, String topMostId){
 
         Note n;
         try {
@@ -64,13 +64,13 @@ public with sharing class TableRowController {
         } catch (Exception e) {
             throwAuraException(e);
         }
-        return new DTO.NoteDTO(n, new List<Note_Metadata__c>());
+        return new NoteDTO(n, new List<Note_Metadata__c>());
     }
 
     @AuraEnabled
-    public static void countView(DTO.NoteMetadataDTO noteMetadata){
+    public static void countView(NoteMetadataDTO metadata){
         try {
-            upsert noteMetadata.convertToDbModel() Note_Metadata__c.Unique_Id__c;
+            upsert metadata.convertToDbModel() Note_Metadata__c.Unique_Id__c;
         } catch (Exception e) {
             throwAuraException(e);
         }

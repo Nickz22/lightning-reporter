@@ -42,15 +42,15 @@ public class LightningReporterController {
     }
 
     @AuraEnabled(cacheable=false)
-    public static DTO.ContextDTO getContext(String typeName, Id contextRecordId, List<DTO.FieldDTO> fieldsToGet){
-        DTO.ContextDTO context;
+    public static ContextDTO getContext(String typeName, Id contextRecordId, List<FieldDTO> fieldsToGet){
+        ContextDTO context;
         try {
-            List<DTO.SubjectDTO> subjects = getRecordsFromTypeLookingUpToId(typeName, contextRecordId, fieldsToGet);
-            List<DTO.NoteDTO> alerts = getAlertsForUser(contextRecordId);   
+            List<SubjectDTO> subjects = getRecordsFromTypeLookingUpToId(typeName, contextRecordId, fieldsToGet);
+            List<NoteDTO> alerts = getAlertsForUser(contextRecordId);   
 
-            for(DTO.SubjectDTO subject : subjects){
-                for(DTO.NoteDTO note : subject.notes){
-                    for(DTO.NoteDTO alert : alerts){
+            for(SubjectDTO subject : subjects){
+                for(NoteDTO note : subject.notes){
+                    for(NoteDTO alert : alerts){
                         if(alert.note.Id == note.note.Id){
                             note.alertRunningUser = true;
                             continue;
@@ -59,7 +59,7 @@ public class LightningReporterController {
                 }                
             }
             
-            context = new DTO.ContextDTO(subjects, alerts);
+            context = new ContextDTO(subjects, alerts);
         } catch (Exception e) {
             throwAuraException(e);
         }
@@ -67,11 +67,11 @@ public class LightningReporterController {
     }
 
     @AuraEnabled(cacheable=true)
-    public static List<DTO.TableConfigDTO> getPinnedViews(){
-        List<DTO.TableConfigDTO> configs = new List<DTO.TableConfigDTO>();
+    public static List<TableConfigDTO> getPinnedViews(){
+        List<TableConfigDTO> configs = new List<TableConfigDTO>();
         try {
             for(Layout_Configuration__c config : new LayoutConfigurationSelector().selectConfigurationsCreatedByCurrentUser()){
-                configs.add(new DTO.TableConfigDTO(
+                configs.add(new TableConfigDTO(
                     config.Object__c, 
                     getFieldDTOs(config.Object__c, config.Default_Fieldset__c.split(',')
                 )));
@@ -84,9 +84,9 @@ public class LightningReporterController {
     }
 
     @AuraEnabled
-    public static List<DTO.FieldDTO> getFieldsFromType(String typeName){
+    public static List<FieldDTO> getFieldsFromType(String typeName){
 
-        List<DTO.FieldDTO> fields = new List<DTO.FieldDTO>();
+        List<FieldDTO> fields = new List<FieldDTO>();
         try {
             fields = getFieldDTOs(typeName, new List<String>());            
         } catch (Exception e) {
@@ -117,10 +117,10 @@ public class LightningReporterController {
     }
 
     @AuraEnabled
-    public static void pinLayout(String objectName, List<DTO.FieldDTO> fields){
+    public static void pinLayout(String objectName, List<FieldDTO> fields){
         try {
             String commaSeparatedFields = '';
-            for(DTO.FieldDTO f : fields){
+            for(FieldDTO f : fields){
                 commaSeparatedFields += f.name + ',';
             }
             if(Layout_Configuration__c.getSObjectType().getDescribe().isCreateable()){
@@ -155,7 +155,7 @@ public class LightningReporterController {
     }
 
     // helpers
-    private static List<DTO.NoteDTO> getAlertsForUser(Id contextRecordId){
+    private static List<NoteDTO> getAlertsForUser(Id contextRecordId){
 
         List<Note_Metadata__c> noteMd = new NoteMetadataSelector().selectByContextIdAndViewedOrMentionedByCurrentUser(contextRecordId);
         
@@ -200,13 +200,13 @@ public class LightningReporterController {
         return getNoteDtos(new NoteSelector().selectByIds(alertIds), alerts);
     }
 
-    private static List<DTO.SubjectDTO> getRecordsFromTypeLookingUpToId(String typeName, Id contextRecordId, List<DTO.FieldDTO> fieldsToGet){
+    private static List<SubjectDTO> getRecordsFromTypeLookingUpToId(String typeName, Id contextRecordId, List<FieldDTO> fieldsToGet){
 
-        List<DTO.SubjectDTO> subjects = new List<DTO.SubjectDTO>();
+        List<SubjectDTO> subjects = new List<SubjectDTO>();
         List<String> lookupsToParent = getLookupFieldsPointingToParentId(typeName, contextRecordId);
         Map<String, Schema.SObjectField> fieldsMap = Cache.globalDescribe.get(typeName).getDescribe().fields.getMap();
         List<String> fieldApiNames = new List<String>();
-        for(DTO.FieldDTO field : fieldsToGet){
+        for(FieldDTO field : fieldsToGet){
             fieldApiNames.add(field.name);
             if(field.type == 'reference' && 
                 fieldsMap.get(field.name)
@@ -251,7 +251,7 @@ public class LightningReporterController {
         }
         Map<Id, List<Note_Metadata__c>> noteMdByParentId = getNoteMdByParentId(recordIds);
         for(SObject record : records){
-            subjects.add(new DTO.SubjectDTO(
+            subjects.add(new SubjectDTO(
                 record, 
                 getNoteDtos(
                     record.getSObjects('Notes'), 
@@ -264,8 +264,8 @@ public class LightningReporterController {
         return subjects;
     }    
 
-    private static List<DTO.NoteDTO> getNoteDtos(List<Note> notes, List<Note_Metadata__c> noteMetadata){
-        List<DTO.NoteDTO> noteDtos = new List<DTO.NoteDTO>();
+    private static List<NoteDTO> getNoteDtos(List<Note> notes, List<Note_Metadata__c> noteMetadata){
+        List<NoteDTO> noteDtos = new List<NoteDTO>();
         Map<Id, List<Note_Metadata__c>> noteMdByNoteId = new Map<Id, List<Note_Metadata__c>>();
         for(Note_Metadata__c metadata : noteMetadata){
             if(!noteMdByNoteId.containsKey(metadata.Note_Id__c)){
@@ -275,7 +275,7 @@ public class LightningReporterController {
         }
         if(notes != null && !notes.isEmpty()){
             for(Note note : notes){
-                noteDtos.add(new DTO.NoteDTO(
+                noteDtos.add(new NoteDTO(
                     note, 
                     noteMdByNoteId.containsKey(note.Id) ? 
                     noteMdByNoteId.get(note.Id) : 
@@ -332,19 +332,19 @@ public class LightningReporterController {
         return noteMdByParentId;
     }
 
-    private static List<DTO.FieldDTO> getFieldDTOs(String objectname, List<String> fieldNamesToDto){
+    private static List<FieldDTO> getFieldDTOs(String objectname, List<String> fieldNamesToDto){
 
         SObjectType sObjType = Cache.globalDescribe.get(objectname);
         DescribeSObjectResult d = sObjType.getDescribe();
         Map<String, SObjectField> fieldTokenByApiName = d.fields.getMap();
         List<String> allFieldNames = new List<String>(fieldTokenByApiName.keyset());
         allFieldNames.sort();
-        List<DTO.FieldDTO> fields = new List<DTO.FieldDTO>();
+        List<FieldDTO> fields = new List<FieldDTO>();
 
         if(fieldNamesToDto.isEmpty()){
             for(String fieldName : allFieldNames){
                 DescribeFieldResult describe = fieldTokenByApiName.get(fieldName).getDescribe();
-                DTO.FieldDTO dto = new DTO.FieldDTO(
+                FieldDTO dto = new FieldDTO(
                     describe.getName(),
                     describe.getLabel(),
                     String.valueOf(describe.getType()),
@@ -358,7 +358,7 @@ public class LightningReporterController {
             fieldNamesToDto.sort();
             for(String fieldToDto : fieldNamesToDto){
                 DescribeFieldResult describe = fieldTokenByApiName.get(fieldToDto).getDescribe();
-                DTO.FieldDTO dto = new DTO.FieldDTO(
+                FieldDTO dto = new FieldDTO(
                     describe.getName(),
                     describe.getLabel(),
                     String.valueOf(describe.getType()),

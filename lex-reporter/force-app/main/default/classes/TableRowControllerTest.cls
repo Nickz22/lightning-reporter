@@ -20,7 +20,7 @@ public class TableRowControllerTest {
         Contact con = [SELECT Id FROM Contact LIMIT 1];
 
         Test.startTest();
-        DTO.NoteDTO n = TableRowController.saveNote(noteBody, con.Id, acc.Id);
+        NoteDTO n = TableRowController.saveNote(noteBody, con.Id, acc.Id);
         Test.stopTest();
 
         System.assertEquals(noteBody, n.note.Body);
@@ -39,7 +39,7 @@ public class TableRowControllerTest {
         Contact con = [SELECT Id FROM Contact LIMIT 1];
 
         Test.startTest();
-        DTO.NoteDTO n = TableRowController.saveNote(noteBody, con.Id, acc.Id);
+        NoteDTO n = TableRowController.saveNote(noteBody, con.Id, acc.Id);
         Test.stopTest();
 
         System.assertEquals(noteBody, n.note.Body);
@@ -57,8 +57,8 @@ public class TableRowControllerTest {
         Account acc = [SELECT Id FROM Account LIMIT 1];
         Contact con = [SELECT Id FROM Contact LIMIT 1];
 
-        DTO.NoteDTO n = TableRowController.saveNote(noteBody, con.Id, acc.Id);
-        DTO.NoteMetadataDTO view = new DTO.NoteMetadataDTO();
+        NoteDTO n = TableRowController.saveNote(noteBody, con.Id, acc.Id);
+        NoteMetadataDTO view = new NoteMetadataDTO();
         view.NoteId = n.note.Id;
         view.ViewedById = UserInfo.getUserId();
         view.NoteParentId = n.note.ParentId;
