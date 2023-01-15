@@ -4,7 +4,7 @@ public with sharing class PushUsageMetricsBatch implements Database.Batchable<SO
 
     public Database.QueryLocator start(Database.BatchableContext BC){
         return Database.getQueryLocator(
-            'SELECT Action__c,Object__c,CreatedBy.Name,CreatedById,User_Profile__c FROM Usage_Metric__c'
+            'SELECT Action__c,Object__c,User_Profile__c FROM Usage_Metric__c'
         );
     }
 
