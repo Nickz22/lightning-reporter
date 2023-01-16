@@ -1,3 +1,3 @@
 # lightning-reporter
 
-https://user-images.githubusercontent.com/34489533/212553720-1cc4278c-fd09-483d-ae5e-ac2ebb109757.mp4
+https://user-images.githubusercontent.com/34489533/212574586-2827b8ab-dbf2-446b-ad71-3c1ea3dd4b9c.mp4
