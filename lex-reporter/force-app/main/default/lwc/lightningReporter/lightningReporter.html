@@ -83,9 +83,15 @@
                     </template>
                 </lightning-layout-item>
                 <!-- START FIELDS -->
-                <lightning-layout-item size="3" 
-                                       data-id="field-list"
-                                       class="field-list">
+                <template if:true={selectableFields}>
+                    <lightning-layout-item size="3" 
+                                        data-id="field-list"
+                                        class="field-list">
+                        <c-block-rows rows={selectableFields}
+                                        onblockrowclick={handleFieldClicked}></c-block-rows>
+                    </lightning-layout-item>   
+                </template>
+                <!-- <lightning-layout-item>
                     <template for:each={selectableFields} for:item="field">
                         <template if:true={field.selected}>
                             <p key={field.name} 
@@ -102,7 +108,7 @@
                             </p>
                         </template>
                     </template> 
-                </lightning-layout-item>
+                </lightning-layout-item> -->
                 <!-- END FIELDS -->
             </lightning-layout>
         </div>

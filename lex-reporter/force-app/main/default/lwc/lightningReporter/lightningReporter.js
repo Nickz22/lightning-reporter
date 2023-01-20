@@ -8,6 +8,7 @@ import pinLayout from '@salesforce/apex/LightningReporterController.pinLayout'
 import getPinnedViews from '@salesforce/apex/LightningReporterController.getPinnedViews';
 import deletePin from '@salesforce/apex/LightningReporterController.deletePin';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import SystemModstamp from '@salesforce/schema/Account.SystemModstamp';
 
 export default class LightningReporter extends LightningElement {
     @api recordId;
@@ -19,7 +20,6 @@ export default class LightningReporter extends LightningElement {
     @track displayAlerts = false;
     @track isLoading = false;
     selectableFields;
-    selectableFieldByName = new Map();
     childTypes;
     saved = false;
     iconName;
@@ -136,7 +136,8 @@ export default class LightningReporter extends LightningElement {
                             DataId: context.alerts[i].parentSObjectType,
                             Url: context.alerts[i].note.CreatedBy.FullPhotoUrl,
                             Time: new Date(context.alerts[i].localCreatedDate),
-                            Content: context.alerts[i].note.Body
+                            Content: context.alerts[i].note.Body,
+                            Style: "note-body"
                         };
                         alerts.push(alert);
                     }
@@ -161,10 +162,13 @@ export default class LightningReporter extends LightningElement {
     getPinnedViews(){
         getPinnedViews()
             .then(result => {
-                this.pinnedViews = [...result]; 
+                this.pinnedViews = [...result];
                 if(this.pinnedViews.length > 0){
                     this.selectedType = this.pinnedViews[0].objectName;
                     this.selectedFields = this.pinnedViews[0].defaultFields;
+                    for(let i=0; i<this.selectedFields.length; i++){
+                        this.selectedFields[i].Style = 'field-name field-selected';
+                    }
                     this.selectableFields = this.pinnedViews[0].defaultFields;
                     this.getChildRecords(true);
                 }else{
@@ -192,15 +196,15 @@ export default class LightningReporter extends LightningElement {
 
                 if(i < 10){
                     dto.selected = true;
+                    dto.Style = 'field-name field-selected'
                     selectedFields.push(dto);
+                }else{
+                    dto.selected = false;
+                    dto.Style = 'field-name'
                 }
 
                 selectableFields.push(dto);
             }
-            this.selectableFieldByName = new Map(
-                selectableFields.map(field => {
-                    return [field.name, field];
-            }));
 
             this.selectableFields = selectableFields;
             this.selectedFields = selectedFields;
@@ -212,19 +216,24 @@ export default class LightningReporter extends LightningElement {
     }
 
     handleFieldClicked(event){
-        let fieldName = event.target.dataset.id;
-        let field = this.selectableFieldByName.get(fieldName);
-        let newSelectedFields = this.selectedFields.slice();
+        let fieldName = event.detail;
 
-        if(field.selected){ // unselect field
-            field.selected = false;
-            newSelectedFields = newSelectedFields.filter(f => f.name !== field.name);
-        }else if(newSelectedFields.length < 10){ // select field
-            field.selected = true
-            newSelectedFields.push(field);
+        let newSelectableFields = [...this.selectableFields];
+        for(let i=0; i<newSelectableFields.length; i++){
+            if(newSelectableFields[i].name.toLowerCase() === fieldName.toLowerCase()){
+                newSelectableFields[i].selected = !newSelectableFields[i].selected
+                newSelectableFields[i].Style = newSelectableFields[i].selected ? 'field-name field-selected' : 'field-name';
+                // remove this field from this.selectedFields
+                if(!newSelectableFields[i].selected){
+                    this.selectedFields = this.selectedFields.filter(field => field.name !== newSelectableFields[i].name);
+                }else{
+                    this.selectedFields.push(newSelectableFields[i]);
+                }
+                break;
+            }
         }
 
-        this.selectedFields = newSelectedFields;
+        this.selectableFields = newSelectableFields;
     }
 
     handleChildTypeSelected(event){
@@ -296,8 +305,13 @@ export default class LightningReporter extends LightningElement {
             this.selectedFields = [];
             // get pinned view matching selected type
             let pinnedView = this.pinnedViews.find(view => view.objectName === this.selectedType);
-            this.selectedFields = pinnedView.defaultFields;
-            this.selectableFields = pinnedView.defaultFields;
+            let selectableFields = [...pinnedView.defaultFields];
+            for(let i=0; i<selectableFields; i++){
+                selectableFields[i].selected = true;
+                selectableFields[i].Style = selectableFields[i].selected ? 'field-name field-selected' : 'field-name';
+            }
+            this.selectedFields = selectableFields;
+            this.selectableFields = selectableFields;
             this.getChildRecords(true);
         } catch (error) {
             this.showNotification('Error setting view', error.message, 'error');

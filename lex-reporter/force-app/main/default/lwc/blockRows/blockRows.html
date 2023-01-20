@@ -6,25 +6,30 @@
             <lightning-layout-item size="12" 
                                    class="note">
                 <lightning-layout>
-                    <lightning-layout-item size="1" 
-                                            style="text-align:left;" 
-                                            padding="around-small">
-                        <lightning-avatar src={row.Url} 
-                                        size="medium" 
-                                        variant="square"></lightning-avatar>
+                    <template if:true={row.Url}>
+                        <lightning-layout-item size="1" 
+                                                style="text-align:left;" 
+                                                padding="around-small">
+                            <lightning-avatar src={row.Url} 
+                                                size="medium" 
+                                                variant="square"></lightning-avatar>
+                        </lightning-layout-item>
+                    </template>
+                    <lightning-layout-item size="11" 
+                                            class={row.Style} 
+                                            data-id={row.DataId}
+                                            onclick={handleRowClick}>
+                        <lightning-formatted-rich-text value={row.Content}
+                                                        data-id={row.DataId}></lightning-formatted-rich-text>
+                        <!-- if has row.Time -->
+                        <template if:true={row.Time}>
+                            <div class="note-footer" data-id={row.DataId}>
+                                <div class="note-time">
+                                    <lightning-relative-date-time value={row.Time}></lightning-relative-date-time>
+                                </div>
+                            </div>
+                        </template>
                     </lightning-layout-item>
-                <lightning-layout-item size="11" 
-                                        class="note-body" 
-                                        data-id={row.DataId}
-                                        onclick={handleRowClick}>
-                    <lightning-formatted-rich-text value={row.Content}
-                                                    data-id={row.DataId}></lightning-formatted-rich-text>
-                    <div class="note-footer" data-id={row.DataId}>
-                        <div class="note-time">
-                            <lightning-relative-date-time value={row.Time}></lightning-relative-date-time>
-                        </div>
-                    </div>
-                </lightning-layout-item>
                 </lightning-layout>
             </lightning-layout-item>
         </lightning-layout>

@@ -24,3 +24,16 @@
     display: flex;
     justify-content: space-between;
 }
+
+.field-name{
+    border-bottom: black 1px solid;
+    cursor: pointer;
+}
+
+.field-name:hover{
+    background-color: lightcyan;
+}
+
+.field-selected{
+    background-color: lightcyan;
+}

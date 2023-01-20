@@ -8,19 +8,6 @@
     max-height: 350px;
 }
 
-.field-name{
-    border-bottom: black 1px solid;
-    cursor: pointer;
-}
-
-.field-name:hover{
-    background-color: lightcyan;
-}
-
-.field-selected{
-    background-color: lightcyan;
-}
-
 .table-container{
     text-align: center;
     max-height: 500px;
