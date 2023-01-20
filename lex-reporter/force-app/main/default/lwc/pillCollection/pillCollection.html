@@ -1,0 +1,18 @@
+<template>
+    <lightning-layout multiple-rows="true" 
+                        horizontal-align="space">
+        <template for:each={pills} for:item="pill">
+            <lightning-layout-item size="3" 
+                                    key={pill.objectName}
+                                    class="pinned-view-container"> 
+                <lightning-pill label={pill.label} 
+                                data-id={pill.label}
+                                onclick={pillSelected}
+                                onremove={pillRemoved}
+                                class="pinned-view"
+                                variant="link"
+                                href=""></lightning-pill>
+            </lightning-layout-item>
+        </template>
+    </lightning-layout>
+</template>

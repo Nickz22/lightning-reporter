@@ -1,0 +1,11 @@
+.pinned-view-container{
+    padding: .25em;
+}
+
+.pinned-view{
+    cursor: pointer;
+}
+
+lightning-pill{
+    color: rgb(50, 50, 217);
+}

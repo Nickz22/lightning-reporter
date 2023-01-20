@@ -184,20 +184,6 @@ export default class LightningReporter extends LightningElement {
             })
     }
 
-    setView(event){
-        try {
-            this.selectedType = event.target.dataset.id;
-            this.selectedFields = [];
-            // get pinned view matching selected type
-            let pinnedView = this.pinnedViews.find(view => view.objectName === this.selectedType);
-            this.selectedFields = pinnedView.defaultFields;
-            this.selectableFields = pinnedView.defaultFields;
-            this.getChildRecords(true);
-        } catch (error) {
-            this.showNotification('Error setting view', error.message, 'error');
-        }
-    }
-
     getSelectableFields(){
         getFieldsFromType({
             typeName: this.selectedType
@@ -296,6 +282,7 @@ export default class LightningReporter extends LightningElement {
                 .then(result => {
                     this.pinnedViews.push({
                         objectName: this.selectedType,
+                        label: this.selectedType,
                         defaultFields: this.selectedFields
                     });
                     this.showNotification('Pinned', '', 'success');
@@ -307,15 +294,27 @@ export default class LightningReporter extends LightningElement {
         }catch (error) {
             this.showNotification('Error pinning view', error.message, 'error');
         }
-        
+    }
+
+    setView(event){
+        try {
+            this.selectedType = event.detail;
+            this.selectedFields = [];
+            // get pinned view matching selected type
+            let pinnedView = this.pinnedViews.find(view => view.objectName === this.selectedType);
+            this.selectedFields = pinnedView.defaultFields;
+            this.selectableFields = pinnedView.defaultFields;
+            this.getChildRecords(true);
+        } catch (error) {
+            this.showNotification('Error setting view', error.message, 'error');
+        }
     }
 
     removePin(event){
         try {
-            event.preventDefault();
             let pinnedViews = [...this.pinnedViews];
             for(let i=0; i<pinnedViews.length; i++){
-                if(pinnedViews[i].objectName === event.target.dataset.id){
+                if(pinnedViews[i].objectName === event.detail){
                     pinnedViews.splice(i, 1);
                     break;
                 }
@@ -336,7 +335,7 @@ export default class LightningReporter extends LightningElement {
                 this.getChildRecords(true);
             }
 
-            deletePin({objectName: event.target.dataset.id})
+            deletePin({objectName: event.detail})
                 .catch(error => {
                     this.getPinnedViews();
                     this.showNotification('Error removing pin', error.body?.message, 'error');

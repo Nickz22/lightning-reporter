@@ -210,7 +210,6 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     }
 
     set saved(value){
-        console.log("handling save");
         let newCells = [];
         for(let cell of this.cells){
             cell.notEditing = true;
@@ -259,7 +258,6 @@ export default class TableRow extends NavigationMixin(LightningElement) {
             }
 
             if(this.avatars.length > 0){
-                console.log('setting avatars');
                 this.previewAvatar = this.avatars[0];
                 this.previewAvatar.unreadStyle = hasAlert ? "border: 2px solid #00ff00;" : "";
                 if(this.notes.length > 0){

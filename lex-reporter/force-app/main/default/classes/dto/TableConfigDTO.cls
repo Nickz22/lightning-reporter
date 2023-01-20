@@ -1,9 +1,11 @@
 public class TableConfigDTO{
     @AuraEnabled public String objectName {get;set;}
+    @AuraEnabled public String label {get;set;}
     @AuraEnabled public List<FieldDTO> defaultFields {get;set;}
 
     public TableConfigDTO(String objectName, List<FieldDTO> defaultFields){
         this.objectName = objectName;
+        this.label = objectName;
         this.defaultFields = defaultFields;
     }
 
