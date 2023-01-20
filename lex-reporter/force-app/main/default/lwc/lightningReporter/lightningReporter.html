@@ -13,22 +13,10 @@
                 <!-- TABLE ACTIONS -->
                 <lightning-layout-item size="3" 
                                        data-id="child-type-options">
-                    <lightning-layout vertical-align="end">
-                        <lightning-layout-item size="3">
-                            <lightning-icon icon-name={iconName} size="small"></lightning-icon>
-                        </lightning-layout-item>  
-                        <lightning-layout-item size="6">
-                            <lightning-combobox
-                                name="Select Child Type"
-                                label=""
-                                value={selectedType}
+                    <c-picklist default-option={selectedType}
+                                icon-name={iconName}
                                 options={options}
-                                onchange={handleChildTypeChange}
-                                style="margin-top: -1em;">
-                            </lightning-combobox>
-                        </lightning-layout-item>
-                        <lightning-layout-item size="3"></lightning-layout-item>
-                    </lightning-layout>
+                                onoptionselected={handleChildTypeSelected}></c-picklist>
                 </lightning-layout-item>
                 <lightning-layout-item size="5" 
                                       padding="horizontal-small"

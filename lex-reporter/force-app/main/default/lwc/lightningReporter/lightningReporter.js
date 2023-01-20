@@ -247,8 +247,8 @@ export default class LightningReporter extends LightningElement {
         this.selectedFields = newSelectedFields;
     }
 
-    handleChildTypeChange(event){
-        this.selectedType = event.target.value;
+    handleChildTypeSelected(event){
+        this.selectedType = event.detail;
         this.isLoading = true;
         this.childRecords = [];
         this.selectableFields = [];
