@@ -78,33 +78,8 @@
                         </template>
                     </template>
                     <template if:true={displayAlerts}>
-                        <template for:each={alerts} for:item="alert">
-                            <lightning-layout multiple-rows="true" 
-                                                key={alert.Id}
-                                                style="overflow:auto">
-                                <lightning-layout-item size="12" 
-                                                       class="note">
-                                    <lightning-layout>
-                                        <lightning-layout-item size="1" style="text-align:left;" padding="around-small">
-                                            <lightning-avatar src={alert.url} size="medium" variant="square"></lightning-avatar>
-                                        </lightning-layout-item>
-                                    <lightning-layout-item size="11" 
-                                                            class="note-body" 
-                                                            data-id={alert.parentSObjectType}
-                                                            onclick={focusOnAlertView}
-                                                            onmouseenter={countNoteView}>
-                                        <lightning-formatted-rich-text value={alert.note.Body}
-                                                                        data-id={alert.parentSObjectType}></lightning-formatted-rich-text>
-                                        <div class="note-footer" data-id={alert.parentSObjectType}>
-                                            <div class="note-time">
-                                                <lightning-relative-date-time value={alert.time}></lightning-relative-date-time>
-                                            </div>
-                                        </div>
-                                    </lightning-layout-item>
-                                    </lightning-layout>
-                                </lightning-layout-item>
-                            </lightning-layout>
-                        </template>
+                        <c-block-rows rows={alerts}
+                                    onblockrowclick={focusOnAlertView}></c-block-rows>
                     </template>
                 </lightning-layout-item>
                 <!-- START FIELDS -->

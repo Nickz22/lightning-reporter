@@ -103,7 +103,7 @@ export default class LightningReporter extends LightningElement {
     }
 
     focusOnAlertView(event){
-        this.selectedType = event.target.dataset.id;
+        this.selectedType = event.detail;
         this.selectableFields = [];
         this.selectedFields = [];
         this.displayAlerts = false;
@@ -129,21 +129,15 @@ export default class LightningReporter extends LightningElement {
             .then(context => {
                 try {
                     let sObjects = context.subjects;
-                    for(let i=0; i<sObjects.length; i++){
-                        if(!sObjects[i].notes){
-                            continue;
-                        }
-                    }
-
                     let alerts = [];
                     for(let i=0; i<context.alerts.length; i++){
-                        let alert = {};
-                        for(let key in context.alerts[i]){
-                            alert[key] = context.alerts[i][key];
-                        }
-                        alert.url = alert.note.CreatedBy.FullPhotoUrl;
-                        alert.time = new Date(alert.localCreatedDate);
-                        alert.timeStamp = alert.note.localCreatedDate;
+                        let alert = {
+                            Key: context.alerts[i].Id,
+                            DataId: context.alerts[i].parentSObjectType,
+                            Url: context.alerts[i].note.CreatedBy.FullPhotoUrl,
+                            Time: new Date(context.alerts[i].localCreatedDate),
+                            Content: context.alerts[i].note.Body
+                        };
                         alerts.push(alert);
                     }
                     this.alerts = alerts
