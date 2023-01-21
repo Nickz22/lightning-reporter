@@ -111,10 +111,6 @@ export default class TableRow extends NavigationMixin(LightningElement) {
             this.isUserSearching = true;
         }else if(event.key !== '@' && event.keyCode !== 13 && this.isUserSearching){ // if key press is not @ or enter
             try {
-                console.dir(event.target);
-                console.log(`value from event : ${event.target.value}`);
-                console.log(`value from innerText : ${event.target.innerText}`);
-                console.log(`num children: ${event.target.childNodes.length}`);
                 // loop through event.target child nodes and log their innerText
                 for(let i = 0; i < event.target.childNodes.length; i++){
                     console.log(`value from child node ${i} : ${event.target.childNodes[i].innerText}`);
@@ -145,12 +141,10 @@ export default class TableRow extends NavigationMixin(LightningElement) {
         fetchUsers()
             .then(result => {
                 for(let i = 0; i < result.length; i++){
-                    let user = {};
-                    for(let param in result[i]){
-                        user[param] = result[i][param];
-                    }
-                    user.hidden = false;
-                    this.users.push(user);
+                    this.users.push({
+                        ...result[i],
+                        hidden: false
+                    });
                 }
             })
             .catch(error => {
@@ -244,12 +238,10 @@ export default class TableRow extends NavigationMixin(LightningElement) {
                     // for each value in value.noteMdByNoteId[value.notes[i].Id], set a `leftStyle` property equal to the value of the index
                     if(noteDto.views){
                         for(let j = 0; j < noteDto.views.length; j++){
-                            let view = {};
-                            for(let param in noteDto.views[j]){ // noteMd[j] is read-only
-                                view[param] = noteDto.views[j][param];
-                            }
-                            view.leftStyle = 'left: '+j+'em;';
-                            views.push(view);
+                            views.push({
+                                ...noteDto.views[j],
+                                leftStyle : 'left: '+j+'em;'
+                            });
                         }
                     }
                     newAvatar.views = views;
@@ -313,12 +305,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     handleValueChange(event){
         try{
 
-            let clone = {};
-
-            for(let field in this._sObject.record){
-                clone[field] = this._sObject.record[field];
-            }
-
+            let clone = {...this._sObject.record};
             let input = event.target;
             let fieldName = input.dataset.id;
             clone[fieldName] = input.value;

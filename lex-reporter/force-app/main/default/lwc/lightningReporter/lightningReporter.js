@@ -8,7 +8,6 @@ import pinLayout from '@salesforce/apex/LightningReporterController.pinLayout'
 import getPinnedViews from '@salesforce/apex/LightningReporterController.getPinnedViews';
 import deletePin from '@salesforce/apex/LightningReporterController.deletePin';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import SystemModstamp from '@salesforce/schema/Account.SystemModstamp';
 
 export default class LightningReporter extends LightningElement {
     @api recordId;
@@ -189,18 +188,14 @@ export default class LightningReporter extends LightningElement {
             let selectableFields = [];
             let selectedFields = [];
             for(let i=0; i<result.length; i++){
-                let dto = {};
-                for(let key in result[i]){
-                    dto[key] = result[i][key];
-                }
+                let dto = {
+                    ...result[i],
+                    selected: i < 10,
+                    Style: i < 10 ? 'field-name field-selected' : 'field-name'
+                };
 
-                if(i < 10){
-                    dto.selected = true;
-                    dto.Style = 'field-name field-selected'
+                if(dto.selected){
                     selectedFields.push(dto);
-                }else{
-                    dto.selected = false;
-                    dto.Style = 'field-name'
                 }
 
                 selectableFields.push(dto);
@@ -305,10 +300,14 @@ export default class LightningReporter extends LightningElement {
             this.selectedFields = [];
             // get pinned view matching selected type
             let pinnedView = this.pinnedViews.find(view => view.objectName === this.selectedType);
-            let selectableFields = [...pinnedView.defaultFields];
-            for(let i=0; i<selectableFields; i++){
-                selectableFields[i].selected = true;
-                selectableFields[i].Style = selectableFields[i].selected ? 'field-name field-selected' : 'field-name';
+
+            let selectableFields = [];
+            for(let i=0; i<pinnedView.defaultFields.length; i++){
+                selectableFields.push({
+                    ...pinnedView.defaultFields[i],
+                    selected: true,
+                    Style: 'field-name field-selected'
+                });
             }
             this.selectedFields = selectableFields;
             this.selectableFields = selectableFields;
