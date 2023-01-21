@@ -31,64 +31,12 @@
             <!-- componentize table cell -->
             <template for:each={cells} for:item="cell">
                 <lightning-layout-item size="3"
-                                        key={cell.apiName}
-                                        class="cell"
-                                        alignment-bump="top">
-                    <template if:true={cell.isReference}>
-                        <a href={cell.url} target="_blank">{cell.label}</a>
-                    </template>
-                    <template if:false={cell.isReference}>
-                        <template if:true={cell.isUpdateable}>
-                            <div onclick={initEdit} data-id={cell.apiName}>
-                                <template if:false={cell.isDatetime}>
-                                    <lightning-input data-id={cell.apiName}
-                                                    value={cell.value} 
-                                                    type={cell.type}
-                                                    read-only={cell.notEditing}
-                                                    onchange={handleValueChange}></lightning-input>
-                                </template>
-                                <template if:true={cell.isDatetime}>
-                                    <template if:false={cell.notEditing}>
-                                        <lightning-input data-id={cell.apiName}
-                                                        value={cell.value} 
-                                                        type={cell.type}
-                                                        read-only={cell.notEditing}
-                                                        onchange={handleValueChange}></lightning-input>
-                                    </template>
-                                    <template if:true={cell.notEditing}>
-                                        <p class="datetime">
-                                            <lightning-formatted-date-time value={cell.value} 
-                                                                            year="numeric" 
-                                                                            month="numeric" 
-                                                                            day="numeric" 
-                                                                            hour="2-digit"
-                                                                            minute="2-digit"
-                                                                            data-id={cell.apiName}></lightning-formatted-date-time>
-                                        </p>
-                                    </template>
-                                </template>
-                            </div>
-                        </template>
-                        <template if:false={cell.isUpdateable}>
-                            <template if:true={cell.isDatetime}>
-                                <p class="datetime">
-                                <lightning-formatted-date-time value={cell.value} 
-                                                                year="numeric" 
-                                                                month="numeric" 
-                                                                day="numeric" 
-                                                                hour="2-digit"
-                                                                minute="2-digit"></lightning-formatted-date-time>
-                                </p>
-                            </template>
-                            <template if:false={cell.isDatetime}>    
-                                <lightning-input data-id={cell.apiName}
-                                                value={cell.value} 
-                                                type={cell.type}
-                                                read-only={cell.notEditing}
-                                                onchange={handleValueChange}></lightning-input>
-                            </template>
-                        </template>
-                    </template>
+                            class="cell"
+                            alignment-bump="top"
+                            key={cell.DataId}>
+                    <c-table-cell cell={cell}
+                                    oncellclick={initEdit}
+                                    onvaluechange={handleCellValueChange}></c-table-cell>
                 </lightning-layout-item>
             </template>
         </lightning-layout>

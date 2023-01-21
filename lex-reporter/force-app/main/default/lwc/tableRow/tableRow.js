@@ -86,11 +86,14 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     set saved(value){
         let newCells = [];
         for(let cell of this.cells){
-            cell.notEditing = true;
-            cell.size = 10;
+            cell = {
+                ...cell,
+                ReadOnly: true
+            };
             newCells.push(cell);
         }
         this.cells = newCells;
+        this._saved = value;
     }
 
     @api get sObject(){
@@ -162,33 +165,29 @@ export default class TableRow extends NavigationMixin(LightningElement) {
                                 isRef ? field.isCustom ? field.name.replace('__c', '__r') : field.name.replace('Id', '') : ''; 
             let refLabel = isId ? this._sObject.record[refLabelPath] : 
                             isRef ? this._sObject.record[refLabelPath]?.Name : ''; 
-            cells.push(
-                {
-                    'apiName': field.name, 
-                    'label' : (isRef || isId) && refLabel > 15 ? refLabel.substring(0,15)+'...' : 
+            cells.push({
+                    DataId : field.name,
+                    Label : (isRef || isId) && refLabel > 15 ? refLabel.substring(0,15)+'...' :
                                 (isRef || isId) ? refLabel : field.label,
-                    'value': this._sObject.record[field.name],
-                    'isUpdateable' : field.isUpdateable,
-                    'isReference' : isRef || isId,
-                    'url' : isRef || isId ? baseUrl+this._sObject.record[field.name] : '',
-                    'notEditing' : true, // have to make this resolve to `true`...
-                                         // cant make read-only show with a `false` boolean value
-                    'type' : this.inputTypeBySfSchemaType.get(field.type),
-                    'isDatetime' : this.inputTypeBySfSchemaType.get(field.type) === 'datetime',
-                }
-            );
+                    Value : this._sObject.record[field.name],
+                    IsEditable : field.isUpdateable,
+                    IsReference : isRef || isId,
+                    Url : isRef || isId ? baseUrl+this._sObject.record[field.name] : '',
+                    ReadOnly : true,
+                    Type : this.inputTypeBySfSchemaType.get(field.type),
+                    IsDatetime : this.inputTypeBySfSchemaType.get(field.type) === 'datetime',
+            });
         }
 
         return cells;
     }
 
-    handleValueChange(event){
+    handleCellValueChange(event){
         try{
 
             let clone = {...this._sObject.record};
-            let input = event.target;
-            let fieldName = input.dataset.id;
-            clone[fieldName] = input.value;
+            let fieldName = event.detail.DataId;
+            clone[fieldName] = event.detail.Value;
             this._updatedSObject = clone;
         }catch(e){
             console.error(e);
@@ -205,11 +204,10 @@ export default class TableRow extends NavigationMixin(LightningElement) {
             composed: true,
             bubbles: true
         }));
-        let clickedFieldName = event.target.dataset.id;
+        let clickedFieldName = event.detail;
         for(let cell of this.cells){
-            let isNotEditing = cell.apiName !== clickedFieldName 
-            cell.notEditing = isNotEditing;
-            cell.size = 12;
+            let isReadOnly = cell.DataId !== clickedFieldName 
+            cell.ReadOnly = isReadOnly;
         }
     }
 

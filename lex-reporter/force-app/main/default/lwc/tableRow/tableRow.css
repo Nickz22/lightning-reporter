@@ -25,18 +25,3 @@
 .cell:hover{
     background-color: rgba(224, 216, 216, 0.3);
 }
-
-a {
-    max-width: 10em;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-input{
-    text-align: center;
-}
-
-.datetime{
-    min-height: 2em;
-}
