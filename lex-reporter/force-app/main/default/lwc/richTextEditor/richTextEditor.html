@@ -1,0 +1,22 @@
+<template>
+    <lightning-input-rich-text  onkeyup={handleKeyUp}
+                                onkeydown={handleKeyDown}
+                                disabled-categories={disabledCategories}
+                                placeholder={placeholder}
+                                variant="bottom-toolbar">
+    </lightning-input-rich-text>
+    <div class="user-search">
+        <template for:each={users} for:item="user">
+            <template if:false={user.hidden}>
+                <div key={user.Id} 
+                    class="lookup-user" 
+                    onclick={handleUserSelect}
+                    tabindex="-1"
+                    onkeyup={handleUserKeyUp}>
+                    <lightning-avatar src={user.FullPhotoUrl} size="x-small"></lightning-avatar>
+                    <p>{user.Name}</p>
+                </div>
+            </template>
+        </template>
+    </div>
+</template>

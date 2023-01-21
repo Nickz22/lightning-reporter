@@ -4,7 +4,6 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import saveNote from '@salesforce/apex/TableRowController.saveNote';
 import countView from '@salesforce/apex/TableRowController.countView';
 import runningUserId from '@salesforce/user/Id';
-import fetchUsers from '@salesforce/apex/TableRowController.fetchUsers';
 
 export default class TableRow extends NavigationMixin(LightningElement) {
 
@@ -29,20 +28,12 @@ export default class TableRow extends NavigationMixin(LightningElement) {
 
     @api topMostId;
     @api fields = [];
-    @track rteContent;
     isEditMode = false;
-    usersPosition = "";
-    @track users = [];
     @track avatars = [];
     @track previewAvatar;
     @track notes = [];
     @track cells = [];
-    bypassUserFocus = false;
-    sObjectDisplayName;
-    isUserSearching = false;
-    focusAtEnd = false;
     
-
     // on render callback
     renderedCallback(){
         // if in edit mode
@@ -52,146 +43,36 @@ export default class TableRow extends NavigationMixin(LightningElement) {
         }
     }
 
-    handleRteKeyDown(event){
-        // when meta + enter is pressed
-        if(event.metaKey && event.keyCode === 13){
-            this.renderRte();
-            saveNote({
-                content: event.target.value,
-                parentId: this._sObject.record.Id,
-                topMostId: this.topMostId
-            })
-            .then(noteDTO => {
-                let currentAvatars = this.avatars;
-                currentAvatars.splice(0,0,{
-                    "url" : noteDTO.note.CreatedBy.FullPhotoUrl,
-                    "name" : noteDTO.note.CreatedBy.Name,
-                    "body" : noteDTO.note.Body,
-                    "id" : noteDTO.note.Id,
-                    "time" : noteDTO.localCreatedDate
-                });
-                this.avatars = currentAvatars;
-                this.showNotification('Note Saved', '', 'success');
-            })
-            .catch(error => {
-                throw error;
-            });
-        }
-
-        // when down arrow pressed
-        if(event.keyCode === 40){
-            let users = this.template.querySelectorAll('.lookup-user');
-            if(users.length > 0){
-                users[0].focus();
-            }
-        }
-
-        if(event.keyCode === 13 && this.isUserSearching){
-            let users = this.template.querySelectorAll('.lookup-user');
-            if(users.length === 1){
-                this.selectLookupUser(users[0].textContent)
-            }
-        }
-    }
-
     handleRteKeyUp(event){
         // if key press is escape
-        if(event.keyCode === 27){
-            if(this.users.length > 0){
-                this.users = [];
-            }else{
-                this.renderRte();
-            }   
-            this.isUserSearching = false;
-        }
-        // if key press is @
-        if(event.key === '@' && !this.isUserSearching){
-            this.fetchUsers(event);
-            this.isUserSearching = true;
-        }else if(event.key !== '@' && event.keyCode !== 13 && this.isUserSearching){ // if key press is not @ or enter
-            try {
-                // loop through event.target child nodes and log their innerText
-                for(let i = 0; i < event.target.childNodes.length; i++){
-                    console.log(`value from child node ${i} : ${event.target.childNodes[i].innerText}`);
-                }
-                    
-                // find substring between last "@" and last "</p>"
-                let lastAt = event.target.value.lastIndexOf('@');
-                let lastP = event.target.value.lastIndexOf('</p>');
-                let substring = event.target.value.substring(lastAt+1, lastP);
-                // filter users by name
-                for(let user of this.users){
-                    if(!substring){
-                        user.hidden = false;
-                    }
-                    if(!user.Name.toLowerCase().includes(substring.toLowerCase())){
-                        user.hidden = true;
-                    }else{
-                        user.hidden = false;
-                    }
-                }   
-            } catch (error) {
-                console.error(error.message);
-            }
+        if(event.detail === 27){
+            this.renderRte();
         }
     }
 
-    fetchUsers(){
-        fetchUsers()
-            .then(result => {
-                for(let i = 0; i < result.length; i++){
-                    this.users.push({
-                        ...result[i],
-                        hidden: false
-                    });
-                }
-            })
-            .catch(error => {
-                this.showNotification('Error', error.body.message, 'error');
+    saveNote(event){
+        console.log(`saveNote in tableRow`);
+        this.renderRte();
+        saveNote({
+            content: event.detail,
+            parentId: this._sObject.record.Id,
+            topMostId: this.topMostId
+        })
+        .then(noteDTO => {
+            let currentAvatars = this.avatars;
+            currentAvatars.splice(0,0,{
+                "url" : noteDTO.note.CreatedBy.FullPhotoUrl,
+                "name" : noteDTO.note.CreatedBy.Name,
+                "body" : noteDTO.note.Body,
+                "id" : noteDTO.note.Id,
+                "time" : noteDTO.localCreatedDate
             });
-    }
-
-    handleUserSelect(event){
-        console.dir(event.target.childNodes[1]);
-        this.selectLookupUser(event.target.childNodes[1].textContent);
-    }
-
-    selectLookupUser(userName){
-
-        let rte = this.template.querySelectorAll('lightning-input-rich-text')[0];
-        let lastAt = rte.value.lastIndexOf('@');
-        let lastP = rte.value.lastIndexOf('</p>');
-        let substring = rte.value.substring(lastAt+1, lastP);
-        let range = rte.value.lastIndexOf(substring);
-
-        let firstMsgSegment = rte.value.substring(0, range).replace("</p>", "");
-        let secondMsgSegment = rte.value.substring(range+substring.length);
-
-        rte.value = `${firstMsgSegment}<strong>${userName}</strong>${secondMsgSegment}`;
-        rte.setRangeText('', rte.value.length, rte.value.length, 'end');
-        rte.setFormat({bold: false});
-        this.isUserSearching = false;
-        this.users = [];
-    }
-
-    handleUserKeyUp(event){
-        // if key press is down
-        if(event.keyCode === 40){
-            event.target.nextSibling.focus();
-        }
-        // if key press is up
-        if(event.keyCode === 38){
-            event.target.previousSibling.focus();
-        }
-        // if key press is enter
-        if(event.keyCode === 13){
-            this.users = [];
-            this.handleUserSelect(event);
-        }
-        // if key press is escape
-        if(event.keyCode === 27){
-            this.users = [];
-        }
+            this.avatars = currentAvatars;
+            this.showNotification('Note Saved', '', 'success');
+        })
+        .catch(error => {
+            throw error;
+        });
     }
         
     @api get updatedSObject(){

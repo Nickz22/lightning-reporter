@@ -21,30 +21,14 @@
                 </lightning-layout>
                 <template if:true={isEditMode}>
                     <div class="rte">
-                        <lightning-input-rich-text value={rteContent} 
-                                                onkeyup={handleRteKeyUp}
-                                                onkeydown={handleRteKeyDown}
-                                                disabled-categories="ALIGN_TEXT,FORMAT_FONT,FORMAT_BODY"
-                                                placeholder="ESC to close | CMD+ENTER to save | FN for emojis"
-                                                variant="bottom-toolbar">
-                        </lightning-input-rich-text>
-                        <div class="user-search">
-                            <template for:each={users} for:item="user">
-                                <template if:false={user.hidden}>
-                                    <div key={user.Id} 
-                                        class="lookup-user" 
-                                        onclick={handleUserSelect}
-                                        tabindex="-1"
-                                        onkeyup={handleUserKeyUp}>
-                                        <lightning-avatar src={user.FullPhotoUrl} size="x-small"></lightning-avatar>
-                                        <p>{user.Name}</p>
-                                    </div>
-                                </template>
-                            </template>
-                        </div>
+                        <c-rich-text-editor onsave={saveNote}
+                                            onrtekeyup={handleRteKeyUp}
+                                            placeholder="ESC to close | CMD+ENTER to save | FN for emojis"
+                                            disabled-categories="ALIGN_TEXT,FORMAT_FONT,FORMAT_BODY"></c-rich-text-editor>
                     </div>
                 </template>
             </lightning-layout-item>
+            <!-- componentize table cell -->
             <template for:each={cells} for:item="cell">
                 <lightning-layout-item size="3"
                                         key={cell.apiName}
@@ -108,6 +92,7 @@
                 </lightning-layout-item>
             </template>
         </lightning-layout>
+        <!-- switch out for c-blockRows -->
         <lightning-layout multiple-rows="true">
             <template for:each={notes} for:item="note">
                 <lightning-layout-item size="12" 

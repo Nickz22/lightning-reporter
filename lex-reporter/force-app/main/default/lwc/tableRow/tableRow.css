@@ -12,32 +12,6 @@
     min-width: 22em;
 }
 
-.user-search{
-    position: relative;
-    overflow: scroll;
-    max-height: 50px;
-    z-index: 2;
-}
-
-.lookup-user{
-    border-bottom: 1px solid black;
-    cursor: pointer;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    padding: 0.5em;
-    background-color: white;
-}
-
-.lookup-user > p {
-    padding-left: .5em;
-}
-
-.lookup-user:hover{
-    border-bottom: 1px solid black;
-    background-color: lightblue;
-}
-
 .note{
     cursor: pointer;
 }
