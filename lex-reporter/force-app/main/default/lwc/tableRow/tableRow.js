@@ -38,7 +38,6 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     @track notes = [];
     @track cells = [];
     bypassUserFocus = false;
-    cellSize;
     sObjectDisplayName;
     isUserSearching = false;
     focusAtEnd = false;
@@ -265,8 +264,6 @@ export default class TableRow extends NavigationMixin(LightningElement) {
                     "unreadStyle" : ""
                 };
             }
-
-            this.cellSize = 3;   
         } catch (error) {
             this.showNotification('Error', error.message, 'error');
         }
@@ -316,7 +313,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     }
 
     initEdit(event){
-
+        console.log('initEdit');
         this.dispatchEvent(new CustomEvent('edit', {
             detail: {
                 'sObject' : this._sObject,

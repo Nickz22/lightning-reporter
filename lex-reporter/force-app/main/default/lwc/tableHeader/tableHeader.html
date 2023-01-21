@@ -2,7 +2,7 @@
     <lightning-layout class="header-container">
         <lightning-layout-item size="1"></lightning-layout-item>
         <template for:each={columns} for:item="column">
-            <lightning-layout-item size={cellSize}
+            <lightning-layout-item size="3"
                                    key={column.name} 
                                    class="column-cell">
                 {column.label}

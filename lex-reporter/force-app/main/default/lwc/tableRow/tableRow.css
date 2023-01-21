@@ -94,6 +94,10 @@
     max-height: 4em;
 }
 
+.cell:hover{
+    background-color: rgba(224, 216, 216, 0.3);
+}
+
 a {
     max-width: 10em;
     overflow: hidden;
@@ -103,22 +107,6 @@ a {
 
 input{
     text-align: center;
-}
-
-.edit-container{
-    position: relative;
-    cursor: pointer;
-}
-
-.edit-container:hover{
-    background-color: rgba(224, 216, 216, 0.3);
-}
-
-.edit-icon{
-    cursor: pointer;
-    position:absolute;
-    bottom: 1em;
-    right: 1.2em;
 }
 
 .datetime{
