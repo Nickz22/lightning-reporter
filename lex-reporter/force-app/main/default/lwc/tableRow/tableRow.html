@@ -5,7 +5,7 @@
                                     class="rte-launcher">
                 <lightning-layout style="position: absolute">
                     <lightning-layout-item size="6">
-                        <lightning-avatar src={previewAvatar.url}
+                        <lightning-avatar src={previewAvatar.Url}
                                         size="x-small"
                                         variant="circle"
                                         onclick={toggleRowComments}
@@ -92,46 +92,7 @@
                 </lightning-layout-item>
             </template>
         </lightning-layout>
-        <!-- switch out for c-blockRows -->
-        <lightning-layout multiple-rows="true">
-            <template for:each={notes} for:item="note">
-                <lightning-layout-item size="12" 
-                                        key={note.id} 
-                                        class="note">
-                    <lightning-layout>
-                        <lightning-layout-item size="1" 
-                                                style="text-align:left;" 
-                                                padding="around-small">
-                            <lightning-avatar src={note.url} 
-                                            size="medium" 
-                                            variant="square"></lightning-avatar>
-                    </lightning-layout-item>
-                    <lightning-layout-item size="11" 
-                                            class="note-body" 
-                                            data-id={note.id}
-                                            onmouseenter={countNoteView}>
-                        <lightning-formatted-rich-text value={note.body}></lightning-formatted-rich-text>
-                        <div class="note-footer">
-                            <div class="viewed-by">
-                                <template for:each={note.views} for:item="view" for:index="i">
-                                    <lightning-avatar key={view.Id} 
-                                                      src={view.Reporter__Viewed_By__r.FullPhotoUrl}
-                                                      size="x-small"
-                                                      variant="circle"
-                                                      data-n={i}
-                                                      class="viewed-by-avatar"
-                                                      style={view.leftStyle}
-                                                      alternative-text={view.Reporter__Viewed_By__r.Name}></lightning-avatar>
-                                </template>
-                            </div>
-                            <div class="note-time">
-                                <lightning-relative-date-time value={note.time}></lightning-relative-date-time>
-                            </div>
-                        </div>
-                    </lightning-layout-item>
-                    </lightning-layout>
-                </lightning-layout-item>
-            </template>
-        </lightning-layout>
+        <c-block-rows rows={notes}
+                      onblockrowmouseenter={countNoteView}></c-block-rows>
     </div>
 </template>

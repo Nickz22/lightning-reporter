@@ -1,11 +1,11 @@
 <template>
     <template for:each={rows} for:item="row">
         <lightning-layout multiple-rows="true" 
-                            key={row.Key}
-                            style="overflow:auto">
+                            key={row.Key}>
             <lightning-layout-item size="12" 
                                    class="note">
                 <lightning-layout>
+                    <!-- row avatar -->
                     <template if:true={row.Url}>
                         <lightning-layout-item size="1" 
                                                 style="text-align:left;" 
@@ -15,20 +15,33 @@
                                                 variant="square"></lightning-avatar>
                         </lightning-layout-item>
                     </template>
+                    <!-- row content -->
                     <lightning-layout-item size="11" 
                                             class={row.Style} 
                                             data-id={row.DataId}
-                                            onclick={handleRowClick}>
+                                            onclick={handleRowClick}
+                                            onmouseenter={handleMouseEnter}>
                         <lightning-formatted-rich-text value={row.Content}
                                                         data-id={row.DataId}></lightning-formatted-rich-text>
-                        <!-- if has row.Time -->
-                        <template if:true={row.Time}>
-                            <div class="note-footer" data-id={row.DataId}>
-                                <div class="note-time">
-                                    <lightning-relative-date-time value={row.Time}></lightning-relative-date-time>
-                                </div>
+                        <div class="note-footer" data-id={row.DataId}>
+                            <!-- if has views -->
+                            <div class="viewed-by" if:true={row.views}>
+                                <template for:each={row.views} for:item="view" for:index="i">
+                                    <lightning-avatar key={view.Id} 
+                                                      src={view.Reporter__Viewed_By__r.FullPhotoUrl}
+                                                      size="x-small"
+                                                      variant="circle"
+                                                      data-n={i}
+                                                      class="viewed-by-avatar"
+                                                      style={view.leftStyle}
+                                                      alternative-text={view.Reporter__Viewed_By__r.Name}></lightning-avatar>
+                                </template>
                             </div>
-                        </template>
+                            <!-- if has Time -->
+                            <div class="note-time" if:true={row.Time}>
+                                <lightning-relative-date-time value={row.Time}></lightning-relative-date-time>
+                            </div>
+                        </div>
                     </lightning-layout-item>
                 </lightning-layout>
             </lightning-layout-item>

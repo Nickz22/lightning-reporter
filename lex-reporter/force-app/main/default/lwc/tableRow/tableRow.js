@@ -108,11 +108,13 @@ export default class TableRow extends NavigationMixin(LightningElement) {
                     let noteDto = value.notes[i];
                     hasAlert = noteDto.alertRunningUser ? true : hasAlert;
                     let newAvatar = {
-                        "url" : noteDto.note.CreatedBy.FullPhotoUrl,
-                        "name" : noteDto.note.CreatedBy.Name,
-                        "body" : noteDto.note.Body,
-                        "id" : noteDto.note.Id,
-                        "time" : new Date(noteDto.localCreatedDate)
+                        "Url" : noteDto.note.CreatedBy.FullPhotoUrl,
+                        "AlternativeText" : noteDto.note.CreatedBy.Name,
+                        "Content" : noteDto.note.Body,
+                        "DataId" : noteDto.note.Id,
+                        "Key" : noteDto.note.Id,
+                        "Time" : new Date(noteDto.localCreatedDate),
+                        "Style" : "note-body"
                     };   
                     let views = [];
                     // for each value in value.noteMdByNoteId[value.notes[i].Id], set a `leftStyle` property equal to the value of the index
@@ -247,7 +249,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     countNoteView(event){
         countView({
             metadata: {
-                NoteId: event.target.dataset.id, 
+                NoteId: event.detail,
                 NoteParentId: this._sObject.record.Id, 
                 ViewedById: runningUserId,
                 TopMostId: this.topMostId

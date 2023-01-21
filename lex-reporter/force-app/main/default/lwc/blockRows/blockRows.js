@@ -1,13 +1,21 @@
-import { LightningElement, api, track } from 'lwc';
+import { LightningElement, api } from 'lwc';
 
 export default class BlockRows extends LightningElement {
 
-    @track blockRows;
     @api rows;
 
     handleRowClick(event){
         const selectedEvent = new CustomEvent('blockrowclick', { 
-            detail: event.target.dataset.id 
+            detail: event.target.dataset.id,
+            bubbles: true
+        });
+        this.dispatchEvent(selectedEvent);
+    }
+
+    handleMouseEnter(event){
+        const selectedEvent = new CustomEvent('blockrowmouseenter', { 
+            detail: event.target.dataset.id,
+            bubbles: true
         });
         this.dispatchEvent(selectedEvent);
     }
