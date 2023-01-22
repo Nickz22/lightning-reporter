@@ -28,7 +28,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
 
     @api topMostId;
     @api fields = [];
-    isEditMode = false;
+    showRte = false;
     @track avatars = [];
     @track previewAvatar;
     @track notes = [];
@@ -37,7 +37,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     // on render callback
     renderedCallback(){
         // if in edit mode
-        if(this.isEditMode){
+        if(this.showRte){
             // focus on rte
             this.template.querySelectorAll('lightning-input-rich-text')[0].focus();
         }
@@ -165,9 +165,10 @@ export default class TableRow extends NavigationMixin(LightningElement) {
                                 isRef ? field.isCustom ? field.name.replace('__c', '__r') : field.name.replace('Id', '') : ''; 
             let refLabel = isId ? this._sObject.record[refLabelPath] : 
                             isRef ? this._sObject.record[refLabelPath]?.Name : ''; 
+
             cells.push({
                     DataId : field.name,
-                    Label : (isRef || isId) && refLabel > 15 ? refLabel.substring(0,15)+'...' :
+                    Label : (isRef || isId) && refLabel.length > 18 ? refLabel.substring(0,18)+'...' :
                                 (isRef || isId) ? refLabel : field.label,
                     Value : this._sObject.record[field.name],
                     IsEditable : field.isUpdateable,
@@ -212,7 +213,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     }
 
     renderRte(){
-        this.isEditMode = !this.isEditMode;
+        this.showRte = !this.showRte;
     }
 
     showNotification(title, message, variant) {

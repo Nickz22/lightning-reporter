@@ -1,6 +1,7 @@
 <template>
     <div class="table-row">
         <lightning-layout class="table-row-data" vertical-align="center">
+            <!-- componentize into c-row-actions component -->
             <lightning-layout-item size="1" 
                                     class="rte-launcher">
                 <lightning-layout style="position: absolute">
@@ -19,7 +20,8 @@
                         </lightning-icon>
                     </lightning-layout-item>
                 </lightning-layout>
-                <template if:true={isEditMode}>
+                <!-- end componentize into c-row-actions component -->
+                <template if:true={showRte}>
                     <div class="rte">
                         <c-rich-text-editor onsave={saveNote}
                                             onrtekeyup={handleRteKeyUp}
@@ -28,7 +30,6 @@
                     </div>
                 </template>
             </lightning-layout-item>
-            <!-- componentize table cell -->
             <template for:each={cells} for:item="cell">
                 <lightning-layout-item size="3"
                             class="cell"
@@ -40,6 +41,8 @@
                 </lightning-layout-item>
             </template>
         </lightning-layout>
+        <!-- this might be better in LightningReporter...unless I make it like
+        tableRowState type of thing - doesn't seem like it belongs in the table-row concern -->
         <c-block-rows rows={notes}
                       onblockrowmouseenter={countNoteView}></c-block-rows>
     </div>

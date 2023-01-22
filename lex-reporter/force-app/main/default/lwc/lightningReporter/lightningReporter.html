@@ -1,6 +1,5 @@
 <template>
     <lightning-card>
-        <!-- classes not allowed on lightning-card -->
         <div class="report-box"> 
             <!-- if {hasPermission} is false, show text explainer -->
             <template if:false={hasPermission}>
@@ -58,6 +57,7 @@
                     </lightning-button>
                 </lightning-layout-item>
                 <!-- END TABLE ACTIONS -->
+                <!-- START TABLE -->
                 <lightning-layout-item size="9" 
                                        data-id="record-table"
                                        padding="around-medium"
@@ -82,6 +82,7 @@
                                     onblockrowclick={focusOnAlertView}></c-block-rows>
                     </template>
                 </lightning-layout-item>
+                <!-- END TABLE -->
                 <!-- START FIELDS -->
                 <template if:true={selectableFields}>
                     <lightning-layout-item size="3" 
@@ -91,24 +92,6 @@
                                         onblockrowclick={handleFieldClicked}></c-block-rows>
                     </lightning-layout-item>   
                 </template>
-                <!-- <lightning-layout-item>
-                    <template for:each={selectableFields} for:item="field">
-                        <template if:true={field.selected}>
-                            <p key={field.name} 
-                                data-id={field.name}
-                                class="field-name field-selected"
-                                onclick={handleFieldClicked}>{field.label} ({field.type})
-                            </p>
-                        </template>
-                        <template if:false={field.selected}>
-                            <p key={field.name} 
-                                data-id={field.name}
-                                class="field-name"
-                                onclick={handleFieldClicked}>{field.name} ({field.type})
-                            </p>
-                        </template>
-                    </template> 
-                </lightning-layout-item> -->
                 <!-- END FIELDS -->
             </lightning-layout>
         </div>

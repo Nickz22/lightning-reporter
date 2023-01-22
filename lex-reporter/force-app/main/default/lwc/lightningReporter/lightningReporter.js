@@ -36,46 +36,6 @@ export default class LightningReporter extends LightningElement {
         return this._selectedType;
     }
 
-    renderedCallback(){
-        if(!this.polling){
-            this.polling = true;
-            setInterval(() => {
-                try {
-                    if(this.isEditingRow || this.childRecords?.length === 0){ 
-                        return; 
-                    }
-                    this.getChildRecords(false);
-                } catch (error) {
-                    this.showNotification('Error getting records', error.message, 'error');
-                    this.isLoading = false;
-                }
-            }, 10000);
-        }
-    }
-
-    @wire (getChildTypes, {recordId : '$recordId'})
-    getRecordsFromDefaultChildType({error, data}){
-        if(error){
-            console.error('error getting default child records: '+error)
-            return;
-        }
-        userHasPermission()
-            .then(hasPermission => {
-                this.hasPermission = hasPermission;
-                if(hasPermission){
-                    if(data){
-                        this.childTypes = data;
-                        this.getPinnedViews();
-                    }else{
-                        console.error('no data returned from getChildTypes');
-                    }
-                }
-            })
-            .catch(error => {
-                this.showNotification('Error getting permissions', error.body?.message, 'error');
-            })
-    }
-
     get options() {
         let options = [];
         
@@ -93,6 +53,49 @@ export default class LightningReporter extends LightningElement {
         }
 
         return options;
+    }
+
+    @wire (getChildTypes, {recordId : '$recordId'})
+    getRecordsFromDefaultChildType({error, data}){
+        this.isLoading = true;
+        if(error){
+            console.error('error getting default child records: '+error);
+            this.isLoading = false;
+            return;
+        }
+        userHasPermission()
+            .then(hasPermission => {
+                this.hasPermission = hasPermission;
+                if(hasPermission){
+                    if(data){
+                        this.childTypes = data;
+                        this.getPinnedViews();
+                    }else{
+                        console.error('no data returned from getChildTypes');
+                    }
+                }
+            })
+            .catch(error => {
+                this.isLoading = false;
+                this.showNotification('Error getting permissions', error.body?.message, 'error');
+            })
+    }
+
+    renderedCallback(){
+        if(!this.polling){
+            this.polling = true;
+            setInterval(() => {
+                try {
+                    if(this.isEditingRow || this.childRecords?.length === 0){ 
+                        return; 
+                    }
+                    this.getChildRecords(false);
+                } catch (error) {
+                    this.showNotification('Error getting records', error.message, 'error');
+                    this.isLoading = false;
+                }
+            }, 10000);
+        }
     }
 
     imperativeRefresh(){
@@ -150,6 +153,7 @@ export default class LightningReporter extends LightningElement {
                     }
                     this.isLoading = false;
                 } catch (error) {
+                    this.isLoading = false;
                     this.showNotification('Error getting records', error.message, 'error');
                 }
             }).catch(error => {
@@ -163,21 +167,31 @@ export default class LightningReporter extends LightningElement {
             .then(result => {
                 this.pinnedViews = [...result];
                 if(this.pinnedViews.length > 0){
-                    this.selectedType = this.pinnedViews[0].objectName;
-                    this.selectedFields = this.pinnedViews[0].defaultFields;
-                    for(let i=0; i<this.selectedFields.length; i++){
-                        this.selectedFields[i].Style = 'field-name field-selected';
+                    let selectedFields = [];
+                    for(let i=0; i<this.pinnedViews[0].defaultFields.length; i++){
+                        let field = {
+                            ...this.pinnedViews[0].defaultFields[i],
+                            selected: true,
+                            Style: 'field-name field-selected'
+                        };
+                        selectedFields.push(field);
                     }
-                    this.selectableFields = this.pinnedViews[0].defaultFields;
+                    this.selectedType = this.pinnedViews[0].objectName;
+                    this.selectedFields = selectedFields;
+                    this.selectableFields = selectedFields;
                     this.getChildRecords(true);
                 }else{
                     this.selectedType = null;
                     this.selectedFields = [];
                     this.selectableFields = [];
                     this.childRecords = [];
+                    this.isLoading = false;
                 }
             }).catch(error => {
-                throw error;
+                // print stack trace
+                console.error(error);
+                this.isLoading = false;
+                this.showNotification('Error getting pinned views', error.body?.message, 'error');
             })
     }
 
@@ -206,7 +220,8 @@ export default class LightningReporter extends LightningElement {
             this.getRecords();
         })
         .catch(error => {
-            throw error;
+            this.isLoading = false;
+            this.showNotification('Error getting fields', error.body?.message, 'error');
         })
     }
 

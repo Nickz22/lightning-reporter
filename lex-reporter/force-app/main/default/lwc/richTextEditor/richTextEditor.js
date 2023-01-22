@@ -8,6 +8,10 @@ export default class RichTextEditor extends LightningElement {
     @api disabledCategories;
     isUserSearching = false;
 
+    renderedCallback(){
+        this.template.querySelectorAll('lightning-input-rich-text')[0].focus();
+    }
+
     handleKeyUp(event){
         // if key press is escape
         if(event.keyCode === 27){
