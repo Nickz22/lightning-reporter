@@ -1,7 +1,7 @@
 import { LightningElement, api, track } from 'lwc';
 
 export default class TableCell extends LightningElement {
-    
+
     @track cellStyle = 'read-only-padding';
 
     @api get cell(){
@@ -16,11 +16,10 @@ export default class TableCell extends LightningElement {
         }
         this._cell = value;
     }
-    
 
     handleClick(event){
         this.dispatchEvent(new CustomEvent('cellclick', {detail: event.target.dataset.id}));
-        this.cellStyle = this.cellStyle === '20%' ? '0' : '20%';
+        this.cellStyle = this.cellStyle === 'read-only-padding' ? '' : 'read-only-padding';
     }
 
     handleValueChange(event){

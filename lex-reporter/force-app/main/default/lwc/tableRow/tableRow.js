@@ -4,6 +4,7 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import saveNote from '@salesforce/apex/TableRowController.saveNote';
 import countView from '@salesforce/apex/TableRowController.countView';
 import runningUserId from '@salesforce/user/Id';
+// import Class from 'c/cell';
 
 export default class TableRow extends NavigationMixin(LightningElement) {
 
@@ -166,18 +167,18 @@ export default class TableRow extends NavigationMixin(LightningElement) {
             let refLabel = isId ? this._sObject.record[refLabelPath] : 
                             isRef ? this._sObject.record[refLabelPath]?.Name : ''; 
 
-            cells.push({
-                    DataId : field.name,
-                    Label : (isRef || isId) && refLabel.length > 18 ? refLabel.substring(0,18)+'...' :
-                                (isRef || isId) ? refLabel : field.label,
-                    Value : this._sObject.record[field.name],
-                    IsEditable : field.isUpdateable,
-                    IsReference : isRef || isId,
-                    Url : isRef || isId ? baseUrl+this._sObject.record[field.name] : '',
-                    ReadOnly : true,
-                    Type : this.inputTypeBySfSchemaType.get(field.type),
-                    IsDatetime : this.inputTypeBySfSchemaType.get(field.type) === 'datetime',
-            });
+            cells.push(new Class.Cell(
+                field.name,
+                (isRef || isId) && refLabel.length > 18 ? refLabel.substring(0,18)+'...' :
+                    (isRef || isId) ? refLabel : field.label,
+                this._sObject.record[field.name],
+                field.isUpdateable,
+                isRef || isId,
+                isRef || isId ? baseUrl+this._sObject.record[field.name] : '',
+                true,
+                this.inputTypeBySfSchemaType.get(field.type),
+                this.inputTypeBySfSchemaType.get(field.type) === 'datetime'
+            ));
         }
 
         return cells;
