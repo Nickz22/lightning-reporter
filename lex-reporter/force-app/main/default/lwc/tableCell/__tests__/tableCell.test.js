@@ -8,31 +8,31 @@ describe('a cell', () => {
     });
 
     // given editable text cell
-    editableTextCell.cell = new Class.Cell(
-        'DataId',
-        'Label',
-        'Value',
-        'String',
-        true,
-        false,
-        '',
-        false
-    );
+    const editableCell = new Class.Cell();
+    editableCell.DataId = 'DataId';
+    editableCell.Label = 'Label';
+    editableCell.Value = 'Value';
+    editableCell.Type = 'String';
+    editableCell.IsEditable = true;
+    editableCell.IsReference = false;
+    editableCell.Url = '';
+    editableCell.IsDatetime = false;
+    editableTextCell.cell = editableCell;
 
     // given uneditable text cell
     const uneditableTextCell = createElement('c-table-cell', {
         is: TableCell
     });
-    uneditableTextCell.cell = new Class.Cell(
-        'DataId',
-        'Label',
-        'Value',
-        'String',
-        false,
-        false,
-        '',
-        false
-    );
+    const uneditableCell = new Class.Cell();
+    uneditableCell.DataId = 'DataId';
+    uneditableCell.Label = 'Label';
+    uneditableCell.Value = 'Value';
+    uneditableCell.Type = 'String';
+    uneditableCell.IsEditable = false;
+    uneditableCell.IsReference = false;
+    uneditableCell.Url = '';
+    uneditableCell.IsDatetime = false;
+    uneditableTextCell.cell = uneditableCell;
 
     afterEach(() => {
         // The jsdom instance is shared across test cases in a single file so reset the DOM
@@ -96,5 +96,35 @@ describe('a cell', () => {
         return Promise.resolve().then(() => {
             expect(handler).not.toHaveBeenCalled();
         });
+    });
+
+    it('is reference', () => {
+        // given reference cell
+        const referenceCell = createElement('c-table-cell', {
+            is: TableCell
+        });
+        const cellData = new Class.Cell();
+        cellData.DataId = 'DataId';
+        cellData.Label = 'Label';
+        cellData.Value = 'Value';
+        cellData.Type = 'String';
+        cellData.IsEditable = true;
+        cellData.IsReference = true;
+        cellData.Url = 'http://www.example.com/';
+        cellData.IsDatetime = false;
+        referenceCell.cell = cellData;
+
+        // when page renders
+        document.body.appendChild(referenceCell);
+
+        // then reference cell is rendered
+        const div = referenceCell.shadowRoot.querySelector('div');
+        expect(div).toBeFalsy();
+
+        // and reference cell contains input
+        const anchorTag = referenceCell.shadowRoot.querySelector('a');
+        expect(anchorTag).not.toBeUndefined();
+        expect(anchorTag.textContent).toBe(cellData.Label);
+        expect(anchorTag.href).toBe(cellData.Url);
     });
 });
