@@ -15,6 +15,7 @@ describe('a cell', () => {
     editableCell.Type = 'String';
     editableCell.IsEditable = true;
     editableCell.IsReference = false;
+    editableCell.IsStandardInput = true;
     editableCell.Url = '';
     editableCell.IsDatetime = false;
     editableTextCell.cell = editableCell;
@@ -30,9 +31,26 @@ describe('a cell', () => {
     uneditableCell.Type = 'String';
     uneditableCell.IsEditable = false;
     uneditableCell.IsReference = false;
+    uneditableCell.IsStandardInput = true;
     uneditableCell.Url = '';
     uneditableCell.IsDatetime = false;
     uneditableTextCell.cell = uneditableCell;
+
+    // given reference cell
+    const referenceCell = createElement('c-table-cell', {
+        is: TableCell
+    });
+    const cellData = new Class.Cell();
+    cellData.DataId = 'DataId';
+    cellData.Label = 'Label';
+    cellData.Value = 'Value';
+    cellData.Type = 'String';
+    cellData.IsEditable = true;
+    cellData.IsReference = true;
+    cellData.IsStandardInput = false;
+    cellData.Url = 'http://www.example.com/';
+    cellData.IsDatetime = false;
+    referenceCell.cell = cellData;
 
     afterEach(() => {
         // The jsdom instance is shared across test cases in a single file so reset the DOM
@@ -76,7 +94,7 @@ describe('a cell', () => {
         // then uneditable cell is rendered
         expect(
             uneditableTextCell.shadowRoot.querySelector('div[data-id="DataId"]')
-        ).toBeFalsy();
+        ).toBeTruthy();
 
         // and uneditable cell contains input
         const input = uneditableTextCell.shadowRoot.querySelector('lightning-input');
@@ -99,21 +117,6 @@ describe('a cell', () => {
     });
 
     it('is reference', () => {
-        // given reference cell
-        const referenceCell = createElement('c-table-cell', {
-            is: TableCell
-        });
-        const cellData = new Class.Cell();
-        cellData.DataId = 'DataId';
-        cellData.Label = 'Label';
-        cellData.Value = 'Value';
-        cellData.Type = 'String';
-        cellData.IsEditable = true;
-        cellData.IsReference = true;
-        cellData.Url = 'http://www.example.com/';
-        cellData.IsDatetime = false;
-        referenceCell.cell = cellData;
-
         // when page renders
         document.body.appendChild(referenceCell);
 

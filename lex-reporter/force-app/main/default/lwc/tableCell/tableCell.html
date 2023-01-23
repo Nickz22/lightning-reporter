@@ -1,56 +1,45 @@
 <template>
-        <template if:true={cell.IsReference}>
-            <a href={cell.Url} target="_blank">{cell.Label}</a>
-        </template>
-        <template if:false={cell.IsReference}>
-            <template if:true={cell.IsEditable}>
-                <div onclick={handleClick} data-id={cell.DataId} class={cellStyle}>
-                    <template if:false={cell.IsDatetime}>
-                        <lightning-input data-id={cell.DataId}
-                                        value={cell.Value} 
-                                        type={cell.Type}
-                                        read-only={cell.ReadOnly}
-                                        onchange={handleValueChange}></lightning-input>
-                    </template>
-                    <template if:true={cell.IsDatetime}>
-                        <template if:false={cell.ReadOnly}>
-                            <lightning-input data-id={cell.DataId}
-                                            value={cell.Value} 
-                                            type={cell.Type}
-                                            read-only={cell.ReadOnly}
-                                            onchange={handleValueChange}></lightning-input>
-                        </template>
-                        <template if:true={cell.ReadOnly}>
-                            <p class="datetime">
-                                <lightning-formatted-date-time value={cell.Value} 
-                                                                year="numeric" 
-                                                                month="numeric" 
-                                                                day="numeric" 
-                                                                hour="2-digit"
-                                                                minute="2-digit"
-                                                                data-id={cell.DataId}></lightning-formatted-date-time>
-                            </p>
-                        </template>
-                    </template>
-                </div>
-            </template>
-            <template if:false={cell.IsEditable}>
-                <template if:true={cell.IsDatetime}>
-                    <p class="datetime">
-                    <lightning-formatted-date-time value={cell.Value} 
-                                                    year="numeric" 
-                                                    month="numeric" 
-                                                    day="numeric" 
-                                                    hour="2-digit"
-                                                    minute="2-digit"></lightning-formatted-date-time>
-                    </p>
-                </template>
-                <template if:false={cell.IsDatetime}>    
-                    <lightning-input data-id={cell.DataId}
-                                    value={cell.Value} 
-                                    type={cell.Type}
-                                    read-only={cell.ReadOnly}></lightning-input>
-                </template>
-            </template>
-        </template>
+    <a if:true={cell.IsReference} 
+        href={cell.Url} 
+        target="_blank">{cell.Label}</a>
+    <template if:true={cell.IsDatetime}>
+        <p class="datetime" if:false={cell.IsEditable}>
+            <lightning-formatted-date-time value={cell.Value} 
+                                            year="numeric" 
+                                            month="numeric" 
+                                            day="numeric" 
+                                            hour="2-digit"
+                                            minute="2-digit"></lightning-formatted-date-time>
+        </p>
+        <div if:true={cell.IsEditable} 
+                onclick={handleClick} 
+                data-id={cell.DataId} 
+                class={cellStyle}>
+            <lightning-input if:false={cell.ReadOnly} 
+                            data-id={cell.DataId}
+                            value={cell.Value} 
+                            type={cell.Type}
+                            read-only={cell.ReadOnly}
+                            onchange={handleValueChange}></lightning-input>
+            <p if:true={cell.ReadOnly} class="datetime">
+                <lightning-formatted-date-time value={cell.Value} 
+                                                year="numeric" 
+                                                month="numeric" 
+                                                day="numeric" 
+                                                hour="2-digit"
+                                                minute="2-digit"
+                                                data-id={cell.DataId}></lightning-formatted-date-time>
+            </p>
+        </div>
+    </template>
+    <div if:true={cell.IsStandardInput} 
+        onclick={handleClick} 
+        data-id={cell.DataId} 
+        class={cellStyle}>
+        <lightning-input data-id={cell.DataId}
+                        value={cell.Value} 
+                        type={cell.Type}
+                        read-only={cell.ReadOnly}
+                        onchange={handleValueChange}></lightning-input>
+    </div>
 </template>

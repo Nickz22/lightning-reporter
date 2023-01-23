@@ -3,11 +3,13 @@ export class Cell {
     Label;
     Value;
     Type;
-    IsEditable;
-    IsReference;
     Url;
     IsDatetime;
+    IsReference;
+    IsEditable;
+    IsStandardInput;
     ReadOnly;
+
 
     constructor(){
         this.ReadOnly = true;
