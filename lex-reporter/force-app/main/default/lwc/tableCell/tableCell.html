@@ -1,7 +1,7 @@
 <template>
     <a if:true={cell.IsReference} 
-        href={cell.Url} 
-        target="_blank">{cell.Label}</a>
+        href={cell.RefUrl} 
+        target="_blank">{cell.Value}</a>
     <template if:true={cell.IsDatetime}>
         <p class="datetime" if:false={cell.IsEditable}>
             <lightning-formatted-date-time value={cell.Value} 

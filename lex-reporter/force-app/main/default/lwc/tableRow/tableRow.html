@@ -1,16 +1,16 @@
 <template>
-    <div class="table-row">
-        <lightning-layout class="table-row-data" vertical-align="center">
+    <div>
+        <lightning-layout vertical-align="center">
             <!-- componentize into c-row-actions component -->
             <lightning-layout-item size="1" 
                                     class="rte-launcher">
-                <lightning-layout style="position: absolute">
+                <!-- <lightning-layout style="position: absolute"> -->
+                <lightning-layout>
                     <lightning-layout-item size="6">
                         <lightning-avatar src={previewAvatar.Url}
                                         size="x-small"
                                         variant="circle"
-                                        onclick={toggleRowComments}
-                                        style={previewAvatar.unreadStyle}>
+                                        onclick={toggleRowComments}>
                         </lightning-avatar>
                     </lightning-layout-item>
                     <lightning-layout-item size="6">
