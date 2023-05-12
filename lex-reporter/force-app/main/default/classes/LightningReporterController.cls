@@ -106,7 +106,7 @@ public class LightningReporterController {
     req.setHeader('Content-Type', 'application/json');
     req.setHeader(
       'Authorization',
-      'Bearer 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'
+      'Bearer ' + OpenAi__c.getOrgDefaults().Key__c
     );
 
     req.setBody(
