@@ -7,7 +7,7 @@ import saveRecords from "@salesforce/apex/LightningReporterController.saveRecord
 import pinLayout from "@salesforce/apex/LightningReporterController.pinLayout";
 import getPinnedViews from "@salesforce/apex/LightningReporterController.getPinnedViews";
 import deletePin from "@salesforce/apex/LightningReporterController.deletePin";
-import askGpt from "@salesforce/apex/LightningReporterController.askGpt";
+import filterByNaturalLanguage from "@salesforce/apex/LightningReporterController.filterByNaturalLanguage";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 
 export default class LightningReporter extends LightningElement {
@@ -133,6 +133,11 @@ export default class LightningReporter extends LightningElement {
     } else {
       this.getRecords();
     }
+  }
+
+  async askGpt() {
+    console.log(`askGpt: ${this.searchTerm}`);
+    await filterByNaturalLanguage({ naturalQueryString: this.searchTerm });
   }
 
   async getRecords() {

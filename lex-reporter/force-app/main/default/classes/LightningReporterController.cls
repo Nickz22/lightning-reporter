@@ -88,7 +88,7 @@ public class LightningReporterController {
   }
 
   @AuraEnabled
-  public static void askGpt(String naturalQueryString) {
+  public static void filterByNaturalLanguage(String naturalQueryString) {
     // do http callout
     /**
         curl --location 'https://api.openai.com/v1/chat/completions' \
@@ -110,7 +110,9 @@ public class LightningReporterController {
     );
 
     req.setBody(
-      '{"model": "gpt-3.5-turbo", "messages": [{"role": "user", "content": "Translate the natural language phrase following \'Here is the query - \' into an Apex SOQL query, while considering the following parameters - (1) do not filter by ownerid, any owner filters should only filter by non-ID fields, such as Name, Profile or Role (2) any reference to a \'state\', \'city\' or \'country\' should use \'billingstate\', \'billingcity\' or \'billingcountry\' respectively (3) the current year, month and day is ' +
+      '{"model": "gpt-3.5-turbo", "messages": [{"role": "user", "content": "Translate the natural language phrase following \'Here is the query - \' into an Apex SOQL query, while considering the following parameters - (1) do not filter by ownerid, any owner filters should only filter by non-ID fields, such as Name, Profile or Role (2) any reference to a \'state\', \'city\' or \'country\' should use \'billingstate\', \'billingcity\' or \'billingcountry\' respectively (3) any reference to \'me\' or \'my\' should be interpreted as a filter on OwnerId=\'' +
+      UserInfo.getUserId() +
+      '\' (4) the current year, month and day is ' +
       System.now().year() +
       '/' +
       System.now().month() +
