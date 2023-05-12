@@ -7,6 +7,7 @@ import saveRecords from "@salesforce/apex/LightningReporterController.saveRecord
 import pinLayout from "@salesforce/apex/LightningReporterController.pinLayout";
 import getPinnedViews from "@salesforce/apex/LightningReporterController.getPinnedViews";
 import deletePin from "@salesforce/apex/LightningReporterController.deletePin";
+import askGpt from "@salesforce/apex/LightningReporterController.askGpt";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 
 export default class LightningReporter extends LightningElement {
@@ -18,12 +19,18 @@ export default class LightningReporter extends LightningElement {
   @track alert = false;
   @track displayAlerts = false;
   @track isLoading = false;
+  @track searchTerm = "";
+  @track showNaturalLanguageSearchModal = false;
   selectableFields;
   childTypes;
   saved = false;
   iconName;
   polling = false;
   isEditingRow = false;
+
+  handleSearchChange(event) {
+    this.searchTerm = event.target.value;
+  }
 
   set selectedType(value) {
     if (value !== this._selectedType) {
@@ -98,6 +105,10 @@ export default class LightningReporter extends LightningElement {
       //     }
       // }, 10000);
     }
+  }
+
+  toggleNaturalLanguageSearchModal() {
+    this.showNaturalLanguageSearchModal = !this.showNaturalLanguageSearchModal;
   }
 
   imperativeRefresh() {
