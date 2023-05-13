@@ -8,6 +8,7 @@ import pinLayout from "@salesforce/apex/LightningReporterController.pinLayout";
 import getPinnedViews from "@salesforce/apex/LightningReporterController.getPinnedViews";
 import deletePin from "@salesforce/apex/LightningReporterController.deletePin";
 import filterByNaturalLanguage from "@salesforce/apex/LightningReporterController.filterByNaturalLanguage";
+import gptSummarize from "@salesforce/apex/LightningReporterController.gptSummarize";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 
 export default class LightningReporter extends LightningElement {
@@ -21,6 +22,7 @@ export default class LightningReporter extends LightningElement {
   @track isLoading = false;
   @track searchTerm = "";
   @track showNaturalLanguageSearchModal = false;
+  @track gptSummary;
   selectableFields;
   childTypes;
   saved = false;
@@ -61,33 +63,31 @@ export default class LightningReporter extends LightningElement {
   }
 
   @wire(getChildTypes, { recordId: "$recordId" })
-  getRecordsFromDefaultChildType({ error, data }) {
+  async getRecordsFromDefaultChildType({ error, data }) {
     this.isLoading = true;
-    if (error) {
-      console.error("error getting default child records: " + error);
-      this.isLoading = false;
-      return;
-    }
-    userHasPermission()
-      .then((hasPermission) => {
-        this.hasPermission = hasPermission;
-        if (hasPermission) {
-          if (data) {
-            this.childTypes = data;
-            this.getPinnedViews();
-          } else {
-            console.error("no data returned from getChildTypes");
-          }
-        }
-      })
-      .catch((e) => {
+    try {
+      if (error) {
+        console.error("error getting default child records: " + error);
         this.isLoading = false;
-        this.showNotification(
-          "Error getting permissions",
-          e.body?.message,
-          "error"
-        );
-      });
+        return;
+      }
+      this.hasPermission = await userHasPermission();
+      if (this.hasPermission) {
+        if (data) {
+          this.childTypes = data;
+          this.getPinnedViews();
+        } else {
+          console.error("no data returned from getChildTypes");
+        }
+      }
+    } catch (e) {
+      this.showNotification(
+        "Error getting permissions",
+        e.body?.message,
+        "error"
+      );
+    }
+    this.isLoading = false;
   }
 
   renderedCallback() {
@@ -111,10 +111,22 @@ export default class LightningReporter extends LightningElement {
     this.showNaturalLanguageSearchModal = !this.showNaturalLanguageSearchModal;
   }
 
-  imperativeRefresh() {
+  async imperativeRefresh() {
     this.imperative = true;
     this.isLoading = true;
-    this.getChildRecords(true);
+    await this.getChildRecords(true);
+    const summary = await gptSummarize({
+      idsToSummarize: this.childRecords.map((record) => record.record.Id),
+      fieldsToSummarize: this.selectedFields
+    });
+
+    let summaryText = "";
+    for (let i = 0; i < summary.length; i++) {
+      summaryText += summary[i];
+      this.gptSummary = summaryText;
+      await new Promise((resolve) => setTimeout(resolve, 25));
+    }
+    this.isLoading = false;
   }
 
   async focusOnAlertView(event) {
@@ -125,13 +137,13 @@ export default class LightningReporter extends LightningElement {
     this.getChildRecords(true);
   }
 
-  getChildRecords(isLoading) {
+  async getChildRecords(isLoading) {
     this.isLoading = isLoading;
     // this setup needs to be done for every fetch
     if (!this.selectableFields || this.selectableFields.length === 0) {
       this.getSelectableFields();
     } else {
-      this.getRecords();
+      await this.getRecords();
     }
   }
 
@@ -149,9 +161,7 @@ export default class LightningReporter extends LightningElement {
     try {
       const sObjects = [...context.subjects];
       const dbAlerts = [];
-      console.log("here 0");
       for (let i = 0; i < context.alerts.length; i++) {
-        console.log("here 1");
         dbAlerts.push({
           Key: context.alerts[i].Id,
           DataId: context.alerts[i].parentSObjectType,
@@ -161,29 +171,21 @@ export default class LightningReporter extends LightningElement {
           Style: "note-body"
         });
       }
-      console.log("here 2");
 
       this.alerts = dbAlerts;
-      console.log("here 3");
       this.alert = this.alerts.length > 0;
-      console.log("here 4");
       this.childRecords = sObjects;
-      console.log("here 5");
 
       if (this.imperative) {
-        console.log("success");
-        // this.showNotification("Success", "Records retrieved", "success");
+        this.showNotification("Success", "Records retrieved", "success");
         this.imperative = false;
       }
-      console.log("here 6");
+
       this.isLoading = false;
     } catch (error) {
-      console.log("here 7");
       this.isLoading = false;
-      console.error(`error in getRecords: ${error}`);
-      // this.showNotification('Error getting records', error.message, 'error');
+      this.showNotification("Error getting records", error.message, "error");
     }
-    console.log("here 8");
   }
 
   getPinnedViews() {

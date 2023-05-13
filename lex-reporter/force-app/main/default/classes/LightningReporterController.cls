@@ -88,6 +88,54 @@ public class LightningReporterController {
   }
 
   @AuraEnabled
+  public static String gptSummarize(
+    List<Id> idsToSummarize,
+    List<FieldDTO> fieldsToSummarize
+  ) {
+    String query = 'SELECT ';
+    List<String> fields = new List<String>();
+    for (FieldDTO field : fieldsToSummarize) {
+      fields.add(field.name);
+    }
+    query += String.join(fields, ', ');
+
+    query +=
+      ' FROM ' + idsToSummarize[0].getSObjectType().getDescribe().getName();
+    query += ' WHERE Id IN :idsToSummarize';
+    system.debug(query);
+    HttpRequest req = new HttpRequest();
+    req.setEndpoint('https://api.openai.com/v1/chat/completions');
+    req.setMethod('POST');
+    req.setHeader('Content-Type', 'application/json');
+    req.setHeader(
+      'Authorization',
+      'Bearer ' + OpenAi__c.getOrgDefaults().Key__c
+    );
+    req.setTimeout(120000);
+
+    List<SObject> records = Database.query(query);
+    String prompt =
+      'You are an expert data analyst. Summarize these Salesforce records - highlight anomalies and patterns: ' +
+      records;
+    req.setBody(
+      '{"model": "gpt-3.5-turbo", "messages": [{"role": "user", "content": "' +
+      prompt +
+      '"}], "temperature": 1.1}'
+    );
+
+    System.debug(req.getBody());
+
+    Http http = new Http();
+    HTTPResponse res = http.send(req);
+    System.debug(res.getBody());
+    GptResponse response = (GptResponse) JSON.deserialize(
+      res.getBody(),
+      GptResponse.class
+    );
+    return response.choices[0].message.content;
+  }
+
+  @AuraEnabled
   public static void filterByNaturalLanguage(String naturalQueryString) {
     // do http callout
     /**
@@ -120,7 +168,7 @@ public class LightningReporterController {
       System.now().day() +
       '. Here is the query - ' +
       naturalQueryString +
-      '"}], "temperature": 0.7}'
+      '"}], "temperature": 0.5}'
     );
 
     System.debug(req.getBody());

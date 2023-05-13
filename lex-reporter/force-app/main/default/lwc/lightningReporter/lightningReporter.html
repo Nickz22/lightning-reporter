@@ -76,8 +76,8 @@
                         </template>
                         <template if:false={isLoading}>
                             <template if:true={selectedFields}>
-                                <c-table selected-fields={selectedFields}
-                                        child-records={childRecords}
+                                <c-table fields={selectedFields}
+                                        records={childRecords}
                                         top-most-id={recordId}
                                         saved={saved}
                                         onedit={stopPoller}></c-table>
@@ -92,12 +92,20 @@
                 <!-- END TABLE -->
                 <!-- START FIELDS -->
                 <template if:true={selectableFields}>
-                    <lightning-layout-item size="3" 
-                                        data-id="field-list"
-                                        class="field-list">
-                        <c-block-rows rows={selectableFields}
-                                        onblockrowclick={handleFieldClicked}></c-block-rows>
-                    </lightning-layout-item>   
+                    <lightning-layout-item size="3">
+                        <lightning-layout multiple-rows="true">
+                            <lightning-layout-item size="12" 
+                                                data-id="field-list"
+                                                class="field-list">
+                                <c-block-rows rows={selectableFields}
+                                                onblockrowclick={handleFieldClicked}></c-block-rows>
+                            </lightning-layout-item>
+                            <lightning-layout-item  size="12"
+                                                    class="gpt-summary">
+                                {gptSummary}
+                            </lightning-layout-item>
+                        </lightning-layout>
+                    </lightning-layout-item>    
                 </template>
                 <!-- END FIELDS -->
             </lightning-layout>

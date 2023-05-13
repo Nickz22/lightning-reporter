@@ -5,8 +5,28 @@
 
 .field-list{
     overflow-y: auto;
-    max-height: 350px;
+    max-height: 200px;
 }
+
+.gpt-summary{
+    overflow-y: auto;
+    max-height: 150px;
+}
+
+.gpt-summary::after {
+    content: '|';
+    animation: blink 1s infinite;
+    display: inline;
+}
+
+@keyframes blink {
+    0%, 49% {
+        opacity: 0;
+    }
+    50%, 100% {
+        opacity: 1;
+    }
+} 
 
 .table-container{
     text-align: center;
