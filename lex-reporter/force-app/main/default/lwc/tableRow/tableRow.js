@@ -197,9 +197,10 @@ export default class TableRow extends NavigationMixin(LightningElement) {
           isRef || isId ? baseUrl + this._sObject.record[field.name] : "";
         cell.IsVisible = true;
         cell.InputType = this.inputTypeBySfSchemaType.get(field.type);
-        cell.IsDateTime =
+        cell.IsDatetime =
           this.inputTypeBySfSchemaType.get(field.type) === "datetime";
-        cell.IsStandardInput = !cell.IsDateTime;
+        cell.IsStandardInput = !cell.IsDatetime;
+        cell.IsEditable = field.isUpdateable;
         cells.push(cell);
       }
     } catch (error) {

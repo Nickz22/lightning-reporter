@@ -3,14 +3,14 @@
         <lightning-layout-item size="12"
                                alignment-bump="right"
                                class="table-header">
-            <c-table-header columns={selectedFields}></c-table-header>
+            <c-table-header columns={fields}></c-table-header>
         </lightning-layout-item>
         <lightning-layout-item flexibility="auto"
                                class="table-data-container">
-            <template for:each={childRecords} for:item="record">
+            <template for:each={records} for:item="record">
                 <c-table-row key={record.Id}
                                 data-id={record.Id}
-                                fields={selectedFields}
+                                fields={fields}
                                 s-object={record}
                                 saved={saved}
                                 top-most-id={topMostId}></c-table-row>

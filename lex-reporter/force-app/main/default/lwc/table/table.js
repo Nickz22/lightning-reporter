@@ -1,18 +1,14 @@
 import { LightningElement, api } from "lwc";
 
 export default class Table extends LightningElement {
-  @api selectedFields;
-  @api childRecords;
+  @api fields;
+  @api records;
   @api saved;
   @api topMostId;
 
   connectedCallback() {
-    console.log(
-      `table.js: connectedCallback: selectedFields: ${this.selectedFields}`
-    );
-    console.log(
-      `table.js: connectedCallback: childRecords: ${this.childRecords}`
-    );
+    console.log(`table.js: connectedCallback: fields: ${this.fields}`);
+    console.log(`table.js: connectedCallback: records: ${this.records}`);
     console.log(`table.js: connectedCallback: saved: ${this.saved}`);
     console.log(`table.js: connectedCallback: topMostId: ${this.topMostId}`);
   }
