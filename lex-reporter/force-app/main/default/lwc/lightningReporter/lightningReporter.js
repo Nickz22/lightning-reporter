@@ -75,7 +75,7 @@ export default class LightningReporter extends LightningElement {
       if (this.hasPermission) {
         if (data) {
           this.childTypes = data;
-          this.getPinnedViews();
+          await this.getPinnedViews();
         } else {
           console.error("no data returned from getChildTypes");
         }
@@ -87,6 +87,7 @@ export default class LightningReporter extends LightningElement {
         "error"
       );
     }
+    this.generateGptSummary();
     this.isLoading = false;
   }
 
@@ -115,10 +116,16 @@ export default class LightningReporter extends LightningElement {
     this.imperative = true;
     this.isLoading = true;
     await this.getChildRecords(true);
+    this.generateGptSummary();
+    this.isLoading = false;
+  }
+
+  async generateGptSummary() {
     const summary = await gptSummarize({
       idsToSummarize: this.childRecords.map((record) => record.record.Id),
       fieldsToSummarize: this.selectedFields
     });
+    console.log(summary);
 
     let summaryText = "";
     for (let i = 0; i < summary.length; i++) {
@@ -126,7 +133,6 @@ export default class LightningReporter extends LightningElement {
       this.gptSummary = summaryText;
       await new Promise((resolve) => setTimeout(resolve, 25));
     }
-    this.isLoading = false;
   }
 
   async focusOnAlertView(event) {
@@ -188,42 +194,35 @@ export default class LightningReporter extends LightningElement {
     }
   }
 
-  getPinnedViews() {
-    getPinnedViews()
-      .then((result) => {
-        this.pinnedViews = [...result];
-        if (this.pinnedViews.length > 0) {
-          let selectedFields = [];
-          for (let i = 0; i < this.pinnedViews[0].defaultFields.length; i++) {
-            let field = {
-              ...this.pinnedViews[0].defaultFields[i],
-              selected: true,
-              Style: "field-name field-selected"
-            };
-            selectedFields.push(field);
-          }
-          this.selectedType = this.pinnedViews[0].objectName;
-          this.selectedFields = selectedFields;
-          this.selectableFields = selectedFields;
-          this.getChildRecords(true);
-        } else {
-          this.selectedType = null;
-          this.selectedFields = [];
-          this.selectableFields = [];
-          this.childRecords = [];
-          this.isLoading = false;
+  async getPinnedViews() {
+    try {
+      const result = await getPinnedViews();
+
+      this.pinnedViews = [...result];
+      if (this.pinnedViews.length > 0) {
+        let selectedFields = [];
+        for (let i = 0; i < this.pinnedViews[0].defaultFields.length; i++) {
+          let field = {
+            ...this.pinnedViews[0].defaultFields[i],
+            selected: true,
+            Style: "field-name field-selected"
+          };
+          selectedFields.push(field);
         }
-      })
-      .catch((error) => {
-        // print stack trace
-        console.error(error);
+        this.selectedType = this.pinnedViews[0].objectName;
+        this.selectedFields = selectedFields;
+        this.selectableFields = selectedFields;
+        await this.getChildRecords(true);
+      } else {
+        this.selectedType = null;
+        this.selectedFields = [];
+        this.selectableFields = [];
+        this.childRecords = [];
         this.isLoading = false;
-        this.showNotification(
-          "Error getting pinned views",
-          error.body?.message,
-          "error"
-        );
-      });
+      }
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   async getSelectableFields() {
