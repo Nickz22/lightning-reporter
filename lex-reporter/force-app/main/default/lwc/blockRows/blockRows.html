@@ -1,50 +1,58 @@
 <template>
-    <template for:each={rows} for:item="row">
-        <lightning-layout multiple-rows="true" 
-                            key={row.Key}>
-            <lightning-layout-item size="12" 
-                                   class="note">
-                <lightning-layout>
-                    <!-- row avatar -->
-                    <template if:true={row.Url}>
-                        <lightning-layout-item size="1" 
-                                                style="text-align:left;" 
-                                                padding="around-small">
-                            <lightning-avatar src={row.Url} 
-                                                size="medium" 
-                                                variant="square"></lightning-avatar>
-                        </lightning-layout-item>
-                    </template>
-                    <!-- row content -->
-                    <lightning-layout-item size="11" 
-                                            class={row.Style} 
-                                            data-id={row.DataId}
-                                            onclick={handleRowClick}
-                                            onmouseenter={handleMouseEnter}>
-                        <lightning-formatted-rich-text value={row.Content}
-                                                        data-id={row.DataId}></lightning-formatted-rich-text>
-                        <div class="note-footer" data-id={row.DataId}>
-                            <!-- if has views -->
-                            <div class="viewed-by" if:true={row.views}>
-                                <template for:each={row.views} for:item="view" for:index="i">
-                                    <lightning-avatar key={view.Id} 
-                                                      src={view.Reporter__Viewed_By__r.FullPhotoUrl}
-                                                      size="x-small"
-                                                      variant="circle"
-                                                      data-n={i}
-                                                      class="viewed-by-avatar"
-                                                      style={view.leftStyle}
-                                                      alternative-text={view.Reporter__Viewed_By__r.Name}></lightning-avatar>
-                                </template>
-                            </div>
-                            <!-- if has Time -->
-                            <div class="note-time" if:true={row.Time}>
-                                <lightning-relative-date-time value={row.Time}></lightning-relative-date-time>
-                            </div>
-                        </div>
-                    </lightning-layout-item>
-                </lightning-layout>
+  <template for:each={rows} for:item="row">
+    <lightning-layout multiple-rows="true" key={row.Key}>
+      <lightning-layout-item size="12" class="note">
+        <lightning-layout>
+          <template if:true={row.Url}>
+            <lightning-layout-item
+              size="1"
+              style="text-align: left"
+              padding="around-small"
+            >
+              <lightning-avatar
+                src={row.Url}
+                size="medium"
+                variant="square"
+              ></lightning-avatar>
             </lightning-layout-item>
+          </template>
+
+          <lightning-layout-item
+            size="11"
+            class={row.Style}
+            data-id={row.DataId}
+            onclick={handleRowClick}
+            onmouseenter={handleMouseEnter}
+          >
+            <lightning-formatted-rich-text
+              value={row.Content}
+              data-id={row.DataId}
+            ></lightning-formatted-rich-text>
+            <div class="note-footer" data-id={row.DataId}>
+              <div class="viewed-by" if:true={row.views}>
+                <template for:each={row.views} for:item="view" for:index="i">
+                  <lightning-avatar
+                    key={view.Id}
+                    src={view.Viewed_By__r.FullPhotoUrl}
+                    size="x-small"
+                    variant="circle"
+                    data-n={i}
+                    class="viewed-by-avatar"
+                    style={view.leftStyle}
+                    alternative-text={view.Viewed_By__r.Name}
+                  ></lightning-avatar>
+                </template>
+              </div>
+
+              <div class="note-time" if:true={row.Time}>
+                <lightning-relative-date-time
+                  value={row.Time}
+                ></lightning-relative-date-time>
+              </div>
+            </div>
+          </lightning-layout-item>
         </lightning-layout>
-    </template>
+      </lightning-layout-item>
+    </lightning-layout>
+  </template>
 </template>

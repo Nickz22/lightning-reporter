@@ -53,6 +53,7 @@
     <!-- this might be better in LightningReporter...unless I make it like
         tableRowState type of thing - doesn't seem like it belongs in the table-row concern -->
     <c-block-rows
+      if:true={notes}
       rows={notes}
       onblockrowmouseenter={countNoteView}
     ></c-block-rows>
