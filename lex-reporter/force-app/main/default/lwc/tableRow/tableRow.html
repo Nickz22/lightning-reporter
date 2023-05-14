@@ -44,6 +44,7 @@
           <c-table-cell
             cell={cell}
             oncellclick={initEdit}
+            oncellescape={killEdit}
             onvaluechange={handleCellValueChange}
           ></c-table-cell>
         </lightning-layout-item>

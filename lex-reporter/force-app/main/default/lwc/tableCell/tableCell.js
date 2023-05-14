@@ -16,13 +16,23 @@ export default class TableCell extends LightningElement {
     this._cell = value;
   }
 
-  handleClick(event) {
+  initEdit(event) {
     if (this.cell.IsEditable && this.cell.ReadOnly) {
       this.dispatchEvent(
         new CustomEvent("cellclick", { detail: event.target.dataset.id })
       );
       // this.cellStyle =
       //   this.cellStyle === "read-only-padding" ? "" : "read-only-padding";
+    }
+  }
+
+  listenForEscape(event) {
+    console.log(`listenForEscape in tableCell`);
+    console.log(`event.keyCode: ${event.keyCode}`);
+    if (event.keyCode === 27) {
+      this.dispatchEvent(
+        new CustomEvent("cellescape", { detail: event.target.dataset.id })
+      );
     }
   }
 

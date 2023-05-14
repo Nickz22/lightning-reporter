@@ -42,7 +42,7 @@
   </template>
   <div
     if:true={cell.IsStandardInput}
-    onclick={handleClick}
+    onclick={initEdit}
     data-id={cell.DataId}
     class="left-padding"
   >
@@ -52,6 +52,7 @@
       type={cell.Type}
       read-only={cell.ReadOnly}
       onchange={handleValueChange}
+      onkeydown={listenForEscape}
       class="standard-input"
     ></lightning-input>
   </div>

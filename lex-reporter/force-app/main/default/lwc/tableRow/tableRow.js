@@ -239,6 +239,16 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     }
   }
 
+  killEdit(event) {
+    const clickedFieldName = event.detail;
+    for (let cell of this.cells) {
+      if (cell.DataId === clickedFieldName) {
+        cell.ReadOnly = true;
+        break;
+      }
+    }
+  }
+
   renderRte() {
     this.showRte = !this.showRte;
   }
