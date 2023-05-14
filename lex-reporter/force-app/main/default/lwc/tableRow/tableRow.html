@@ -1,49 +1,59 @@
 <template>
-    <div>
-        <lightning-layout vertical-align="center">
-            <!-- componentize into c-row-actions component -->
-            <lightning-layout-item size="1" 
-                                    class="rte-launcher">
-                <!-- <lightning-layout style="position: absolute"> -->
-                <lightning-layout>
-                    <lightning-layout-item size="6">
-                        <lightning-avatar src={previewAvatar.Url}
-                                        size="x-small"
-                                        variant="circle"
-                                        onclick={toggleRowComments}>
-                        </lightning-avatar>
-                    </lightning-layout-item>
-                    <lightning-layout-item size="6">
-                        <lightning-icon onclick={renderRte} 
-                                        icon-name="standard:messaging_conversation"
-                                        size="xx-small">
-                        </lightning-icon>
-                    </lightning-layout-item>
-                </lightning-layout>
-                <!-- end componentize into c-row-actions component -->
-                <template if:true={showRte}>
-                    <div class="rte">
-                        <c-rich-text-editor onsave={saveNote}
-                                            onrtekeyup={handleRteKeyUp}
-                                            placeholder="ESC to close | CMD+ENTER to save | FN for emojis"
-                                            disabled-categories="ALIGN_TEXT,FORMAT_FONT,FORMAT_BODY"></c-rich-text-editor>
-                    </div>
-                </template>
-            </lightning-layout-item>
-            <template for:each={cells} for:item="cell">
-                <lightning-layout-item size="3"
-                            class="cell"
-                            alignment-bump="top"
-                            key={cell.DataId}>
-                    <c-table-cell cell={cell}
-                                    oncellclick={initEdit}
-                                    onvaluechange={handleCellValueChange}></c-table-cell>
-                </lightning-layout-item>
-            </template>
+  <div>
+    <lightning-layout vertical-align="center">
+      <!-- componentize into c-row-actions component -->
+      <lightning-layout-item size="1" class="rte-launcher">
+        <lightning-layout>
+          <lightning-layout-item size="6">
+            <lightning-avatar
+              src={previewAvatar.Url}
+              size="x-small"
+              variant="circle"
+              onclick={toggleRowComments}
+            >
+            </lightning-avatar>
+          </lightning-layout-item>
+          <lightning-layout-item size="6">
+            <lightning-icon
+              onclick={renderRte}
+              icon-name="standard:messaging_conversation"
+              size="xx-small"
+            >
+            </lightning-icon>
+          </lightning-layout-item>
         </lightning-layout>
-        <!-- this might be better in LightningReporter...unless I make it like
+        <!-- end componentize into c-row-actions component -->
+        <template if:true={showRte}>
+          <div class="rte">
+            <c-rich-text-editor
+              onsave={saveNote}
+              onrtekeyup={handleRteKeyUp}
+              placeholder="ESC to close | CMD+ENTER to save | FN for emojis"
+              disabled-categories="ALIGN_TEXT,FORMAT_FONT,FORMAT_BODY"
+            ></c-rich-text-editor>
+          </div>
+        </template>
+      </lightning-layout-item>
+      <template for:each={cells} for:item="cell">
+        <lightning-layout-item
+          size="3"
+          class="cell"
+          alignment-bump="top"
+          key={cell.DataId}
+        >
+          <c-table-cell
+            cell={cell}
+            oncellclick={initEdit}
+            onvaluechange={handleCellValueChange}
+          ></c-table-cell>
+        </lightning-layout-item>
+      </template>
+    </lightning-layout>
+    <!-- this might be better in LightningReporter...unless I make it like
         tableRowState type of thing - doesn't seem like it belongs in the table-row concern -->
-        <c-block-rows rows={notes}
-                      onblockrowmouseenter={countNoteView}></c-block-rows>
-    </div>
+    <c-block-rows
+      rows={notes}
+      onblockrowmouseenter={countNoteView}
+    ></c-block-rows>
+  </div>
 </template>

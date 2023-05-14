@@ -93,7 +93,8 @@
                 <!-- START FIELDS -->
                 <template if:true={selectableFields}>
                     <lightning-layout-item size="3">
-                        <lightning-layout multiple-rows="true">
+                        <lightning-layout multiple-rows="true"
+                                            vertical-align="stretch">
                             <lightning-layout-item size="12" 
                                                 data-id="field-list"
                                                 class="field-list">
@@ -124,7 +125,7 @@
                                     class="natural-language-search natural-language-search-input"></lightning-input>
                     <lightning-button label="Save"
                                     variant="brand"
-                                    onclick={askGpt}
+                                    onclick={naturalLanguageFilter}
                                     class="natural-language-search"></lightning-button>
                     <lightning-button label="Cancel"
                                     variant="neutral"

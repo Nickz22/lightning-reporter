@@ -1,11 +1,11 @@
 .header-container{
-    background-color: #c3c5c6;
+    background-color: #e3e8e8;
     border-radius: 5%;
     min-height: 2.5em;
 }
 
 .column-cell{
     overflow-x: clip;
-    background-color: #c3c5c6;
+    background-color: #e3e8e8;
     padding-top: 0.5em; /* center */
 }

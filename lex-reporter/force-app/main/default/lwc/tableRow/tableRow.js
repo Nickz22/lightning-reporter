@@ -199,7 +199,7 @@ export default class TableRow extends NavigationMixin(LightningElement) {
         cell.InputType = this.inputTypeBySfSchemaType.get(field.type);
         cell.IsDatetime =
           this.inputTypeBySfSchemaType.get(field.type) === "datetime";
-        cell.IsStandardInput = !cell.IsDatetime;
+        cell.IsStandardInput = !cell.IsDatetime && !cell.IsReference;
         cell.IsEditable = field.isUpdateable;
         cells.push(cell);
       }

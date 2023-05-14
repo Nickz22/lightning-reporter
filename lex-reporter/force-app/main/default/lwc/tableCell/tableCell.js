@@ -21,8 +21,8 @@ export default class TableCell extends LightningElement {
       this.dispatchEvent(
         new CustomEvent("cellclick", { detail: event.target.dataset.id })
       );
-      this.cellStyle =
-        this.cellStyle === "read-only-padding" ? "" : "read-only-padding";
+      // this.cellStyle =
+      //   this.cellStyle === "read-only-padding" ? "" : "read-only-padding";
     }
   }
 

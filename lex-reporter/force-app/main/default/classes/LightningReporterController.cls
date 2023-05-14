@@ -136,18 +136,11 @@ public class LightningReporterController {
   }
 
   @AuraEnabled
-  public static void filterByNaturalLanguage(String naturalQueryString) {
-    // do http callout
-    /**
-        curl --location 'https://api.openai.com/v1/chat/completions' \
---header 'Content-Type: application/json' \
---header 'Authorization: Bearer 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' \
---data '{
-     "model": "gpt-3.5-turbo",
-     "messages": [{"role": "user", "content": "Say this is a test!"}],
-     "temperature": 0.7
-   }' */
-
+  public static ContextDTO filterByNaturalLanguage(
+    String naturalQueryString,
+    Id contextRecordId,
+    List<FieldDTO> fieldsToGet
+  ) {
     HttpRequest req = new HttpRequest();
     req.setEndpoint('https://api.openai.com/v1/chat/completions');
     req.setMethod('POST');
@@ -158,24 +151,88 @@ public class LightningReporterController {
     );
 
     req.setBody(
-      '{"model": "gpt-3.5-turbo", "messages": [{"role": "user", "content": "Translate the natural language phrase following \'Here is the query - \' into an Apex SOQL query, while considering the following parameters - (1) do not filter by ownerid, any owner filters should only filter by non-ID fields, such as Name, Profile or Role (2) any reference to a \'state\', \'city\' or \'country\' should use \'billingstate\', \'billingcity\' or \'billingcountry\' respectively (3) any reference to \'me\' or \'my\' should be interpreted as a filter on OwnerId=\'' +
+      '{"model": "gpt-3.5-turbo", "messages": [{"role": "user", "content": "Translate the natural language phrase following \'** START QUERY **\' into an Apex SOQL query, while considering the following guidelines - (1) owner filters should only filter by non-ID fields, such as Name, Profile or Role, and should only be included if the natural language phrase explicitly contains \'owned by\' (2) any reference to a \'state\', \'city\' or \'country\' should use \'billingstate\', \'billingcity\' or \'billingcountry\' respectively (3) if the natural language phrase includes \'me\' or \'my\', you should interpet that as a filter on OwnerId=\'' +
       UserInfo.getUserId() +
-      '\' (4) the current year, month and day is ' +
+      '\' (4) omit any query modifiers other than the WHERE clause, such as ORDER BY (5) the current year, month and day is ' +
       System.now().year() +
       '/' +
       System.now().month() +
       '/' +
       System.now().day() +
-      '. Here is the query - ' +
+      '. Now that you have the guidelines, here is the query ** START QUERY ** - ' +
       naturalQueryString +
-      '"}], "temperature": 0.5}'
+      '"}], "temperature": 0.7}'
     );
 
     System.debug(req.getBody());
 
     Http http = new Http();
     HTTPResponse res = http.send(req);
-    System.debug(res.getBody());
+    // deserialize gptresponse
+    GptResponse response = (GptResponse) JSON.deserialize(
+      res.getBody(),
+      GptResponse.class
+    );
+    String gptSoql = response.choices[0].message.content;
+    System.debug('gptSoql: ' + gptSoql);
+    String gptWhereClause = gptSoql.substringAfter('WHERE').trim();
+    System.debug('gptWhereClause: ' + gptWhereClause);
+    String queryObject = gptSoql.substringBetween('FROM', 'WHERE').trim();
+    String contextSoql = getContextQueryString(
+      queryObject,
+      contextRecordId,
+      fieldsToGet
+    );
+    System.debug('contextSoql: ' + contextSoql);
+    // inject gptWhereClause+" AND "+ into contextSoql after "WHERE"
+    String finalSoql =
+      contextSoql.substringBefore('WHERE') +
+      'WHERE ' +
+      gptWhereClause +
+      ' AND ' +
+      contextSoql.substringAfter('WHERE');
+    System.debug('finalSoql' + finalSoql);
+    List<SObject> records = Database.query(finalSoql);
+    Set<String> recordIds = new Set<String>();
+    Map<String, Schema.SObjectField> tokenByFieldName = Cache.globalDescribe
+      .get(queryObject)
+      .getDescribe()
+      .fields.getMap();
+    for (SObject record : records) {
+      recordIds.add(record.Id);
+    }
+    Map<Id, List<Note_Metadata__c>> noteMdByParentId = getNoteMdByParentId(
+      recordIds
+    );
+    List<SubjectDTO> subjects = new List<SubjectDTO>();
+    for (SObject record : records) {
+      subjects.add(
+        new SubjectDTO(
+          record,
+          getNoteDtos(
+            record.getSObjects('Notes'),
+            noteMdByParentId.containsKey(record.Id)
+              ? noteMdByParentId.get(record.Id)
+              : new List<Note_Metadata__c>()
+          )
+        )
+      );
+    }
+
+    List<NoteDTO> alerts = getAlertsForUser(contextRecordId);
+
+    for (SubjectDTO subject : subjects) {
+      for (NoteDTO note : subject.notes) {
+        for (NoteDTO alert : alerts) {
+          if (alert.note.Id == note.note.Id) {
+            note.alertRunningUser = true;
+            continue;
+          }
+        }
+      }
+    }
+
+    return new ContextDTO(subjects, alerts);
   }
 
   @AuraEnabled(cacheable=true)
@@ -347,6 +404,46 @@ public class LightningReporterController {
     List<FieldDTO> fieldsToGet
   ) {
     List<SubjectDTO> subjects = new List<SubjectDTO>();
+    String query = getContextQueryString(
+      typeName,
+      contextRecordId,
+      fieldsToGet
+    );
+
+    List<SObject> records = Database.query(query);
+    Set<String> recordIds = new Set<String>();
+    Map<String, Schema.SObjectField> tokenByFieldName = Cache.globalDescribe
+      .get(typeName)
+      .getDescribe()
+      .fields.getMap();
+    for (SObject record : records) {
+      recordIds.add(record.Id);
+    }
+    Map<Id, List<Note_Metadata__c>> noteMdByParentId = getNoteMdByParentId(
+      recordIds
+    );
+    for (SObject record : records) {
+      subjects.add(
+        new SubjectDTO(
+          record,
+          getNoteDtos(
+            record.getSObjects('Notes'),
+            noteMdByParentId.containsKey(record.Id)
+              ? noteMdByParentId.get(record.Id)
+              : new List<Note_Metadata__c>()
+          )
+        )
+      );
+    }
+
+    return subjects;
+  }
+
+  private static String getContextQueryString(
+    String typeName,
+    Id contextRecordId,
+    List<FieldDTO> fieldsToGet
+  ) {
     List<String> lookupsToParent = getLookupFieldsPointingToParentId(
       typeName,
       contextRecordId
@@ -399,34 +496,7 @@ public class LightningReporterController {
       ' ' +
       'ORDER BY LastModifiedDate desc';
     System.debug(query);
-
-    List<SObject> records = Database.query(query);
-    Set<String> recordIds = new Set<String>();
-    Map<String, Schema.SObjectField> tokenByFieldName = Cache.globalDescribe
-      .get(typeName)
-      .getDescribe()
-      .fields.getMap();
-    for (SObject record : records) {
-      recordIds.add(record.Id);
-    }
-    Map<Id, List<Note_Metadata__c>> noteMdByParentId = getNoteMdByParentId(
-      recordIds
-    );
-    for (SObject record : records) {
-      subjects.add(
-        new SubjectDTO(
-          record,
-          getNoteDtos(
-            record.getSObjects('Notes'),
-            noteMdByParentId.containsKey(record.Id)
-              ? noteMdByParentId.get(record.Id)
-              : new List<Note_Metadata__c>()
-          )
-        )
-      );
-    }
-
-    return subjects;
+    return query;
   }
 
   private static List<NoteDTO> getNoteDtos(

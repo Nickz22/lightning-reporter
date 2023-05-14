@@ -121,18 +121,18 @@ export default class LightningReporter extends LightningElement {
   }
 
   async generateGptSummary() {
-    const summary = await gptSummarize({
-      idsToSummarize: this.childRecords.map((record) => record.record.Id),
-      fieldsToSummarize: this.selectedFields
-    });
-    console.log(summary);
-
-    let summaryText = "";
-    for (let i = 0; i < summary.length; i++) {
-      summaryText += summary[i];
-      this.gptSummary = summaryText;
-      await new Promise((resolve) => setTimeout(resolve, 25));
-    }
+    // const summary = await gptSummarize({
+    //   idsToSummarize: this.childRecords.map((record) => record.record.Id),
+    //   fieldsToSummarize: this.selectedFields
+    // });
+    // console.log(summary);
+    // let summaryText = "";
+    // for (let i = 0; i < summary.length; i++) {
+    //   summaryText += summary[i];
+    //   this.gptSummary = summaryText;
+    //   // eslint-disable-next-line no-await-in-loop, @lwc/lwc/no-async-operation
+    //   await new Promise((resolve) => setTimeout(resolve, 25));
+    // }
   }
 
   async focusOnAlertView(event) {
@@ -153,9 +153,17 @@ export default class LightningReporter extends LightningElement {
     }
   }
 
-  async askGpt() {
+  async naturalLanguageFilter() {
+    this.isLoading = true;
     console.log(`askGpt: ${this.searchTerm}`);
-    await filterByNaturalLanguage({ naturalQueryString: this.searchTerm });
+    const context = await filterByNaturalLanguage({
+      naturalQueryString: this.searchTerm,
+      contextRecordId: this.recordId,
+      fieldsToGet: this.selectedFields
+    });
+    this.destructureContext(context);
+    this.toggleNaturalLanguageSearchModal();
+    this.isLoading = false;
   }
 
   async getRecords() {
@@ -164,6 +172,10 @@ export default class LightningReporter extends LightningElement {
       contextRecordId: this.recordId,
       fieldsToGet: this.selectedFields
     });
+    this.destructureContext(context);
+  }
+
+  destructureContext(context) {
     try {
       const sObjects = [...context.subjects];
       const dbAlerts = [];

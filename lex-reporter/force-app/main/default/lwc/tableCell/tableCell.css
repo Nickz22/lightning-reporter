@@ -1,4 +1,4 @@
-.read-only-padding{
+.left-padding{
     padding-left: 20%;
 }
 
@@ -11,6 +11,13 @@ a {
 
 lightning-input input{
     text-align: center;
+}
+
+/* dont know a better way to get the
+lightning-input to align to top of 
+parent div at the moment */
+.standard-input{
+    margin-top: -1.5em;
 }
 
 .datetime{
