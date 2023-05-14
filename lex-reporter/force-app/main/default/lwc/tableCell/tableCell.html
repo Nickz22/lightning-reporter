@@ -20,14 +20,15 @@
       class={cellStyle}
     >
       <lightning-input
-        if:false={cell.ReadOnly}
+        if:false={readOnly}
         data-id={cell.DataId}
         value={cell.Value}
-        type={cell.Type}
-        read-only={cell.ReadOnly}
+        type={cell.InputType}
+        read-only={readOnly}
         onchange={handleValueChange}
+        onkeydown={listenForEscape}
       ></lightning-input>
-      <p if:true={cell.ReadOnly} class="datetime">
+      <p if:true={readOnly} class="datetime">
         <lightning-formatted-date-time
           value={cell.Value}
           year="numeric"
@@ -47,19 +48,19 @@
     class="left-padding"
   >
     <lightning-input
-      if:false={cell.ReadOnly}
+      if:false={readOnly}
       data-id={cell.DataId}
       value={cell.Value}
-      type={cell.Type}
+      type={cell.InputType}
       onchange={handleValueChange}
       onkeydown={listenForEscape}
       class="standard-input"
     ></lightning-input>
     <lightning-input
-      if:true={cell.ReadOnly}
+      if:true={readOnly}
       data-id={cell.DataId}
       value={cell.Value}
-      type={cell.Type}
+      type={cell.InputType}
       onchange={handleValueChange}
       onkeydown={listenForEscape}
       read-only

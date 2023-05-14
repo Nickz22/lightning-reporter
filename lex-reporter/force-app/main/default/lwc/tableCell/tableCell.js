@@ -1,38 +1,18 @@
 import { LightningElement, api, track } from "lwc";
 
 export default class TableCell extends LightningElement {
-  @track cellStyle = "read-only-padding";
+  @track readOnly = true;
+  @api cell;
 
-  @api get cell() {
-    return this._cell;
-  }
-
-  set cell(value) {
-    if (value != null) {
-      if (value.ReadOnly && this.cellStyle !== "read-only-padding") {
-        this.cellStyle = "read-only-padding";
-      }
-    }
-    this._cell = value;
-  }
-
-  initEdit(event) {
+  initEdit() {
     if (this.cell.IsEditable && this.cell.ReadOnly) {
-      this.dispatchEvent(
-        new CustomEvent("cellclick", { detail: event.target.dataset.id })
-      );
-      // this.cellStyle =
-      //   this.cellStyle === "read-only-padding" ? "" : "read-only-padding";
+      this.readOnly = false;
     }
   }
 
   listenForEscape(event) {
-    console.log(`listenForEscape in tableCell`);
-    console.log(`event.keyCode: ${event.keyCode}`);
     if (event.keyCode === 27) {
-      this.dispatchEvent(
-        new CustomEvent("cellescape", { detail: event.target.dataset.id })
-      );
+      this.readOnly = true;
     }
   }
 

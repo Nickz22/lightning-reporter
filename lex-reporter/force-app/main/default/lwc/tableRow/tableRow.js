@@ -79,23 +79,6 @@ export default class TableRow extends NavigationMixin(LightningElement) {
     return this._updatedSObject ? this._updatedSObject : this._sObject.record;
   }
 
-  @api get saved() {
-    return this._saved;
-  }
-
-  set saved(value) {
-    let newCells = [];
-    for (let cell of this.cells) {
-      cell = {
-        ...cell,
-        ReadOnly: true
-      };
-      newCells.push(cell);
-    }
-    this.cells = newCells;
-    this._saved = value;
-  }
-
   @api get sObject() {
     return this._sObject.record;
   }
@@ -218,34 +201,6 @@ export default class TableRow extends NavigationMixin(LightningElement) {
       this._updatedSObject = clone;
     } catch (e) {
       console.error(e);
-    }
-  }
-
-  initEdit(event) {
-    this.dispatchEvent(
-      new CustomEvent("edit", {
-        detail: {
-          sObject: this._sObject,
-          updatedSObject: this._updatedSObject
-        },
-        composed: true,
-        bubbles: true
-      })
-    );
-    let clickedFieldName = event.detail;
-    for (let cell of this.cells) {
-      let isReadOnly = cell.DataId !== clickedFieldName;
-      cell.ReadOnly = isReadOnly;
-    }
-  }
-
-  killEdit(event) {
-    const clickedFieldName = event.detail;
-    for (let cell of this.cells) {
-      if (cell.DataId === clickedFieldName) {
-        cell.ReadOnly = true;
-        break;
-      }
     }
   }
 

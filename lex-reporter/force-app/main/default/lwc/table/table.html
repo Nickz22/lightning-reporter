@@ -1,20 +1,22 @@
 <template>
-    <lightning-layout multiple-rows class="table">
-        <lightning-layout-item size="12"
-                               alignment-bump="right"
-                               class="table-header">
-            <c-table-header columns={fields}></c-table-header>
-        </lightning-layout-item>
-        <lightning-layout-item flexibility="auto"
-                               class="table-data-container">
-            <template for:each={records} for:item="record">
-                <c-table-row key={record.Id}
-                                data-id={record.Id}
-                                fields={fields}
-                                s-object={record}
-                                saved={saved}
-                                top-most-id={topMostId}></c-table-row>
-            </template>
-        </lightning-layout-item>
-    </lightning-layout>
+  <lightning-layout multiple-rows class="table">
+    <lightning-layout-item
+      size="12"
+      alignment-bump="right"
+      class="table-header"
+    >
+      <c-table-header columns={fields}></c-table-header>
+    </lightning-layout-item>
+    <lightning-layout-item flexibility="auto" class="table-data-container">
+      <template for:each={records} for:item="record">
+        <c-table-row
+          key={record.Id}
+          data-id={record.Id}
+          fields={fields}
+          s-object={record}
+          top-most-id={topMostId}
+        ></c-table-row>
+      </template>
+    </lightning-layout-item>
+  </lightning-layout>
 </template>

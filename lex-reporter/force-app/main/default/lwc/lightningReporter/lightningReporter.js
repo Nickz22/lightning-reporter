@@ -194,11 +194,6 @@ export default class LightningReporter extends LightningElement {
       this.alert = this.alerts.length > 0;
       this.childRecords = sObjects;
 
-      if (this.imperative) {
-        this.showNotification("Success", "Records retrieved", "success");
-        this.imperative = false;
-      }
-
       this.isLoading = false;
     } catch (error) {
       this.isLoading = false;
@@ -304,7 +299,8 @@ export default class LightningReporter extends LightningElement {
     this.getSelectableFields();
   }
 
-  saveRecords(event) {
+  async saveRecords(event) {
+    this.isLoading = true;
     let sObjects = [];
 
     // use reducer here?
@@ -314,17 +310,13 @@ export default class LightningReporter extends LightningElement {
       sObjects.push(rows[i].updatedSObject);
     }
 
-    saveRecords({
+    await saveRecords({
       sObjects: sObjects
-    })
-      .then((result) => {
-        this.showNotification("Records saved successfully", "", "success");
-        this.saved = !this.saved;
-      })
-      .catch((error) => {
-        this.showNotification("We hit a snag", error.body?.message, "error");
-      });
+    });
 
+    this.saved = !this.saved;
+    await this.imperativeRefresh();
+    this.showNotification("Records saved successfully", "", "success");
     this.isEditingRow = false;
   }
 
