@@ -47,12 +47,22 @@
     class="left-padding"
   >
     <lightning-input
+      if:false={cell.ReadOnly}
       data-id={cell.DataId}
       value={cell.Value}
       type={cell.Type}
-      read-only={cell.ReadOnly}
       onchange={handleValueChange}
       onkeydown={listenForEscape}
+      class="standard-input"
+    ></lightning-input>
+    <lightning-input
+      if:true={cell.ReadOnly}
+      data-id={cell.DataId}
+      value={cell.Value}
+      type={cell.Type}
+      onchange={handleValueChange}
+      onkeydown={listenForEscape}
+      read-only
       class="standard-input"
     ></lightning-input>
   </div>
