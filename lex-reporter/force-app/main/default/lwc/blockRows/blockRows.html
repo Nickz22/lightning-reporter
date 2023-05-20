@@ -33,13 +33,13 @@
                 <template for:each={row.views} for:item="view" for:index="i">
                   <lightning-avatar
                     key={view.Id}
-                    src={view.Viewed_By__r.FullPhotoUrl}
+                    src={view.Reporter__Viewed_By__r.FullPhotoUrl}
                     size="x-small"
                     variant="circle"
                     data-n={i}
                     class="viewed-by-avatar"
                     style={view.leftStyle}
-                    alternative-text={view.Viewed_By__r.Name}
+                    alternative-text={view.Reporter__Viewed_By__r.Name}
                   ></lightning-avatar>
                 </template>
               </div>

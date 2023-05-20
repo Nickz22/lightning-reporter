@@ -290,37 +290,41 @@ export default class LightningReporter extends LightningElement {
     this.selectableFields = newSelectableFields;
   }
 
-  handleChildTypeSelected(event) {
+  async handleChildTypeSelected(event) {
     this.selectedType = event.detail;
     this.isLoading = true;
     this.childRecords = [];
     this.selectableFields = [];
     this.selectedFields = [];
-    this.getSelectableFields();
+    await this.getSelectableFields();
   }
 
-  async saveRecords(event) {
-    this.isLoading = true;
-    let sObjects = [];
+  async saveRecords() {
+    try {
+      this.isLoading = true;
+      let sObjects = [];
 
-    // use reducer here?
-    let table = this.template.querySelectorAll("c-table");
-    let rows = table[0].getRows();
-    for (let i = 0; i < rows.length; i++) {
-      sObjects.push(rows[i].updatedSObject);
+      // use reducer here?
+      let table = this.template.querySelectorAll("c-table");
+      let rows = table[0].getRows();
+      for (let i = 0; i < rows.length; i++) {
+        sObjects.push(rows[i].updatedSObject);
+      }
+
+      await saveRecords({
+        sObjects: sObjects
+      });
+
+      this.saved = !this.saved;
+      await this.imperativeRefresh();
+      this.showNotification("Records saved successfully", "", "success");
+      this.isEditingRow = false;
+    } catch (error) {
+      this.showNotification("Error saving records", error.message, "error");
     }
-
-    await saveRecords({
-      sObjects: sObjects
-    });
-
-    this.saved = !this.saved;
-    await this.imperativeRefresh();
-    this.showNotification("Records saved successfully", "", "success");
-    this.isEditingRow = false;
   }
 
-  pinView() {
+  async pinView() {
     try {
       for (let i = 0; i < this.pinnedViews.length; i++) {
         if (this.pinnedViews[i].objectName === this.selectedType) {
@@ -333,32 +337,23 @@ export default class LightningReporter extends LightningElement {
         }
       }
 
-      pinLayout({
+      await pinLayout({
         objectName: this.selectedType,
         fields: this.selectedFields
-      })
-        .then((result) => {
-          this.pinnedViews.push({
-            objectName: this.selectedType,
-            label: this.selectedType,
-            defaultFields: this.selectedFields
-          });
-          this.showNotification("Pinned", "", "success");
-        })
-        .catch((error) => {
-          // get message from error
-          this.showNotification(
-            "Error pinning layout",
-            error.body?.message,
-            "error"
-          );
-        });
+      });
+
+      this.pinnedViews.push({
+        objectName: this.selectedType,
+        label: this.selectedType,
+        defaultFields: this.selectedFields
+      });
+      this.showNotification("Pinned", "", "success");
     } catch (error) {
       this.showNotification("Error pinning view", error.message, "error");
     }
   }
 
-  setView(event) {
+  async setView(event) {
     try {
       this.selectedType = event.detail;
       this.selectedFields = [];
@@ -377,13 +372,13 @@ export default class LightningReporter extends LightningElement {
       }
       this.selectedFields = selectableFields;
       this.selectableFields = selectableFields;
-      this.getChildRecords(true);
+      await this.getChildRecords(true);
     } catch (error) {
       this.showNotification("Error setting view", error.message, "error");
     }
   }
 
-  removePin(event) {
+  async removePin(event) {
     try {
       let pinnedViews = [...this.pinnedViews];
       for (let i = 0; i < pinnedViews.length; i++) {
@@ -405,7 +400,7 @@ export default class LightningReporter extends LightningElement {
         this.selectedFields = this.pinnedViews[0].defaultFields;
         this.selectableFields = this.pinnedViews[0].defaultFields;
         this.isLoading = true;
-        this.getChildRecords(true);
+        await this.getChildRecords(true);
       }
 
       deletePin({ objectName: event.detail }).catch((error) => {
