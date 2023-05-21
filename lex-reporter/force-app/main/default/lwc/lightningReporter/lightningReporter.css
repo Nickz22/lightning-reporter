@@ -8,9 +8,11 @@
     max-height: 11rem;
 }
 
-.gpt-summary{
+.gpt-summary-container{
+    margin: 1em .5em;
     overflow-y: auto;
-    max-height: 11rem;
+    max-height: 8rem;
+    position: relative;
 }
 
 .gpt-summary::after {
@@ -27,6 +29,14 @@
         opacity: 1;
     }
 } 
+
+.close-gpt-summary{
+    /* put at top right of parent container */
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: .25em;
+}
 
 .table-container{
     text-align: center;

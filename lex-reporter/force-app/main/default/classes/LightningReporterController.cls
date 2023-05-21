@@ -88,7 +88,7 @@ public class LightningReporterController {
   }
 
   @AuraEnabled
-  public static String gptSummarize(
+  public static String gptDetectAnomalies(
     List<Id> idsToSummarize,
     List<FieldDTO> fieldsToSummarize
   ) {

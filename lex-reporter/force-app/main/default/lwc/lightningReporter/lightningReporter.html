@@ -127,11 +127,21 @@
                   onblockrowclick={handleFieldClicked}
                 ></c-block-rows>
               </lightning-layout-item>
-              <!-- <lightning-layout-item  size="12"
-                                                    class="gpt-summary">
-                                {gptSummary}
-                            </lightning-layout-item> -->
               <lightning-layout-item
+                size="12"
+                if:true={gptSummary}
+                class="gpt-summary-container"
+              >
+                <lightning-button-icon
+                  icon-name="utility:close"
+                  variant="bare"
+                  onclick={closeGptSummary}
+                  class="close-gpt-summary"
+                ></lightning-button-icon>
+                <p class="gpt-summary">{gptSummary}</p>
+              </lightning-layout-item>
+              <lightning-layout-item
+                if:false={gptSummary}
                 size="3"
                 class="ai-options"
                 title="Last View Delta"
@@ -145,18 +155,22 @@
                 ></lightning-icon
               ></lightning-layout-item>
               <lightning-layout-item
+                if:false={gptSummary}
                 size="3"
                 class="ai-options"
                 title="Anomaly Detection"
+                onclick={gptDetectAnomalies}
                 ><lightning-icon
                   icon-name="utility:search"
                   class="ai-icon"
                   onmouseover={showAiHelp}
                   onmouseout={hideAiHelp}
                   data-id="ai-anomaly"
+                  onclick={gptDetectAnomalies}
                 ></lightning-icon
               ></lightning-layout-item>
               <lightning-layout-item
+                if:false={gptSummary}
                 size="3"
                 class="ai-options"
                 title="Focused Analysis"
@@ -169,7 +183,7 @@
                   data-id="ai-focused-analysis"
                 ></lightning-icon
               ></lightning-layout-item>
-              <lightning-layout-item size="12" if:true={aiHelpText}
+              <lightning-layout-item size="12" if:false={gptSummary}
                 ><p style="color: grey; font-size: x-small">
                   {aiHelpText}
                 </p></lightning-layout-item

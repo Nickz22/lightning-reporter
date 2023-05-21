@@ -8,7 +8,7 @@ import pinLayout from "@salesforce/apex/LightningReporterController.pinLayout";
 import getPinnedViews from "@salesforce/apex/LightningReporterController.getPinnedViews";
 import deletePin from "@salesforce/apex/LightningReporterController.deletePin";
 import filterByNaturalLanguage from "@salesforce/apex/LightningReporterController.filterByNaturalLanguage";
-import gptSummarize from "@salesforce/apex/LightningReporterController.gptSummarize";
+import gptDetectAnomalies from "@salesforce/apex/LightningReporterController.gptDetectAnomalies";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 const aiHelpByType = {
   "ai-delta":
@@ -128,23 +128,31 @@ export default class LightningReporter extends LightningElement {
     this.imperative = true;
     this.isLoading = true;
     await this.getChildRecords(true);
-    this.generateGptSummary();
     this.isLoading = false;
   }
 
-  async generateGptSummary() {
-    // const summary = await gptSummarize({
-    //   idsToSummarize: this.childRecords.map((record) => record.record.Id),
-    //   fieldsToSummarize: this.selectedFields
-    // });
-    // console.log(summary);
-    // let summaryText = "";
-    // for (let i = 0; i < summary.length; i++) {
-    //   summaryText += summary[i];
-    //   this.gptSummary = summaryText;
-    //   // eslint-disable-next-line no-await-in-loop, @lwc/lwc/no-async-operation
-    //   await new Promise((resolve) => setTimeout(resolve, 25));
-    // }
+  closeGptSummary() {
+    this.gptSummary = "";
+  }
+
+  async gptDetectAnomalies(event) {
+    if (this.gptSummary === " ") {
+      // running twice if icon is clicked, need to figure this out later
+      return;
+    }
+    event.preventDefault();
+    this.gptSummary = " ";
+    const summary = await gptDetectAnomalies({
+      idsToSummarize: this.childRecords.map((record) => record.record.Id),
+      fieldsToSummarize: this.selectedFields
+    });
+    let summaryText = "";
+    for (let i = 0; i < summary.length; i++) {
+      summaryText += summary[i];
+      this.gptSummary = summaryText;
+      // eslint-disable-next-line no-await-in-loop, @lwc/lwc/no-async-operation
+      await new Promise((resolve) => setTimeout(resolve, 25));
+    }
   }
 
   async focusOnAlertView(event) {
