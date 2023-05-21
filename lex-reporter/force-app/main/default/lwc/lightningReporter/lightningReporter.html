@@ -1,138 +1,195 @@
 <template>
-    <lightning-card>
-        <div class="report-box"> 
-            <!-- if {hasPermission} is false, show text explainer -->
-            <template if:false={hasPermission}>
-                <div class="no-permission">
-                    <h1>Permission Required</h1>
-                    <p>You need the Lightning Reporter permission set to view this page.</p>
-                </div>
+  <lightning-card>
+    <div class="report-box">
+      <!-- if {hasPermission} is false, show text explainer -->
+      <template if:false={hasPermission}>
+        <div class="no-permission">
+          <h1>Permission Required</h1>
+          <p>
+            You need the Lightning Reporter permission set to view this page.
+          </p>
+        </div>
+      </template>
+      <lightning-layout multiple-rows>
+        <!-- TABLE ACTIONS -->
+        <lightning-layout-item size="3" data-id="child-type-options">
+          <c-picklist
+            default-option={selectedType}
+            icon-name={iconName}
+            options={options}
+            onoptionselected={handleChildTypeSelected}
+          ></c-picklist>
+        </lightning-layout-item>
+        <lightning-layout-item
+          size="4"
+          padding="horizontal-small"
+          class="pinned-views"
+        >
+          <c-pill-collection
+            pills={pinnedViews}
+            onpillselected={setView}
+            onpillremoved={removePin}
+          ></c-pill-collection>
+        </lightning-layout-item>
+        <lightning-layout-item size="1">
+          <!-- search button -->
+          <lightning-button-icon
+            icon-name="utility:filterList"
+            variant="bare"
+            onclick={toggleNaturalLanguageSearchModal}
+            label="Language Search"
+          ></lightning-button-icon>
+        </lightning-layout-item>
+        <lightning-layout-item size="1">
+          <template if:true={alert}>
+            <lightning-icon
+              icon-name="utility:alert"
+              onclick={showAlerts}
+              size="small"
+              class="alerts red"
+            ></lightning-icon>
+          </template>
+          <template if:false={alert}>
+            <lightning-icon
+              icon-name="utility:alert"
+              size="small"
+              class="alerts"
+            ></lightning-icon>
+          </template>
+        </lightning-layout-item>
+        <lightning-layout-item size="3" class="button-group">
+          <lightning-button
+            label="Run"
+            variant="neutral"
+            onclick={imperativeRefresh}
+          >
+          </lightning-button>
+          <lightning-button label="Save" variant="brand" onclick={saveRecords}>
+          </lightning-button>
+          <lightning-button
+            label=""
+            icon-name="utility:pin"
+            variant="neutral"
+            onclick={pinView}
+          >
+          </lightning-button>
+        </lightning-layout-item>
+        <!-- END TABLE ACTIONS -->
+        <!-- START TABLE -->
+        <lightning-layout-item
+          size="9"
+          data-id="record-table"
+          padding="around-medium"
+          class="table-container"
+        >
+          <template if:false={displayAlerts}>
+            <template if:true={isLoading}>
+              <lightning-spinner
+                alternative-text="Loading"
+                onclick={checkForSpinnerHardEscape}
+              ></lightning-spinner>
             </template>
-            <lightning-layout multiple-rows>
-                <!-- TABLE ACTIONS -->
-                <lightning-layout-item size="3" 
-                                       data-id="child-type-options">
-                    <c-picklist default-option={selectedType}
-                                icon-name={iconName}
-                                options={options}
-                                onoptionselected={handleChildTypeSelected}></c-picklist>
-                </lightning-layout-item>
-                <lightning-layout-item size="4" 
-                                      padding="horizontal-small"
-                                      class="pinned-views">
-                    <c-pill-collection pills={pinnedViews}
-                                        onpillselected={setView}
-                                        onpillremoved={removePin}></c-pill-collection>
-                </lightning-layout-item>
-                <lightning-layout-item size="1">
-                    <!-- search button -->
-                    <lightning-button-icon icon-name="utility:filterList"
-                                            variant="bare"
-                                            onclick={toggleNaturalLanguageSearchModal}
-                                            label="Language Search"></lightning-button-icon>
-                </lightning-layout-item>
-                <lightning-layout-item size="1">
-                    <template if:true={alert}>
-                        <lightning-icon icon-name="utility:alert" 
-                                    onclick={showAlerts}
-                                    size="small"
-                                    class="alerts red"></lightning-icon>
-                    </template>
-                    <template if:false={alert}>
-                        <lightning-icon icon-name="utility:alert"
-                                    size="small"
-                                    class="alerts"></lightning-icon>
-                    </template>
-                </lightning-layout-item>
-                <lightning-layout-item size="3"
-                                        class="button-group">
-                    <lightning-button
-                        label="Run"
-                        variant="neutral"
-                        onclick={imperativeRefresh}>
-                    </lightning-button>
-                    <lightning-button
-                        label="Save"
-                        variant="brand"
-                        onclick={saveRecords}>
-                    </lightning-button>
-                    <lightning-button
-                        label=""
-                        icon-name="utility:pin"
-                        variant="neutral"
-                        onclick={pinView}>
-                    </lightning-button>
-                </lightning-layout-item>
-                <!-- END TABLE ACTIONS -->
-                <!-- START TABLE -->
-                <lightning-layout-item size="9" 
-                                       data-id="record-table"
-                                       padding="around-medium"
-                                       class="table-container">
-                    <template if:false={displayAlerts}>
-                        <template if:true={isLoading}>
-                            <lightning-spinner alternative-text="Loading"
-                                                onclick={checkForSpinnerHardEscape}></lightning-spinner>
-                        </template>
-                        <template if:false={isLoading}>
-                            <template if:true={selectedFields}>
-                                <c-table fields={selectedFields}
-                                        records={childRecords}
-                                        top-most-id={recordId}
-                                        saved={saved}
-                                        onedit={stopPoller}></c-table>
-                            </template>
-                        </template>
-                    </template>
-                    <template if:true={displayAlerts}>
-                        <c-block-rows rows={alerts}
-                                    onblockrowclick={focusOnAlertView}></c-block-rows>
-                    </template>
-                </lightning-layout-item>
-                <!-- END TABLE -->
-                <!-- START FIELDS -->
-                <template if:true={selectableFields}>
-                    <lightning-layout-item size="3">
-                        <lightning-layout multiple-rows="true"
-                                            vertical-align="stretch">
-                            <lightning-layout-item size="12" 
-                                                data-id="field-list"
-                                                class="field-list">
-                                <c-block-rows rows={selectableFields}
-                                                onblockrowclick={handleFieldClicked}></c-block-rows>
-                            </lightning-layout-item>
-                            <lightning-layout-item  size="12"
+            <template if:false={isLoading}>
+              <template if:true={selectedFields}>
+                <c-table
+                  fields={selectedFields}
+                  records={childRecords}
+                  top-most-id={recordId}
+                  saved={saved}
+                  onedit={stopPoller}
+                ></c-table>
+              </template>
+            </template>
+          </template>
+          <template if:true={displayAlerts}>
+            <c-block-rows
+              rows={alerts}
+              onblockrowclick={focusOnAlertView}
+            ></c-block-rows>
+          </template>
+        </lightning-layout-item>
+        <!-- END TABLE -->
+        <!-- START FIELDS -->
+        <template if:true={selectableFields}>
+          <lightning-layout-item size="3">
+            <lightning-layout multiple-rows="true" vertical-align="stretch">
+              <lightning-layout-item
+                size="12"
+                data-id="field-list"
+                class="field-list"
+              >
+                <c-block-rows
+                  rows={selectableFields}
+                  onblockrowclick={handleFieldClicked}
+                ></c-block-rows>
+              </lightning-layout-item>
+              <!-- <lightning-layout-item  size="12"
                                                     class="gpt-summary">
                                 {gptSummary}
-                            </lightning-layout-item>
-                        </lightning-layout>
-                    </lightning-layout-item>    
-                </template>
-                <!-- END FIELDS -->
+                            </lightning-layout-item> -->
+              <lightning-layout-item
+                size="3"
+                class="ai-options"
+                title="Last View Delta"
+              >
+                <lightning-icon
+                  icon-name="utility:rotate"
+                  class="ai-icon"
+                ></lightning-icon
+              ></lightning-layout-item>
+              <lightning-layout-item
+                size="3"
+                class="ai-options"
+                title="Anomaly Detection"
+                ><lightning-icon
+                  icon-name="utility:search"
+                  class="ai-icon"
+                ></lightning-icon
+              ></lightning-layout-item>
+              <lightning-layout-item
+                size="3"
+                class="ai-options"
+                title="Focused Analysis"
+              >
+                <lightning-icon
+                  class="ai-icon"
+                  icon-name="utility:segments"
+                ></lightning-icon
+              ></lightning-layout-item>
             </lightning-layout>
+          </lightning-layout-item>
+        </template>
+        <!-- END FIELDS -->
+      </lightning-layout>
+    </div>
+  </lightning-card>
+  <!-- make a overlay modal -->
+  <template if:true={showNaturalLanguageSearchModal}>
+    <div class="modal-container">
+      <div class="modal">
+        <div class="modal-content">
+          <lightning-input
+            type="text"
+            label="Type your question"
+            field-level-help="Filter table records with natural language, we'll use AI to translate your question into a query."
+            value={searchTerm}
+            onchange={handleSearchChange}
+            class="natural-language-search natural-language-search-input"
+          ></lightning-input>
+          <lightning-button
+            label="Save"
+            variant="brand"
+            onclick={naturalLanguageFilter}
+            class="natural-language-search"
+          ></lightning-button>
+          <lightning-button
+            label="Cancel"
+            variant="neutral"
+            onclick={toggleNaturalLanguageSearchModal}
+            class="natural-language-search"
+          ></lightning-button>
         </div>
-    </lightning-card>
-    <!-- make a overlay modal -->
-    <template if:true={showNaturalLanguageSearchModal}>
-        <div class="modal-container">
-            <div class="modal">
-                <div class="modal-content">
-                    <lightning-input type="text"
-                                    label="Type your question"
-                                    field-level-help="Filter table records with natural language, we'll use AI to translate your question into a query."
-                                    value={searchTerm}
-                                    onchange={handleSearchChange}
-                                    class="natural-language-search natural-language-search-input"></lightning-input>
-                    <lightning-button label="Save"
-                                    variant="brand"
-                                    onclick={naturalLanguageFilter}
-                                    class="natural-language-search"></lightning-button>
-                    <lightning-button label="Cancel"
-                                    variant="neutral"
-                                    onclick={toggleNaturalLanguageSearchModal}
-                                    class="natural-language-search"></lightning-button>
-                </div>
-            </div>
-        </div>
-    </template>
+      </div>
+    </div>
+  </template>
 </template>

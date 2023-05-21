@@ -82,3 +82,18 @@
 .natural-language-search-input{
     width: 500px;
 }
+
+.ai-options{
+    height: 5em;
+    margin: 2em .5em;
+    background-color: lightgrey;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10%;
+}
+
+.ai-icon{
+    --sds-c-icon-color-foreground-default: white;
+}
