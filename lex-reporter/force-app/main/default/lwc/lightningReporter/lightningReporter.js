@@ -93,18 +93,23 @@ export default class LightningReporter extends LightningElement {
 
   renderedCallback() {
     if (!this.polling) {
-      // this.polling = true;
-      // setInterval(() => {
-      //     try {
-      //         if(this.isEditingRow || this.childRecords?.length === 0){
-      //             return;
-      //         }
-      //         this.getChildRecords(false);
-      //     } catch (error) {
-      //         this.showNotification('Error getting records', error.message, 'error');
-      //         this.isLoading = false;
-      //     }
-      // }, 10000);
+      this.polling = true;
+      // eslint-disable-next-line @lwc/lwc/no-async-operation
+      setInterval(() => {
+        try {
+          if (this.isEditingRow || this.childRecords?.length === 0) {
+            return;
+          }
+          this.getChildRecords(false);
+        } catch (error) {
+          this.showNotification(
+            "Error getting records",
+            error.message,
+            "error"
+          );
+          this.isLoading = false;
+        }
+      }, 10000);
     }
   }
 
