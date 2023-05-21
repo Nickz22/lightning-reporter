@@ -10,7 +10,13 @@ import deletePin from "@salesforce/apex/LightningReporterController.deletePin";
 import filterByNaturalLanguage from "@salesforce/apex/LightningReporterController.filterByNaturalLanguage";
 import gptSummarize from "@salesforce/apex/LightningReporterController.gptSummarize";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
-
+const aiHelpByType = {
+  "ai-delta":
+    "Use AI to detect changes to the data shown on this view since the last time you viewed it",
+  "ai-anomaly": "Use AI to detect anomalies in the data shown on this view",
+  "ai-focused-analysis":
+    "Tell AI what you are interested in and it will do it's best to analyze the data shown on this view"
+};
 export default class LightningReporter extends LightningElement {
   @api recordId;
   @track childRecords;
@@ -23,6 +29,7 @@ export default class LightningReporter extends LightningElement {
   @track searchTerm = "";
   @track showNaturalLanguageSearchModal = false;
   @track gptSummary;
+  @track aiHelpText;
   selectableFields;
   childTypes;
   saved = false;
@@ -381,6 +388,17 @@ export default class LightningReporter extends LightningElement {
     } catch (error) {
       this.showNotification("Error setting view", error.message, "error");
     }
+  }
+
+  showAiHelp(event) {
+    const aiType = event.target.dataset.id;
+    console.log(aiType);
+
+    this.aiHelpText = aiHelpByType[aiType];
+  }
+
+  hideAiHelp() {
+    this.aiHelpText = null;
   }
 
   async removePin(event) {

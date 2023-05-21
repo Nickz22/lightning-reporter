@@ -112,7 +112,11 @@
         <!-- START FIELDS -->
         <template if:true={selectableFields}>
           <lightning-layout-item size="3">
-            <lightning-layout multiple-rows="true" vertical-align="stretch">
+            <lightning-layout
+              multiple-rows="true"
+              vertical-align="stretch"
+              horizontal-align="center"
+            >
               <lightning-layout-item
                 size="12"
                 data-id="field-list"
@@ -135,6 +139,9 @@
                 <lightning-icon
                   icon-name="utility:rotate"
                   class="ai-icon"
+                  onmouseover={showAiHelp}
+                  onmouseleave={hideAiHelp}
+                  data-id="ai-delta"
                 ></lightning-icon
               ></lightning-layout-item>
               <lightning-layout-item
@@ -144,6 +151,9 @@
                 ><lightning-icon
                   icon-name="utility:search"
                   class="ai-icon"
+                  onmouseover={showAiHelp}
+                  onmouseout={hideAiHelp}
+                  data-id="ai-anomaly"
                 ></lightning-icon
               ></lightning-layout-item>
               <lightning-layout-item
@@ -154,8 +164,16 @@
                 <lightning-icon
                   class="ai-icon"
                   icon-name="utility:segments"
+                  onmouseover={showAiHelp}
+                  onmouseout={hideAiHelp}
+                  data-id="ai-focused-analysis"
                 ></lightning-icon
               ></lightning-layout-item>
+              <lightning-layout-item size="12" if:true={aiHelpText}
+                ><p style="color: grey; font-size: x-small">
+                  {aiHelpText}
+                </p></lightning-layout-item
+              >
             </lightning-layout>
           </lightning-layout-item>
         </template>
