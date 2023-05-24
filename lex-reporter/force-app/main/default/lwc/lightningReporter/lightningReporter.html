@@ -152,6 +152,7 @@
                   onmouseover={showAiHelp}
                   onmouseleave={hideAiHelp}
                   data-id="ai-delta"
+                  onclick={gptDetectDelta}
                 ></lightning-icon
               ></lightning-layout-item>
               <lightning-layout-item
@@ -159,7 +160,6 @@
                 size="3"
                 class="ai-options"
                 title="Anomaly Detection"
-                onclick={gptDetectAnomalies}
                 ><lightning-icon
                   icon-name="utility:search"
                   class="ai-icon"

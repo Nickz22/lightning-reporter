@@ -88,6 +88,43 @@ public class LightningReporterController {
   }
 
   @AuraEnabled
+  public static void insertTableView(TableViewDTO tableViewDto) {
+    try {
+      Table_View__c view = tableViewDto.convertToDbModel();
+      view.Viewer__c = UserInfo.getUserId();
+      insert view;
+    } catch (Exception e) {
+      throw e;
+    }
+  }
+
+  @AuraEnabled
+  public static TableViewDTO getLastTableView(String contextId) {
+    List<Table_View__c> lastView;
+    try {
+      lastView = [
+        SELECT
+          Id,
+          Viewer__c,
+          Context_Id__c,
+          Object_Name__c,
+          State__c,
+          Skinny_State__c
+        FROM Table_View__c
+        WHERE Context_Id__c = :contextId AND Viewer__c = :UserInfo.getUserId()
+        ORDER BY CreatedDate DESC
+        LIMIT 1
+      ];
+    } catch (Exception e) {
+      throw e;
+    }
+
+    return new TableViewDTO(
+      lastView.isEmpty() ? new Table_View__c() : lastView[0]
+    );
+  }
+
+  @AuraEnabled
   public static String gptDetectAnomalies(
     List<Id> idsToSummarize,
     List<FieldDTO> fieldsToSummarize

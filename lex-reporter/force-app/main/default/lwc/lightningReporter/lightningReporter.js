@@ -9,13 +9,14 @@ import getPinnedViews from "@salesforce/apex/LightningReporterController.getPinn
 import deletePin from "@salesforce/apex/LightningReporterController.deletePin";
 import filterByNaturalLanguage from "@salesforce/apex/LightningReporterController.filterByNaturalLanguage";
 import gptDetectAnomalies from "@salesforce/apex/LightningReporterController.gptDetectAnomalies";
+import getLastTableView from "@salesforce/apex/LightningReporterController.getLastTableView";
+import insertTableView from "@salesforce/apex/LightningReporterController.insertTableView";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 const aiHelpByType = {
   "ai-delta":
-    "Use AI to detect changes to the data shown on this view since the last time you viewed it",
+    "Use AI to detect changes to the data shown on this view since the last time you checked",
   "ai-anomaly": "Use AI to detect anomalies in the data shown on this view",
-  "ai-focused-analysis":
-    "Tell AI what you are interested in and it will do it's best to analyze the data shown on this view"
+  "ai-focused-analysis": "Prompt AI about the data shown on this view"
 };
 export default class LightningReporter extends LightningElement {
   @api recordId;
@@ -152,6 +153,34 @@ export default class LightningReporter extends LightningElement {
       this.gptSummary = summaryText;
       // eslint-disable-next-line no-await-in-loop, @lwc/lwc/no-async-operation
       await new Promise((resolve) => setTimeout(resolve, 25));
+    }
+  }
+
+  async gptDetectDelta() {
+    const lastTableView = await getLastTableView({
+      contextId: this.recordId
+    });
+
+    if (!lastTableView.id) {
+      this.showNotification(
+        "View saved in memory",
+        "We'll use this view for comparison on your next delta request",
+        "success"
+      );
+
+      const tableView = {
+        id: null,
+        objectName: this.selectedType,
+        state: JSON.stringify(this.childRecords),
+        skinnyState: JSON.stringify({ count: this.childRecords.length }),
+        viewer: null,
+        contextId: this.recordId
+      };
+      try {
+        await insertTableView({ tableViewDto: tableView });
+      } catch (e) {
+        this.showNotification("Error saving view", e.body?.message, "error");
+      }
     }
   }
 
