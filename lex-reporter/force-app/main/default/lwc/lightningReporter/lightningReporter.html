@@ -32,15 +32,6 @@
           ></c-pill-collection>
         </lightning-layout-item>
         <lightning-layout-item size="1">
-          <!-- search button -->
-          <lightning-button-icon
-            icon-name="utility:filterList"
-            variant="bare"
-            onclick={toggleNaturalLanguageSearchModal}
-            label="Language Search"
-          ></lightning-button-icon>
-        </lightning-layout-item>
-        <lightning-layout-item size="1">
           <template if:true={alert}>
             <lightning-icon
               icon-name="utility:alert"
@@ -195,33 +186,4 @@
       </lightning-layout>
     </div>
   </lightning-card>
-  <!-- make a overlay modal -->
-  <template if:true={showNaturalLanguageSearchModal}>
-    <div class="modal-container">
-      <div class="modal">
-        <div class="modal-content">
-          <lightning-input
-            type="text"
-            label="Type your question"
-            field-level-help="Filter table records with natural language, we'll use AI to translate your question into a query."
-            value={searchTerm}
-            onchange={handleSearchChange}
-            class="natural-language-search natural-language-search-input"
-          ></lightning-input>
-          <lightning-button
-            label="Save"
-            variant="brand"
-            onclick={gptNaturalLanguageFilter}
-            class="natural-language-search"
-          ></lightning-button>
-          <lightning-button
-            label="Cancel"
-            variant="neutral"
-            onclick={toggleNaturalLanguageSearchModal}
-            class="natural-language-search"
-          ></lightning-button>
-        </div>
-      </div>
-    </div>
-  </template>
 </template>

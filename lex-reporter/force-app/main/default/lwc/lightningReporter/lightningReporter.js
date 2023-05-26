@@ -7,7 +7,6 @@ import saveRecords from "@salesforce/apex/LightningReporterController.saveRecord
 import pinLayout from "@salesforce/apex/LightningReporterController.pinLayout";
 import getPinnedViews from "@salesforce/apex/LightningReporterController.getPinnedViews";
 import deletePin from "@salesforce/apex/LightningReporterController.deletePin";
-import filterByNaturalLanguage from "@salesforce/apex/LightningReporterController.filterByNaturalLanguage";
 import gptDetectAnomalies from "@salesforce/apex/LightningReporterController.gptDetectAnomalies";
 import getLastTableView from "@salesforce/apex/LightningReporterController.getLastTableView";
 import insertTableView from "@salesforce/apex/LightningReporterController.insertTableView";
@@ -234,31 +233,6 @@ export default class LightningReporter extends LightningElement {
       this.getSelectableFields();
     } else {
       await this.getRecords();
-    }
-  }
-
-  async gptNaturalLanguageFilter() {
-    this.isLoading = true;
-    console.log(`askGpt: ${this.searchTerm}`);
-    try {
-      const context = await filterByNaturalLanguage({
-        naturalQueryString: this.searchTerm,
-        contextRecordId: this.recordId,
-        fieldsToGet: this.selectedFields,
-        objectToQuery: this.selectedType
-      });
-      console.dir(context);
-      this.destructureContext(context);
-      this.toggleNaturalLanguageSearchModal();
-      this.isLoading = false;
-    } catch (e) {
-      this.showNotification(
-        "Sorry about that",
-        "GPT failed to parse your phrase into a query, please try again with a more specific request.",
-        "info"
-      );
-      this.toggleNaturalLanguageSearchModal();
-      this.isLoading = false;
     }
   }
 
