@@ -11,6 +11,7 @@ import filterByNaturalLanguage from "@salesforce/apex/LightningReporterControlle
 import gptDetectAnomalies from "@salesforce/apex/LightningReporterController.gptDetectAnomalies";
 import getLastTableView from "@salesforce/apex/LightningReporterController.getLastTableView";
 import insertTableView from "@salesforce/apex/LightningReporterController.insertTableView";
+import gptGetTableViewDelta from "@salesforce/apex/LightningReporterController.gptGetTableViewDelta";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 const aiHelpByType = {
   "ai-delta":
@@ -123,6 +124,7 @@ export default class LightningReporter extends LightningElement {
 
   toggleNaturalLanguageSearchModal() {
     this.showNaturalLanguageSearchModal = !this.showNaturalLanguageSearchModal;
+    this.stopPoller(); // don't poll after end user has clicked natural language search
   }
 
   async imperativeRefresh() {
@@ -147,6 +149,10 @@ export default class LightningReporter extends LightningElement {
       idsToSummarize: this.childRecords.map((record) => record.record.Id),
       fieldsToSummarize: this.selectedFields
     });
+    this.displayGptOutput(summary);
+  }
+
+  async displayGptOutput(summary) {
     let summaryText = "";
     for (let i = 0; i < summary.length; i++) {
       summaryText += summary[i];
@@ -161,27 +167,56 @@ export default class LightningReporter extends LightningElement {
       contextId: this.recordId
     });
 
+    const onlyRecords = this.removeNotesFromRecords(this.childRecords);
+
     if (!lastTableView.id) {
+      const newTableView = {
+        id: null,
+        objectName: this.selectedType,
+        state: JSON.stringify(onlyRecords),
+        skinnyState: JSON.stringify({ count: onlyRecords.length }),
+        viewer: null,
+        contextId: this.recordId
+      };
+      try {
+        await insertTableView({ tableViewDto: newTableView });
+      } catch (e) {
+        this.showNotification("Error saving view", e.body?.message, "error");
+      }
+
       this.showNotification(
         "View saved in memory",
         "We'll use this view for comparison on your next delta request",
         "success"
       );
-
-      const tableView = {
+    } else {
+      const newViewDto = {
         id: null,
         objectName: this.selectedType,
-        state: JSON.stringify(this.childRecords),
-        skinnyState: JSON.stringify({ count: this.childRecords.length }),
+        state: JSON.stringify(onlyRecords),
+        skinnyState: JSON.stringify({ count: onlyRecords.length }),
         viewer: null,
         contextId: this.recordId
       };
+      const newTableView = await insertTableView({ tableViewDto: newViewDto });
+      this.gptSummary = " ";
       try {
-        await insertTableView({ tableViewDto: tableView });
+        const summary = await gptGetTableViewDelta({
+          compareView: lastTableView,
+          newView: newTableView
+        });
+        this.displayGptOutput(summary);
       } catch (e) {
-        this.showNotification("Error saving view", e.body?.message, "error");
+        this.showNotification("Error getting delta", e.body?.message, "error");
       }
     }
+  }
+
+  removeNotesFromRecords(records) {
+    return records.map((record) => {
+      const { Notes, CreatedBy, ...rest } = record.record;
+      return rest;
+    });
   }
 
   async focusOnAlertView(event) {
@@ -202,17 +237,29 @@ export default class LightningReporter extends LightningElement {
     }
   }
 
-  async naturalLanguageFilter() {
+  async gptNaturalLanguageFilter() {
     this.isLoading = true;
     console.log(`askGpt: ${this.searchTerm}`);
-    const context = await filterByNaturalLanguage({
-      naturalQueryString: this.searchTerm,
-      contextRecordId: this.recordId,
-      fieldsToGet: this.selectedFields
-    });
-    this.destructureContext(context);
-    this.toggleNaturalLanguageSearchModal();
-    this.isLoading = false;
+    try {
+      const context = await filterByNaturalLanguage({
+        naturalQueryString: this.searchTerm,
+        contextRecordId: this.recordId,
+        fieldsToGet: this.selectedFields,
+        objectToQuery: this.selectedType
+      });
+      console.dir(context);
+      this.destructureContext(context);
+      this.toggleNaturalLanguageSearchModal();
+      this.isLoading = false;
+    } catch (e) {
+      this.showNotification(
+        "Sorry about that",
+        "GPT failed to parse your phrase into a query, please try again with a more specific request.",
+        "info"
+      );
+      this.toggleNaturalLanguageSearchModal();
+      this.isLoading = false;
+    }
   }
 
   async getRecords() {
@@ -429,8 +476,6 @@ export default class LightningReporter extends LightningElement {
 
   showAiHelp(event) {
     const aiType = event.target.dataset.id;
-    console.log(aiType);
-
     this.aiHelpText = aiHelpByType[aiType];
   }
 

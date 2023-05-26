@@ -11,7 +11,7 @@
 .gpt-summary-container{
     margin: 1em .5em;
     overflow-y: auto;
-    max-height: 8rem;
+    max-height: 11rem;
     position: relative;
 }
 
