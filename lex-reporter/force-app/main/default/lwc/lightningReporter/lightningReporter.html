@@ -21,7 +21,7 @@
           ></c-picklist>
         </lightning-layout-item>
         <lightning-layout-item
-          size="4"
+          size="3"
           padding="horizontal-small"
           class="pinned-views"
         >
@@ -31,7 +31,16 @@
             onpillremoved={removePin}
           ></c-pill-collection>
         </lightning-layout-item>
-        <lightning-layout-item size="1">
+        <lightning-layout-item size="3">
+          <lightning-input
+            type="search"
+            name="search"
+            label="Search"
+            class="search"
+            variant="label-hidden"
+          ></lightning-input>
+        </lightning-layout-item>
+        <lightning-layout-item class="alert-icon-box" size="1">
           <template if:true={alert}>
             <lightning-icon
               icon-name="utility:alert"
@@ -164,7 +173,7 @@
                 if:false={gptSummary}
                 size="3"
                 class="ai-options"
-                title="Focused Analysis"
+                title="Prompt GPT"
               >
                 <lightning-icon
                   class="ai-icon"
@@ -172,6 +181,7 @@
                   onmouseover={showAiHelp}
                   onmouseout={hideAiHelp}
                   data-id="ai-focused-analysis"
+                  onclick={togglePromptGptModal}
                 ></lightning-icon
               ></lightning-layout-item>
               <lightning-layout-item size="12" if:false={gptSummary}
@@ -186,4 +196,33 @@
       </lightning-layout>
     </div>
   </lightning-card>
+  <!-- make a overlay modal -->
+  <template if:true={showPromptGptModal}>
+    <div class="modal-container">
+      <div class="modal">
+        <div class="modal-content">
+          <lightning-input
+            type="text"
+            label="Type your prompt"
+            field-level-help="We'll pass this data and your prompt to GPT, then relay the response."
+            value={promptTerm}
+            onchange={handlePromptChange}
+            class="natural-language-search natural-language-search-input"
+          ></lightning-input>
+          <lightning-button
+            label="Prompt"
+            variant="brand"
+            onclick={promptGpt}
+            class="natural-language-search"
+          ></lightning-button>
+          <lightning-button
+            label="Cancel"
+            variant="neutral"
+            onclick={togglePromptGptModal}
+            class="natural-language-search"
+          ></lightning-button>
+        </div>
+      </div>
+    </div>
+  </template>
 </template>

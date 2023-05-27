@@ -164,7 +164,7 @@ public class LightningReporterController {
     List<Map<String, String>> messages = new List<Map<String, String>>{
       new Map<String, String>{
         'role' => 'system',
-        'content' => 'You are an expert data analyst, specifically in Salesforce databases.'
+        'content' => 'You are a data comparison machine whose purpose is to detect differences between Salesforce data snapshots.'
       }
     };
 
@@ -172,10 +172,10 @@ public class LightningReporterController {
     List<String> prompts = new List<String>{
       'Your task is to receive two snapshots of the ' +
       newView.objectName +
-      ' table at different points in time, and detect deltas from the first snapshot to the second snapshot.',
+      ' table at different points in time, and detect deltas from the first snapshot to the latest snapshot.',
       'Here is the first snapshot: ' + compareView.state,
-      'Here is the second snapshot: ' + newView.state,
-      'Please provide analysis on the delta between both datasets.'
+      'Here is the latest snapshot: ' + newView.state,
+      'Detect differences between the snapshots - respond extremely succinctly.'
     };
 
     // Iterate through the prompts and call the GPT API for each of them
@@ -228,7 +228,7 @@ public class LightningReporterController {
 
     List<SObject> records = Database.query(query);
     String prompt =
-      'You are an expert data analyst. Summarize these Salesforce records - highlight anomalies and patterns: ' +
+      'Highlight anomalies and patterns - reference Names or Ids in your response: ' +
       records;
     req.setBody(
       '{"model": "gpt-3.5-turbo", "messages": [{"role": "user", "content": "' +
@@ -247,135 +247,6 @@ public class LightningReporterController {
     );
     return response.choices[0].message.content;
   }
-
-  /**
-   * might be useful later but too much trouble to query via natural language for now
-   */
-  // @AuraEnabled
-  // public static ContextDTO filterByNaturalLanguage(
-  //   String naturalQueryString,
-  //   Id contextRecordId,
-  //   List<FieldDTO> fieldsToGet,
-  //   String objectToQuery
-  // ) {
-  //   // Initialize the list of messages with a system message
-  //   List<Map<String, String>> messages = new List<Map<String, String>>{
-  //     new Map<String, String>{
-  //       'role' => 'system',
-  //       'content' => 'You are a GPT-4 AI model trained to interpret natural language queries into SOQL queries based on specific guidelines.'
-  //     }
-  //   };
-
-  //   // List of user prompts for the GPT API
-  //   List<String> prompts = new List<String>{
-  //     'Your task is to receive a natural language query and convert it into a SOQL query on the ' +
-  //     objectToQuery +
-  //     ' object.',
-  //     'The query should follow these guidelines' +
-  //     ' (1) the current year, month and day is ' +
-  //     System.now().year() +
-  //     '/' +
-  //     System.now().month() +
-  //     '/' +
-  //     System.now().day() +
-  //     ' (2) owner filters should only filter by non-ID fields, such as Name, Profile or Role, and should only be included if the natural language phrase explicitly contains "owned by"' +
-  //     ' (3) any reference to a "state", "city" or "country" should use "billingstate", "billingcity" or "billingcountry" respectively' +
-  //     ' (4) if the natural language phrase includes "me" or "my", you should interpet that as a filter on OwnerId=\'' +
-  //     UserInfo.getUserId() +
-  //     '\'' +
-  //     ' (5) omit query modifiers other than the WHERE clause, such as ORDER BY ' +
-  //     ' (6) any date filters should be converted to the format YYYY-MM-DDT00:00:00Z' +
-  //     ' (7) any use of the word "next" or "last" should use salesforce date literals, such as NEXT_N_DAYS:7 or LAST_N_DAYS:7',
-  //     'Here is the natural language query to convert into a SOQL query on the ' +
-  //     objectToQuery +
-  //     ' object: ' +
-  //     naturalQueryString
-  //   };
-
-  //   // Iterate through the prompts and call the GPT API for each of them
-  //   for (String prompt : prompts) {
-  //     // Add the user message to the list of messages
-  //     messages.add(
-  //       new Map<String, String>{ 'role' => 'user', 'content' => prompt }
-  //     );
-
-  //     // Get the assistant's response
-  //     String response = getGptResponse(messages);
-
-  //     // Add the assistant's response to the list of messages
-  //     messages.add(
-  //       new Map<String, String>{ 'role' => 'assistant', 'content' => response }
-  //     );
-
-  //     System.debug(response);
-  //   }
-
-  //   // The final assistant's response is the SOQL query
-  //   String gptSoql = messages.get(messages.size() - 1).get('content');
-  //   System.debug('gptSoql: ' + gptSoql);
-  //   String gptWhereClause = gptSoql.substringAfter('WHERE').trim();
-  //   System.debug('gptWhereClause: ' + gptWhereClause);
-  //   String queryObject = gptSoql.substringBetween('FROM', 'WHERE').trim();
-  //   // get selected fields and filter by context record
-  //   String contextSoql = getContextQueryString(
-  //     queryObject,
-  //     contextRecordId,
-  //     fieldsToGet
-  //   );
-  //   System.debug('contextSoql: ' + contextSoql);
-  //   // inject gptWhereClause+" AND "+ into contextSoql after "WHERE"
-  //   String finalSoql =
-  //     contextSoql.substringBefore('WHERE') +
-  //     'WHERE ' +
-  //     gptWhereClause +
-  //     ' AND ' +
-  //     contextSoql.substringAfter('WHERE');
-  //   if (finalSoql.contains('```')) {
-  //     finalSoql = finalSoql.substringBefore('```').trim(); // gpt keeps elaborating on the query
-  //   }
-  //   System.debug('finalSoql' + finalSoql);
-  //   List<SObject> records = Database.query(finalSoql);
-  //   Set<String> recordIds = new Set<String>();
-  //   Map<String, Schema.SObjectField> tokenByFieldName = Cache.globalDescribe
-  //     .get(queryObject)
-  //     .getDescribe()
-  //     .fields.getMap();
-  //   for (SObject record : records) {
-  //     recordIds.add(record.Id);
-  //   }
-  //   Map<Id, List<Note_Metadata__c>> noteMdByParentId = getNoteMdByParentId(
-  //     recordIds
-  //   );
-  //   List<SubjectDTO> subjects = new List<SubjectDTO>();
-  //   for (SObject record : records) {
-  //     subjects.add(
-  //       new SubjectDTO(
-  //         record,
-  //         getNoteDtos(
-  //           record.getSObjects('Notes'),
-  //           noteMdByParentId.containsKey(record.Id)
-  //             ? noteMdByParentId.get(record.Id)
-  //             : new List<Note_Metadata__c>()
-  //         )
-  //       )
-  //     );
-  //   }
-
-  //   List<NoteDTO> alerts = getAlertsForUser(contextRecordId);
-
-  //   for (SubjectDTO subject : subjects) {
-  //     for (NoteDTO note : subject.notes) {
-  //       for (NoteDTO alert : alerts) {
-  //         if (alert.note.Id == note.note.Id) {
-  //           note.alertRunningUser = true;
-  //           continue;
-  //         }
-  //       }
-  //     }
-  //   }
-
-  //   return new ContextDTO(subjects, alerts);
-  // }
 
   @AuraEnabled(cacheable=true)
   public static List<TableConfigDTO> getPinnedViews() {
@@ -400,6 +271,16 @@ public class LightningReporterController {
     }
 
     return configs;
+  }
+
+  @AuraEnabled
+  public static string gptPromptTableData(List<SubjectDTO> subjects) {
+    try {
+    } catch (Exception e) {
+      throw e;
+    }
+
+    return '';
   }
 
   @AuraEnabled

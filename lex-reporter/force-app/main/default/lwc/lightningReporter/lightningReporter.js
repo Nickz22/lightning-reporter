@@ -27,8 +27,8 @@ export default class LightningReporter extends LightningElement {
   @track alert = false;
   @track displayAlerts = false;
   @track isLoading = false;
-  @track searchTerm = "";
-  @track showNaturalLanguageSearchModal = false;
+  @track promptTerm = "";
+  @track showPromptGptModal = false;
   @track gptSummary;
   @track aiHelpText;
   selectableFields;
@@ -38,8 +38,8 @@ export default class LightningReporter extends LightningElement {
   polling = false;
   isEditingRow = false;
 
-  handleSearchChange(event) {
-    this.searchTerm = event.target.value;
+  handlePromptChange(event) {
+    this.promptTerm = event.target.value;
   }
 
   set selectedType(value) {
@@ -121,8 +121,10 @@ export default class LightningReporter extends LightningElement {
     }
   }
 
-  toggleNaturalLanguageSearchModal() {
-    this.showNaturalLanguageSearchModal = !this.showNaturalLanguageSearchModal;
+  promptGpt() {}
+
+  togglePromptGptModal() {
+    this.showPromptGptModal = !this.showPromptGptModal;
     this.stopPoller(); // don't poll after end user has clicked natural language search
   }
 
@@ -138,17 +140,21 @@ export default class LightningReporter extends LightningElement {
   }
 
   async gptDetectAnomalies(event) {
-    if (this.gptSummary === " ") {
-      // running twice if icon is clicked, need to figure this out later
-      return;
+    try {
+      if (this.gptSummary === " ") {
+        // running twice if icon is clicked, need to figure this out later
+        return;
+      }
+      event.preventDefault();
+      this.gptSummary = " ";
+      const summary = await gptDetectAnomalies({
+        idsToSummarize: this.childRecords.map((record) => record.record.Id),
+        fieldsToSummarize: this.selectedFields
+      });
+      this.displayGptOutput(summary);
+    } catch (error) {
+      this.showNotification("Error getting anomalies", error.message, "error");
     }
-    event.preventDefault();
-    this.gptSummary = " ";
-    const summary = await gptDetectAnomalies({
-      idsToSummarize: this.childRecords.map((record) => record.record.Id),
-      fieldsToSummarize: this.selectedFields
-    });
-    this.displayGptOutput(summary);
   }
 
   async displayGptOutput(summary) {

@@ -6,6 +6,11 @@ export default class Table extends LightningElement {
   @api saved;
   @api topMostId;
 
+  // connectedcallback
+  connectedCallback() {
+    console.log("connectedCallback");
+  }
+
   @api getRows() {
     return this.template.querySelectorAll("c-table-row");
   }

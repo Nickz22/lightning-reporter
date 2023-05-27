@@ -8,6 +8,10 @@
     max-height: 11rem;
 }
 
+.alert-icon-box{
+    text-align: right;
+}
+
 .gpt-summary-container{
     margin: 1em .5em;
     overflow-y: auto;
@@ -62,9 +66,9 @@
 
 .modal-container{
     position: fixed;
-    z-index: 1;
+    z-index: 2;
     left: 0;
-    top: 10%;
+    top: 0;
     width: 100%;
     height: 100%;
     background-color: rgba(0,0,0,0.4);
@@ -90,7 +94,7 @@
 }
 
 .natural-language-search-input{
-    width: 500px;
+    width: 25rem;
 }
 
 .ai-options{

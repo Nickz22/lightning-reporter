@@ -10,8 +10,8 @@
     <lightning-layout-item flexibility="auto" class="table-data-container">
       <template for:each={records} for:item="record">
         <c-table-row
-          key={record.Id}
-          data-id={record.Id}
+          key={record.record.Id}
+          data-id={record.record.Id}
           fields={fields}
           s-object={record}
           top-most-id={topMostId}
