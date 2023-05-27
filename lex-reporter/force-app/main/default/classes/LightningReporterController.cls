@@ -175,7 +175,7 @@ public class LightningReporterController {
       ' table at different points in time, and detect deltas from the first snapshot to the latest snapshot.',
       'Here is the first snapshot: ' + compareView.state,
       'Here is the latest snapshot: ' + newView.state,
-      'Detect differences between the snapshots - respond extremely succinctly.'
+      'Compare the snapshots and provide any differences between the two, using the "Id" column to identify rows - respond extremely succinctly.'
     };
 
     // Iterate through the prompts and call the GPT API for each of them

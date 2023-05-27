@@ -31,13 +31,14 @@
             onpillremoved={removePin}
           ></c-pill-collection>
         </lightning-layout-item>
-        <lightning-layout-item size="3">
+        <lightning-layout-item size="2">
           <lightning-input
             type="search"
             name="search"
             label="Search"
             class="search"
             variant="label-hidden"
+            onchange={handleSearchChange}
           ></lightning-input>
         </lightning-layout-item>
         <lightning-layout-item class="alert-icon-box" size="1">
@@ -93,7 +94,7 @@
               <template if:true={selectedFields}>
                 <c-table
                   fields={selectedFields}
-                  records={childRecords}
+                  records={filteredRecords}
                   top-most-id={recordId}
                   saved={saved}
                   onedit={stopPoller}
@@ -109,7 +110,7 @@
           </template>
         </lightning-layout-item>
         <!-- END TABLE -->
-        <!-- START FIELDS -->
+        <!-- START FIELDS AND AI-->
         <template if:true={selectableFields}>
           <lightning-layout-item size="3">
             <lightning-layout
@@ -117,6 +118,7 @@
               vertical-align="stretch"
               horizontal-align="center"
             >
+            <!-- FIELDS -->
               <lightning-layout-item
                 size="12"
                 data-id="field-list"
@@ -127,6 +129,8 @@
                   onblockrowclick={handleFieldClicked}
                 ></c-block-rows>
               </lightning-layout-item>
+            <!-- END FIELDS -->
+            <!-- AI -->
               <lightning-layout-item
                 size="12"
                 if:true={gptSummary}
@@ -142,7 +146,7 @@
               </lightning-layout-item>
               <lightning-layout-item
                 if:false={gptSummary}
-                size="3"
+                size="6"
                 class="ai-options"
                 title="Last View Delta"
               >
@@ -153,35 +157,7 @@
                   onmouseleave={hideAiHelp}
                   data-id="ai-delta"
                   onclick={gptDetectDelta}
-                ></lightning-icon
-              ></lightning-layout-item>
-              <lightning-layout-item
-                if:false={gptSummary}
-                size="3"
-                class="ai-options"
-                title="Anomaly Detection"
-                ><lightning-icon
-                  icon-name="utility:search"
-                  class="ai-icon"
-                  onmouseover={showAiHelp}
-                  onmouseout={hideAiHelp}
-                  data-id="ai-anomaly"
-                  onclick={gptDetectAnomalies}
-                ></lightning-icon
-              ></lightning-layout-item>
-              <lightning-layout-item
-                if:false={gptSummary}
-                size="3"
-                class="ai-options"
-                title="Prompt GPT"
-              >
-                <lightning-icon
-                  class="ai-icon"
-                  icon-name="utility:segments"
-                  onmouseover={showAiHelp}
-                  onmouseout={hideAiHelp}
-                  data-id="ai-focused-analysis"
-                  onclick={togglePromptGptModal}
+                  size="large"
                 ></lightning-icon
               ></lightning-layout-item>
               <lightning-layout-item size="12" if:false={gptSummary}
@@ -190,9 +166,10 @@
                 </p></lightning-layout-item
               >
             </lightning-layout>
+            <!-- END AI -->
           </lightning-layout-item>
         </template>
-        <!-- END FIELDS -->
+        <!-- END FIELDS  AND AI-->
       </lightning-layout>
     </div>
   </lightning-card>

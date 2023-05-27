@@ -7,16 +7,13 @@ import saveRecords from "@salesforce/apex/LightningReporterController.saveRecord
 import pinLayout from "@salesforce/apex/LightningReporterController.pinLayout";
 import getPinnedViews from "@salesforce/apex/LightningReporterController.getPinnedViews";
 import deletePin from "@salesforce/apex/LightningReporterController.deletePin";
-import gptDetectAnomalies from "@salesforce/apex/LightningReporterController.gptDetectAnomalies";
 import getLastTableView from "@salesforce/apex/LightningReporterController.getLastTableView";
 import insertTableView from "@salesforce/apex/LightningReporterController.insertTableView";
 import gptGetTableViewDelta from "@salesforce/apex/LightningReporterController.gptGetTableViewDelta";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 const aiHelpByType = {
   "ai-delta":
-    "Use AI to detect changes to the data shown on this view since the last time you checked",
-  "ai-anomaly": "Use AI to detect anomalies in the data shown on this view",
-  "ai-focused-analysis": "Prompt AI about the data shown on this view"
+    "Use AI to detect changes to the data shown on this view since the last time you checked for deltas"
 };
 export default class LightningReporter extends LightningElement {
   @api recordId;
@@ -27,10 +24,11 @@ export default class LightningReporter extends LightningElement {
   @track alert = false;
   @track displayAlerts = false;
   @track isLoading = false;
-  @track promptTerm = "";
   @track showPromptGptModal = false;
   @track gptSummary;
   @track aiHelpText;
+  @track searchTerm = "";
+  @track filteredRecords;
   selectableFields;
   childTypes;
   saved = false;
@@ -38,8 +36,37 @@ export default class LightningReporter extends LightningElement {
   polling = false;
   isEditingRow = false;
 
-  handlePromptChange(event) {
-    this.promptTerm = event.target.value;
+  handleSearchChange(event) {
+    this.searchTerm = event.target.value;
+    this.filterChildRecords();
+  }
+
+  filterChildRecords() {
+    if (!this.searchTerm) {
+      this.filteredRecords = this.childRecords;
+    } else {
+      const lowerCaseSearchTerm = this.searchTerm.toLowerCase();
+
+      this.filteredRecords = this.childRecords.filter((subjectDTO) => {
+        // Check the fields in the 'record' property
+        const recordMatches = Object.values(subjectDTO.record).some((value) =>
+          String(value).toLowerCase().includes(lowerCaseSearchTerm)
+        );
+
+        // Check the 'Body' and 'Title' fields in the 'notes' property
+        const notesMatches = subjectDTO.notes.some(
+          (noteDTO) =>
+            String(noteDTO.note.Body)
+              .toLowerCase()
+              .includes(lowerCaseSearchTerm) ||
+            String(noteDTO.note.Title)
+              .toLowerCase()
+              .includes(lowerCaseSearchTerm)
+        );
+
+        return recordMatches || notesMatches;
+      });
+    }
   }
 
   set selectedType(value) {
@@ -95,7 +122,6 @@ export default class LightningReporter extends LightningElement {
         "error"
       );
     }
-    this.generateGptSummary();
     this.isLoading = false;
   }
 
@@ -121,40 +147,8 @@ export default class LightningReporter extends LightningElement {
     }
   }
 
-  promptGpt() {}
-
-  togglePromptGptModal() {
-    this.showPromptGptModal = !this.showPromptGptModal;
-    this.stopPoller(); // don't poll after end user has clicked natural language search
-  }
-
-  async imperativeRefresh() {
-    this.imperative = true;
-    this.isLoading = true;
-    await this.getChildRecords(true);
-    this.isLoading = false;
-  }
-
   closeGptSummary() {
     this.gptSummary = "";
-  }
-
-  async gptDetectAnomalies(event) {
-    try {
-      if (this.gptSummary === " ") {
-        // running twice if icon is clicked, need to figure this out later
-        return;
-      }
-      event.preventDefault();
-      this.gptSummary = " ";
-      const summary = await gptDetectAnomalies({
-        idsToSummarize: this.childRecords.map((record) => record.record.Id),
-        fieldsToSummarize: this.selectedFields
-      });
-      this.displayGptOutput(summary);
-    } catch (error) {
-      this.showNotification("Error getting anomalies", error.message, "error");
-    }
   }
 
   async displayGptOutput(summary) {
@@ -269,7 +263,7 @@ export default class LightningReporter extends LightningElement {
       this.alerts = dbAlerts;
       this.alert = this.alerts.length > 0;
       this.childRecords = sObjects;
-
+      this.filterChildRecords();
       this.isLoading = false;
     } catch (error) {
       this.isLoading = false;
@@ -398,6 +392,13 @@ export default class LightningReporter extends LightningElement {
     } catch (error) {
       this.showNotification("Error saving records", error.message, "error");
     }
+  }
+
+  async imperativeRefresh() {
+    this.imperative = true;
+    this.isLoading = true;
+    await this.getChildRecords(true);
+    this.isLoading = false;
   }
 
   async pinView() {
