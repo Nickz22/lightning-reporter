@@ -136,21 +136,21 @@ export default class LightningReporter extends LightningElement {
     if (!this.polling) {
       this.polling = true;
       // eslint-disable-next-line @lwc/lwc/no-async-operation
-      setInterval(() => {
-        try {
-          if (this.isEditingRow || this.childRecords?.length === 0) {
-            return;
-          }
-          this.getChildRecords(false);
-        } catch (error) {
-          this.showNotification(
-            "Error getting records",
-            error.message,
-            "error"
-          );
-          this.isLoading = false;
-        }
-      }, 10000);
+      // setInterval(() => {
+      //   try {
+      //     if (this.isEditingRow || this.childRecords?.length === 0) {
+      //       return;
+      //     }
+      //     this.getChildRecords(false);
+      //   } catch (error) {
+      //     this.showNotification(
+      //       "Error getting records",
+      //       error.message,
+      //       "error"
+      //     );
+      //     this.isLoading = false;
+      //   }
+      // }, 10000);
     }
   }
 
@@ -216,6 +216,27 @@ export default class LightningReporter extends LightningElement {
         });
         this.displayGptOutput(summary);
       } catch (e) {
+        if (e.body?.message === "timed out") {
+          this.showNotification(
+            "Initial request timed out",
+            "Trying again...",
+            "info"
+          );
+          try {
+            const summary = await gptGetTableViewDelta({
+              compareView: lastTableView,
+              newView: newTableView
+            });
+            this.displayGptOutput(summary);
+          } catch (e2) {
+            this.showNotification(
+              "Error getting delta",
+              e2.body?.message,
+              "error"
+            );
+          }
+        }
+
         this.showNotification("Error getting delta", e.body?.message, "error");
       }
     }

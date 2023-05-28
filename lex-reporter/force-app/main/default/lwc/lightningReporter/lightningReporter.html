@@ -142,7 +142,11 @@
                   onclick={closeGptSummary}
                   class="close-gpt-summary"
                 ></lightning-button-icon>
-                <p class="gpt-summary">{gptSummary}</p>
+                <!-- rich text -->
+                <lightning-formatted-rich-text
+                  class="gpt-summary"
+                  value={gptSummary}
+                ></lightning-formatted-rich-text>
               </lightning-layout-item>
               <lightning-layout-item if:true={showFilter} class="filters">
                 <c-filter-master fields={selectedFields}></c-filter-master>

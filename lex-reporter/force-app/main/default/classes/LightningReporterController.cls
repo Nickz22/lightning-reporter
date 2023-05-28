@@ -143,7 +143,7 @@ public class LightningReporterController {
     String body =
       '{"model": "gpt-3.5-turbo", "messages": ' +
       JSON.serialize(messages) +
-      ', "temperature": 1.1}';
+      ', "temperature": 1.0}';
     req.setBody(body);
 
     Http http = new Http();
@@ -164,20 +164,25 @@ public class LightningReporterController {
     List<Map<String, String>> messages = new List<Map<String, String>>{
       new Map<String, String>{
         'role' => 'system',
-        'content' => 'Compare two JSON datasets from the ' +
+        'content' => 'You will receive two snapshots of the ' +
         newView.objectName +
-        ' table - they are snapshots of the same query at different points in time.'
+        ' table, and detect any differences from the first snapshot to the second snapshot - use the "Id" column to identify the same record in both snapshots.'
       }
     };
 
     // List of user prompts for the GPT API
     List<String> prompts = new List<String>{
-      'You will receive two snapshots of the ' +
+      'Here is a ' +
       newView.objectName +
-      ' table, and detect any differences from the first snapshot to the second snapshot - use the "Id" column to identify the same record in both snapshots.',
-      'Here is the first snapshot: ' + compareView.state,
-      'Here is the latest snapshot: ' + newView.state,
-      'Compare the snapshots - your output format should state the Id of the Opportunity, and then the change you detected for that Id, even if no changes were found.'
+      ' snapshot: ' +
+      compareView.state,
+      'Here is another ' +
+      newView.objectName +
+      ' snapshot: ' +
+      newView.state,
+      'Compare the snapshots - your output should be in html, and the output format should follow ' +
+      '"<br>[<b>Name</b>] <br> [change]<br>-". If no changes were detected, state "no changes" for that Opportunity Name.' +
+      ' For example, for a single opportunity named "Test Opp" whose "Description" field changed, the readout should be \'<br>[<b>Test Opp</b>]<br>Description changed from "old description" to "new description"<br>-\''
     };
 
     // Iterate through the prompts and call the GPT API for each of them
@@ -273,16 +278,6 @@ public class LightningReporterController {
     }
 
     return configs;
-  }
-
-  @AuraEnabled
-  public static string gptPromptTableData(List<SubjectDTO> subjects) {
-    try {
-    } catch (Exception e) {
-      throw e;
-    }
-
-    return '';
   }
 
   @AuraEnabled
