@@ -164,18 +164,20 @@ public class LightningReporterController {
     List<Map<String, String>> messages = new List<Map<String, String>>{
       new Map<String, String>{
         'role' => 'system',
-        'content' => 'You are a data comparison machine whose purpose is to detect differences between Salesforce data snapshots.'
+        'content' => 'Compare two JSON datasets from the ' +
+        newView.objectName +
+        ' table - they are snapshots of the same query at different points in time.'
       }
     };
 
     // List of user prompts for the GPT API
     List<String> prompts = new List<String>{
-      'Your task is to receive two snapshots of the ' +
+      'You will receive two snapshots of the ' +
       newView.objectName +
-      ' table at different points in time, and detect deltas from the first snapshot to the latest snapshot.',
+      ' table, and detect any differences from the first snapshot to the second snapshot - use the "Id" column to identify the same record in both snapshots.',
       'Here is the first snapshot: ' + compareView.state,
       'Here is the latest snapshot: ' + newView.state,
-      'Compare the snapshots and provide any differences between the two, using the "Id" column to identify rows - respond extremely succinctly.'
+      'Compare the snapshots - your output format should state the Id of the Opportunity, and then the change you detected for that Id, even if no changes were found.'
     };
 
     // Iterate through the prompts and call the GPT API for each of them
