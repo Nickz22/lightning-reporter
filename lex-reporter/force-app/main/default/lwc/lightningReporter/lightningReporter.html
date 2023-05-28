@@ -110,7 +110,7 @@
           </template>
         </lightning-layout-item>
         <!-- END TABLE -->
-        <!-- START FIELDS AND AI-->
+        <!-- START FIELDS AND AI AND FILTER -->
         <template if:true={selectableFields}>
           <lightning-layout-item size="3">
             <lightning-layout
@@ -118,7 +118,7 @@
               vertical-align="stretch"
               horizontal-align="center"
             >
-            <!-- FIELDS -->
+              <!-- FIELDS -->
               <lightning-layout-item
                 size="12"
                 data-id="field-list"
@@ -129,8 +129,8 @@
                   onblockrowclick={handleFieldClicked}
                 ></c-block-rows>
               </lightning-layout-item>
-            <!-- END FIELDS -->
-            <!-- AI -->
+              <!-- END FIELDS -->
+              <!-- AI AND FILTER-->
               <lightning-layout-item
                 size="12"
                 if:true={gptSummary}
@@ -144,9 +144,12 @@
                 ></lightning-button-icon>
                 <p class="gpt-summary">{gptSummary}</p>
               </lightning-layout-item>
+              <lightning-layout-item if:true={showFilter} class="filters">
+                <c-filter-master fields={selectedFields}></c-filter-master>
+              </lightning-layout-item>
               <lightning-layout-item
-                if:false={gptSummary}
-                size="6"
+                if:false={filteringOrShowingGpt}
+                size="4"
                 class="ai-options"
                 title="Last View Delta"
               >
@@ -160,46 +163,31 @@
                   size="large"
                 ></lightning-icon
               ></lightning-layout-item>
-              <lightning-layout-item size="12" if:false={gptSummary}
+              <lightning-layout-item
+                if:false={filteringOrShowingGpt}
+                size="4"
+                class="ai-options"
+                title="Add Filter"
+              >
+                <lightning-icon
+                  icon-name="utility:filterList"
+                  class="ai-icon"
+                  data-id="filter"
+                  size="large"
+                  onclick={toggleShowFilter}
+                ></lightning-icon>
+              </lightning-layout-item>
+              <lightning-layout-item size="12" if:false={filteringOrShowingGpt}
                 ><p style="color: grey; font-size: x-small">
                   {aiHelpText}
                 </p></lightning-layout-item
               >
             </lightning-layout>
-            <!-- END AI -->
+            <!-- END AI AND FILTER -->
           </lightning-layout-item>
         </template>
-        <!-- END FIELDS  AND AI-->
+        <!-- END FIELDS AND AI AND FILTER -->
       </lightning-layout>
     </div>
   </lightning-card>
-  <!-- make a overlay modal -->
-  <template if:true={showPromptGptModal}>
-    <div class="modal-container">
-      <div class="modal">
-        <div class="modal-content">
-          <lightning-input
-            type="text"
-            label="Type your prompt"
-            field-level-help="We'll pass this data and your prompt to GPT, then relay the response."
-            value={promptTerm}
-            onchange={handlePromptChange}
-            class="natural-language-search natural-language-search-input"
-          ></lightning-input>
-          <lightning-button
-            label="Prompt"
-            variant="brand"
-            onclick={promptGpt}
-            class="natural-language-search"
-          ></lightning-button>
-          <lightning-button
-            label="Cancel"
-            variant="neutral"
-            onclick={togglePromptGptModal}
-            class="natural-language-search"
-          ></lightning-button>
-        </div>
-      </div>
-    </div>
-  </template>
 </template>

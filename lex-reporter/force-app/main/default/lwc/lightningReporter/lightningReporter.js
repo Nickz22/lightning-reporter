@@ -29,12 +29,19 @@ export default class LightningReporter extends LightningElement {
   @track aiHelpText;
   @track searchTerm = "";
   @track filteredRecords;
+  @track showFilter = false;
+  @track filteringOrShowingGpt = false;
   selectableFields;
   childTypes;
   saved = false;
   iconName;
   polling = false;
   isEditingRow = false;
+
+  toggleShowFilter() {
+    this.showFilter = !this.showFilter;
+    this.filteringOrShowingGpt = this.showFilter;
+  }
 
   handleSearchChange(event) {
     this.searchTerm = event.target.value;
@@ -149,10 +156,12 @@ export default class LightningReporter extends LightningElement {
 
   closeGptSummary() {
     this.gptSummary = "";
+    this.filteringOrShowingGpt = false;
   }
 
   async displayGptOutput(summary) {
     let summaryText = "";
+    this.filteringOrShowingGpt = true;
     for (let i = 0; i < summary.length; i++) {
       summaryText += summary[i];
       this.gptSummary = summaryText;
@@ -199,6 +208,7 @@ export default class LightningReporter extends LightningElement {
       };
       const newTableView = await insertTableView({ tableViewDto: newViewDto });
       this.gptSummary = " ";
+      this.filteringOrShowingGpt = true;
       try {
         const summary = await gptGetTableViewDelta({
           compareView: lastTableView,

@@ -1,0 +1,27 @@
+<template>
+  <div>
+    <template for:each={filters} for:item="filter">
+      <c-filter-input
+        key={filter.id}
+        dummy={filter.id}
+        filter-id={filter.id}
+        field-options={fieldOptions}
+        operator-options={filter.operatorOptions}
+        onfieldchange={handleFieldChange}
+        onoperatorchange={handleOperatorChange}
+        onvaluechange={handleValueChange}
+      >
+      </c-filter-input>
+    </template>
+    <div>
+      <lightning-button
+        label="Add Filter"
+        onclick={addFilter}
+      ></lightning-button>
+      <lightning-button
+        label="Apply Filters"
+        onclick={applyFilters}
+      ></lightning-button>
+    </div>
+  </div>
+</template>
