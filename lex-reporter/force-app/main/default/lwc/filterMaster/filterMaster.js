@@ -32,9 +32,18 @@ export default class FilterMaster extends LightningElement {
       operator: "",
       value: "",
       type: "text",
-      operatorOptions: this.textOperators
+      operatorOptions: this.textOperators,
+      saved: false
     }
   ];
+
+  applyFilters() {
+    debugger;
+    this.filters = this.filters.map((filter) => ({ ...filter, saved: true }));
+    this.dispatchEvent(
+      new CustomEvent("filterchange", { detail: this.filters })
+    );
+  }
 
   fieldOptions = [];
 
@@ -59,53 +68,62 @@ export default class FilterMaster extends LightningElement {
     ];
   }
 
-  applyFilters() {
-    this.dispatchEvent(
-      new CustomEvent("filterchange", { detail: this.filters })
-    );
-  }
-
   handleFieldChange(event) {
-    debugger;
-    let filter = this.filters.find((f) => f.id === event.detail.id);
-    filter.field = event.detail.value.value;
-    let field = this.fields.find((f) => f.name === filter.field);
-    switch (field.type.toLowerCase()) {
-      case "string":
-        filter.type = "text";
-        filter.operatorOptions = this.textOperators;
-        break;
-      case "date":
-        filter.type = "date";
-        filter.operatorOptions = this.dateOperators;
-        break;
-      case "datetime":
-        filter.type = "datetime";
-        filter.operatorOptions = this.dateOperators;
-        break;
-      case "number":
-        filter.type = "number";
-        filter.operatorOptions = this.numberOperators;
-        break;
-      case "currency":
-        filter.type = "number";
-        filter.operatorOptions = this.numberOperators;
-        break;
-      case "boolean":
-        filter.type = "boolean";
-        filter.operatorOptions = this.booleanOperators;
-        break;
-      default:
-    }
+    this.filters = this.filters.map((f) => {
+      if (f.id === event.detail.id) {
+        f.field = event.detail.value.value;
+        let field = this.fields.find(
+          (f) => f.name === event.detail.value.value
+        );
+
+        switch (field.type.toLowerCase()) {
+          case "string":
+            f.type = "text";
+            f.operatorOptions = this.textOperators;
+            break;
+          case "date":
+            f.type = "date";
+            f.operatorOptions = this.dateOperators;
+            break;
+          case "datetime":
+            f.type = "datetime";
+            f.operatorOptions = this.dateOperators;
+            break;
+          case "number":
+            f.type = "number";
+            f.operatorOptions = this.numberOperators;
+            break;
+          case "currency":
+            f.type = "number";
+            f.operatorOptions = this.numberOperators;
+            break;
+          case "boolean":
+            f.type = "boolean";
+            f.operatorOptions = this.booleanOperators;
+            break;
+          default:
+            f.type = "text";
+            f.operatorOptions = this.textOperators;
+            break;
+        }
+      }
+      return f;
+    });
   }
 
   handleOperatorChange(event) {
-    let filter = this.filters.find((f) => f.id === event.detail.name);
-    filter.operator = event.detail.operator;
+    debugger;
+    // set filter whose id === event.detail.id to have operator === event.detail.value
+    this.filters = this.filters.map((f) => {
+      if (f.id === event.detail.id) {
+        f.operator = event.detail.value;
+      }
+      return f;
+    });
   }
 
   handleValueChange(event) {
-    let filter = this.filters.find((f) => f.id === event.detail.name);
+    let filter = this.filters.find((f) => f.id === event.detail.id);
     filter.value = event.detail.value;
   }
 }

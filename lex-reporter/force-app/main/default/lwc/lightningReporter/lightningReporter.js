@@ -38,6 +38,117 @@ export default class LightningReporter extends LightningElement {
   polling = false;
   isEditingRow = false;
 
+  filterRecords(records, filters) {
+    return records.filter((record) => {
+      record = record.record;
+      return filters.every((filter) => {
+        if (!record.hasOwnProperty(filter.field)) {
+          return false;
+        }
+        // find type of filter.field via selectedFields
+        const fieldType = this.selectedFields.find(
+          (field) => field.name === filter.field
+        ).type;
+
+        // parse filter.value into correct type
+        switch (fieldType.toLowerCase()) {
+          case "string":
+            filter.value = filter.value.toString();
+            break;
+          case "boolean":
+            filter.value = filter.value === "true";
+            break;
+          case "double":
+            filter.value = parseFloat(filter.value);
+            break;
+          case "date":
+            filter.value = new Date(filter.value);
+            break;
+          case "datetime":
+            filter.value = new Date(filter.value);
+            break;
+          case "integer":
+            filter.value = parseInt(filter.value);
+            break;
+          case "currency":
+            filter.value = parseFloat(filter.value);
+            break;
+          case "percent":
+            filter.value = parseFloat(filter.value);
+            break;
+          case "reference":
+            filter.value = filter.value.toString();
+            break;
+          case "email":
+            filter.value = filter.value.toString();
+            break;
+          case "phone":
+            filter.value = filter.value.toString();
+            break;
+          case "url":
+            filter.value = filter.value.toString();
+            break;
+          case "textarea":
+            filter.value = filter.value.toString();
+            break;
+          case "picklist":
+            filter.value = filter.value.toString();
+            break;
+          case "multipicklist":
+            filter.value = filter.value.toString();
+            break;
+          case "combobox":
+            filter.value = filter.value.toString();
+            break;
+          default:
+            filter.value = filter.value.toString();
+        }
+
+        switch (filter.operator) {
+          case "equals":
+            return record[filter.field] === filter.value;
+          case "contains":
+            return record[filter.field].includes(filter.value);
+          case "not-equals":
+            return record[filter.field] !== filter.value;
+          case "not-contains":
+            return !record[filter.field].includes(filter.value);
+          case "before":
+            return new Date(record[filter.field]) < new Date(filter.value);
+          case "after":
+            return new Date(record[filter.field]) > new Date(filter.value);
+          case "on":
+            return (
+              new Date(record[filter.field]).setHours(0, 0, 0, 0) ===
+              new Date(filter.value).setHours(0, 0, 0, 0)
+            );
+          case "on-before":
+            return new Date(record[filter.field]) <= new Date(filter.value);
+          case "on-after":
+            return new Date(record[filter.field]) >= new Date(filter.value);
+          case "greater":
+            return record[filter.field] > filter.value;
+          case "less":
+            return record[filter.field] < filter.value;
+          case "greater-equal":
+            return record[filter.field] >= filter.value;
+          case "less-equal":
+            return record[filter.field] <= filter.value;
+          default:
+            return false;
+        }
+      });
+    });
+  }
+
+  handleFilterChange(event) {
+    debugger;
+    this.filters = event.detail;
+    this.filteredRecords = [
+      ...this.filterRecords(this.filteredRecords, this.filters)
+    ];
+  }
+
   toggleShowFilter() {
     this.showFilter = !this.showFilter;
     this.filteringOrShowingGpt = this.showFilter;
@@ -157,6 +268,7 @@ export default class LightningReporter extends LightningElement {
   closeGptSummary() {
     this.gptSummary = "";
     this.filteringOrShowingGpt = false;
+    this.showFilter = false;
   }
 
   async displayGptOutput(summary) {

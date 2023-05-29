@@ -149,7 +149,17 @@
                 ></lightning-formatted-rich-text>
               </lightning-layout-item>
               <lightning-layout-item if:true={showFilter} class="filters">
-                <c-filter-master fields={selectedFields}></c-filter-master>
+                <lightning-button-icon
+                  icon-name="utility:close"
+                  variant="bare"
+                  onclick={closeGptSummary}
+                  class="close-gpt-summary"
+                  style="z-index: 2"
+                ></lightning-button-icon>
+                <c-filter-master
+                  fields={selectedFields}
+                  onfilterchange={handleFilterChange}
+                ></c-filter-master>
               </lightning-layout-item>
               <lightning-layout-item
                 if:false={filteringOrShowingGpt}

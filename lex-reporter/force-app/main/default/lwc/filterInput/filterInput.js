@@ -3,14 +3,11 @@ import { LightningElement, api, track } from "lwc";
 export default class FilterInput extends LightningElement {
   @api filterId;
   @api dummy;
+  @api type;
   @api fieldOptions;
   @api operatorOptions;
   @api mode;
-
-  connectedCallback() {
-    debugger;
-    console.log(this.filterId);
-  }
+  @api isSaved = false;
 
   @track _field;
   @api
@@ -56,6 +53,7 @@ export default class FilterInput extends LightningElement {
   }
 
   handleOperatorChange(event) {
+    debugger;
     this._operator = event.detail.value;
     let operator = this.operatorOptions.find(
       (option) => option.value === this._operator
@@ -64,13 +62,14 @@ export default class FilterInput extends LightningElement {
       new CustomEvent("operatorchange", {
         detail: {
           id: this.filterId,
-          value: operator
+          value: operator.value
         }
       })
     );
   }
 
   handleValueChange(event) {
+    debugger;
     this._value = event.detail.value;
     this.dispatchEvent(
       new CustomEvent("valuechange", {

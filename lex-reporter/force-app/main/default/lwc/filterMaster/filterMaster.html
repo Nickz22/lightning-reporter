@@ -3,13 +3,14 @@
     <template for:each={filters} for:item="filter">
       <c-filter-input
         key={filter.id}
-        dummy={filter.id}
         filter-id={filter.id}
         field-options={fieldOptions}
+        type={filter.type}
         operator-options={filter.operatorOptions}
         onfieldchange={handleFieldChange}
         onoperatorchange={handleOperatorChange}
         onvaluechange={handleValueChange}
+        is-saved={filter.saved}
       >
       </c-filter-input>
     </template>
@@ -18,10 +19,7 @@
         label="Add Filter"
         onclick={addFilter}
       ></lightning-button>
-      <lightning-button
-        label="Apply Filters"
-        onclick={applyFilters}
-      ></lightning-button>
+      <lightning-button label="Save" onclick={applyFilters}></lightning-button>
     </div>
   </div>
 </template>

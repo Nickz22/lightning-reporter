@@ -1,24 +1,32 @@
 <template>
-  <div class="filter-row">
-    <lightning-combobox
-      name="field"
-      label="Field"
-      value={field}
-      options={fieldOptions}
-      onchange={handleFieldChange}
-    ></lightning-combobox>
-    <lightning-combobox
-      name="operator"
-      label="Operator"
-      value={operator}
-      options={operatorOptions}
-      onchange={handleOperatorChange}
-    ></lightning-combobox>
-    <lightning-input
-      name="value"
-      label="Value"
-      value={value}
-      onchange={handleValueChange}
-    ></lightning-input>
-  </div>
+  <template if:false={isSaved}>
+    <div class="filter-row">
+      <lightning-combobox
+        name="field"
+        label="Field"
+        value={field}
+        options={fieldOptions}
+        onchange={handleFieldChange}
+      ></lightning-combobox>
+      <lightning-combobox
+        name="operator"
+        label="Operator"
+        value={operator}
+        options={operatorOptions}
+        onchange={handleOperatorChange}
+      ></lightning-combobox>
+      <lightning-input
+        name="value"
+        label="Value"
+        value={value}
+        type={type}
+        onchange={handleValueChange}
+      ></lightning-input>
+    </div>
+  </template>
+  <template if:true={isSaved}>
+    <div class="filter-row">
+      <p>{field} {operator} {value}</p>
+    </div>
+  </template>
 </template>
