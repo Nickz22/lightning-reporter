@@ -24,6 +24,7 @@
     overflow-y: auto;
     max-height: 11rem;
     position: relative;
+    width: 20rem;
 }
 
 .gpt-summary::after {

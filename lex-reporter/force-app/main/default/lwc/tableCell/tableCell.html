@@ -47,24 +47,21 @@
     data-id={cell.DataId}
     class="left-padding"
   >
-    <lightning-input
+    <input
       if:false={readOnly}
       data-id={cell.DataId}
       value={cell.Value}
       type={cell.InputType}
       onchange={handleValueChange}
       onkeydown={listenForEscape}
-      class="standard-input"
-    ></lightning-input>
-    <lightning-input
+    />
+    <input
       if:true={readOnly}
       data-id={cell.DataId}
       value={cell.Value}
       type={cell.InputType}
       onchange={handleValueChange}
       onkeydown={listenForEscape}
-      read-only
-      class="standard-input"
-    ></lightning-input>
+    />
   </div>
 </template>

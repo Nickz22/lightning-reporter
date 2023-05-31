@@ -98,6 +98,7 @@
                   top-most-id={recordId}
                   saved={saved}
                   onedit={stopPoller}
+                  onsort={handleSort}
                 ></c-table>
               </template>
             </template>
@@ -193,7 +194,7 @@
               </lightning-layout-item>
               <lightning-layout-item size="12" if:false={filteringOrShowingGpt}
                 ><p style="color: grey; font-size: x-small">
-                  {aiHelpText}
+                  {iconHelpText}
                 </p></lightning-layout-item
               >
             </lightning-layout>

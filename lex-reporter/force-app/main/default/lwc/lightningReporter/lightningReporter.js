@@ -26,7 +26,7 @@ export default class LightningReporter extends LightningElement {
   @track isLoading = false;
   @track showPromptGptModal = false;
   @track gptSummary;
-  @track aiHelpText;
+  @track iconHelpText;
   @track searchTerm = "";
   @track filteredRecords;
   @track showFilter = false;
@@ -38,7 +38,43 @@ export default class LightningReporter extends LightningElement {
   polling = false;
   isEditingRow = false;
 
+  @track sortedBy = "";
+  @track sortedDirection = "asc";
+
+  handleSort(event) {
+    const fieldName = event.detail.fieldName;
+    const sortDirection = event.detail.sortDirection;
+
+    // Sort the records.
+    this.filteredRecords = this.sortData(fieldName, sortDirection, [
+      ...this.filteredRecords
+    ]);
+
+    // Update the selectedFields state.
+    this.selectedFields = event.detail.columns;
+  }
+
+  sortData(fieldName, sortDirection) {
+    let data = JSON.parse(JSON.stringify(this.filteredRecords));
+    let key = (a) => a.record[fieldName];
+    let reverse = sortDirection === "asc" ? 1 : -1;
+
+    data.sort((a, b) => {
+      a = key(a) ? key(a) : ""; // Handle null or undefined values
+      b = key(b) ? key(b) : "";
+
+      return a > b ? 1 * reverse : -1 * reverse;
+    });
+
+    return data;
+  }
+
   filterRecords(records, filters) {
+    debugger;
+    if (filters.length === 0) {
+      return this.childRecords;
+    }
+
     return records.filter((record) => {
       record = record.record;
       return filters.every((filter) => {
@@ -109,7 +145,7 @@ export default class LightningReporter extends LightningElement {
             return record[filter.field] === filter.value;
           case "contains":
             return record[filter.field].includes(filter.value);
-          case "not-equals":
+          case "not-equal":
             return record[filter.field] !== filter.value;
           case "not-contains":
             return !record[filter.field].includes(filter.value);
@@ -145,7 +181,7 @@ export default class LightningReporter extends LightningElement {
     debugger;
     this.filters = event.detail;
     this.filteredRecords = [
-      ...this.filterRecords(this.filteredRecords, this.filters)
+      ...this.filterRecords(this.childRecords, this.filters)
     ];
   }
 
@@ -243,27 +279,30 @@ export default class LightningReporter extends LightningElement {
     this.isLoading = false;
   }
 
-  renderedCallback() {
-    if (!this.polling) {
-      this.polling = true;
-      // eslint-disable-next-line @lwc/lwc/no-async-operation
-      // setInterval(() => {
-      //   try {
-      //     if (this.isEditingRow || this.childRecords?.length === 0) {
-      //       return;
-      //     }
-      //     this.getChildRecords(false);
-      //   } catch (error) {
-      //     this.showNotification(
-      //       "Error getting records",
-      //       error.message,
-      //       "error"
-      //     );
-      //     this.isLoading = false;
-      //   }
-      // }, 10000);
-    }
-  }
+  /**
+   * this is making a mess
+   */
+  // renderedCallback() {
+  //   if (!this.polling) {
+  //     this.polling = true;
+  //     // eslint-disable-next-line @lwc/lwc/no-async-operation
+  //     setInterval(() => {
+  //       try {
+  //         if (this.isEditingRow || this.childRecords?.length === 0) {
+  //           return;
+  //         }
+  //         this.getChildRecords(false);
+  //       } catch (error) {
+  //         this.showNotification(
+  //           "Error getting records",
+  //           error.message,
+  //           "error"
+  //         );
+  //         this.isLoading = false;
+  //       }
+  //     }, 10000);
+  //   }
+  // }
 
   closeGptSummary() {
     this.gptSummary = "";
@@ -600,11 +639,15 @@ export default class LightningReporter extends LightningElement {
 
   showAiHelp(event) {
     const aiType = event.target.dataset.id;
-    this.aiHelpText = aiHelpByType[aiType];
+    this.iconHelpText = aiHelpByType[aiType];
+  }
+
+  showFilterHelp() {
+    this.iconHelpText = "Configure filters on the dataset";
   }
 
   hideAiHelp() {
-    this.aiHelpText = null;
+    this.iconHelpText = null;
   }
 
   async removePin(event) {

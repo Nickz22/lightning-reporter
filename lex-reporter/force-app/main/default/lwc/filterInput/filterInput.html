@@ -25,8 +25,15 @@
     </div>
   </template>
   <template if:true={isSaved}>
-    <div class="filter-row">
+    <div class="saved-filter-row">
       <p>{field} {operator} {value}</p>
+      <lightning-button-icon
+        icon-name="utility:delete"
+        variant="bare"
+        title="Remove filter"
+        alternative-text="Remove this filter"
+        onclick={handleRemoveFilter}
+      ></lightning-button-icon>
     </div>
   </template>
 </template>

@@ -54,7 +54,10 @@ export default class FilterMaster extends LightningElement {
   }
 
   addFilter() {
-    let newId = this.filters[this.filters.length - 1].id + 1;
+    let newId =
+      this.filters.length === 0
+        ? 0
+        : this.filters[this.filters.length - 1].id + 1;
     this.filters = [
       ...this.filters,
       {
@@ -66,6 +69,15 @@ export default class FilterMaster extends LightningElement {
         operatorOptions: this.textOperators
       }
     ];
+  }
+
+  handleRemoveFilter(event) {
+    debugger;
+    // Remove the filter with the matching id
+    this.filters = this.filters.filter((f) => f.id !== event.detail.id);
+
+    // Apply filters
+    this.applyFilters();
   }
 
   handleFieldChange(event) {

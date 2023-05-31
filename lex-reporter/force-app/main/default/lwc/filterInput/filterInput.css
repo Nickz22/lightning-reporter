@@ -1,0 +1,7 @@
+.saved-filter-row{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: left;
+    margin-bottom: 1rem;
+}

@@ -1,12 +1,24 @@
 <template>
-    <lightning-layout class="header-container">
-        <lightning-layout-item size="1"></lightning-layout-item>
-        <template for:each={columns} for:item="column">
-            <lightning-layout-item size="3"
-                                   key={column.name} 
-                                   class="column-cell">
-                {column.label}
-            </lightning-layout-item>
+  <lightning-layout class="header-container">
+    <lightning-layout-item size="1"></lightning-layout-item>
+    <template for:each={columns} for:item="column">
+      <lightning-layout-item
+        size="3"
+        key={column.name}
+        class="column-cell"
+        data-name={column.name}
+        onclick={handleSort}
+      >
+        {column.label}
+        <template if:true={column.isSorted}>
+          <lightning-icon
+            icon-name={column.sortedIcon}
+            alternative-text={column.sortedDirection}
+            size="x-small"
+          >
+          </lightning-icon>
         </template>
-    </lightning-layout>
+      </lightning-layout-item>
+    </template>
+  </lightning-layout>
 </template>

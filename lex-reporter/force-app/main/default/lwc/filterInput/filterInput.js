@@ -77,4 +77,12 @@ export default class FilterInput extends LightningElement {
       })
     );
   }
+
+  handleRemoveFilter() {
+    this.dispatchEvent(
+      new CustomEvent("removefilter", {
+        detail: { id: this.filterId }
+      })
+    );
+  }
 }

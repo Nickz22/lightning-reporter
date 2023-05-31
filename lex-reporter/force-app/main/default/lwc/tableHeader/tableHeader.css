@@ -9,3 +9,7 @@
     background-color: #e3e8e8;
     padding-top: 0.5em; /* center */
 }
+
+.column-cell:hover{
+    cursor: pointer;
+}
